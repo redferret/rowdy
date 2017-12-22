@@ -18,7 +18,7 @@ public class Function {
     funcReturnValue = value;
   }
 
-  public void setIDValue(String idName, Value value) {
+  public void allocate(String idName, Value value) {
     Value curValue;
     if (value == null) {
       value = new Value("null");
@@ -32,8 +32,8 @@ public class Function {
     }
   }
 
-  public void setIDValue(Terminal cur, Value value) {
-    setIDValue(cur.getName(), value);
+  public void allocate(Terminal cur, Value value) {
+    Function.this.allocate(cur.getName(), value);
   }
 
   /**

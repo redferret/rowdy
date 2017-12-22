@@ -536,7 +536,7 @@ public class ParseTree {
       setAsGlobal(idTerminal, value);
     } else {
       Function currentFunction = callStack.peek();
-      currentFunction.setIDValue(idTerminal, value);
+      currentFunction.allocate(idTerminal, value);
     }
   }
 
