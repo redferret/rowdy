@@ -1,10 +1,5 @@
 package rowdy;
-
-
-
-
-import java.util.Hashtable;
-
+import java.util.HashMap;
 /**
  * Builds a generic language based on the list of values given.
  * Each list contains integer values that map to terminals and non-terminals
@@ -15,10 +10,8 @@ import java.util.Hashtable;
  * @author Richard DeSilvey
  */
 public class Language {
-
-    private Hashtable<Integer, Rule> grammar;
-    private Hashtable<Integer, Symbol> symbols;
-    
+    private final HashMap<Integer, Rule> GRAMMAR;
+    private final HashMap<Integer, Symbol> SYMBOLS;
     /**
      * Produces a new language.
      * @param terms The terminals
@@ -31,17 +24,14 @@ public class Language {
             int[][] grammarRules, int[][][] grammarHints){
         return new Language(terms, nTerms, grammarRules, grammarHints);
     }
-    
     private Language(String[] terms, String[] nTerms, int[][] grammarRules, 
                                             int[][][] grammarHints){
-        grammar = new Hashtable<>();
-        symbols = new Hashtable<>();
+        GRAMMAR = new HashMap<>();
+        SYMBOLS = new HashMap<>();
         for (int i = 0; i < terms.length; i++){
-            symbols.put(i, new Terminal(terms[i], i));
+            SYMBOLS.put(i, new Terminal(terms[i], i));
         }
-        
         final int TERMINAL = 0, RULE = 1;
-        
         Hint[] hints;
         for (int i = 0; i < nTerms.length; i++){
             NonTerminal nt = new NonTerminal(nTerms[i], i + terms.length);
@@ -49,27 +39,22 @@ public class Language {
             hints = new Hint[grammarHints[i].length];
             for (int h = 0; h < grammarHints[i].length; h++){
                 int tid = grammarHints[i][h][TERMINAL];
-                terminal = (Terminal) symbols.get(tid);
+                terminal = (Terminal) SYMBOLS.get(tid);
                 hints[h] = new Hint(terminal, grammarHints[i][h][RULE]);
             }
             nt.setHints(hints);
-            
-            symbols.put(i + terms.length, nt);
+            SYMBOLS.put(i + terms.length, nt);
         }
-        
         Symbol symbs[];
         for (int i = 0; i < grammarRules.length; i++){
             symbs = new Symbol[grammarRules[i].length];
             for (int j = 0; j < grammarRules[i].length; j++){
                 int symbolID = grammarRules[i][j];
-                
-                symbs[j] = symbols.get(symbolID);
+                symbs[j] = SYMBOLS.get(symbolID);
             }
-            grammar.put(i, new Rule(symbs));
+            GRAMMAR.put(i, new Rule(symbs));
         }
-        
     }
-    
     /**
      * Fetches a production rule from this language with a given production
      * Hint.
@@ -80,15 +65,14 @@ public class Language {
         if (productionHint == null){
             return new Rule();
         }
-        return (productionHint == null) ? new Rule() : grammar.get(productionHint.getHint());
+        return (productionHint == null) ? new Rule() : GRAMMAR.get(productionHint.getHint());
     }
-    
     /**
      * Fetches a language symbol with the given id.
      * @param id The symbol's id
      * @return The non-terminal or terminal symbol.
      */
     public Symbol getSymbol(int id){
-        return symbols.get(id);
+        return SYMBOLS.get(id);
     }
 }

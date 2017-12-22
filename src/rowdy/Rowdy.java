@@ -25,17 +25,17 @@ public class Rowdy {
             SLICE = 33, STRCMP = 34, FUNC = 35, CALL = 36, RETURN = 37,
             ISSET = 38, ROUND = 39;
     
-    public static final int prog = 40, stmt_list = 41, stmt = 42, 
-            stmt_tail = 43, if_stmt = 44, loop_stmt = 45, break_stmt = 46, 
-            assign_stmt = 47, read_stmt = 48, print_stmt = 49, expr = 50, 
-            else_part = 51, id_option = 52, atom_list_tail = 53, bool_term = 54, 
-            bool_term_tail = 55, bool_factor = 56, bool_factor_tail = 57, 
-            arith_expr = 58, relation_option = 59, term = 60, term_tail = 61,
-            factor = 62, factor_tail = 63, atom = 64, def = 65, func = 66, 
-            func_tail = 67, params = 68, params_tail = 69, func_call = 70, stmt_id = 71,
-            return_stmt = 72, expr_list = 73, round_stmt = 74, isset_expr = 75;
+    public static final int PROGRAM = 40, STMT_LIST = 41, STATEMENT = 42, 
+            STMT_TAIL = 43, IF_STMT = 44, LOOP_STMT = 45, BREAK_STMT = 46, 
+            ASSIGN_STMT = 47, READ_STMT = 48, PRINT_STMT = 49, EXPRESSION = 50, 
+            ELSE_PART = 51, ID_OPTION = 52, ATOM_LIST_TAIL = 53, BOOL_TERM = 54, 
+            BOOL_TERM_TAIL = 55, BOOL_FACTOR = 56, BOOL_FACTOR_TAIL = 57, 
+            ARITHM_EXPR = 58, RELATION_OPTION = 59, TERM = 60, TERM_TAIL = 61,
+            FACTOR = 62, FACTOR_TAIL = 63, ATOMIC = 64, DEFINITION = 65, FUNCTION = 66, 
+            FUNC_TAIL = 67, PARAMETERS = 68, PARAMS_TAIL = 69, FUNC_CALL = 70, STMT_ID = 71,
+            RETURN_STMT = 72, EXPR_LIST = 73, ROUND_STMT = 74, ISSET_EXPR = 75;
     
-    private static String[] nonTerminals = {"prog", "stmt-list", "stmt", "stmt-tail", 
+    private static final String[] NON_TERMINALS = {"prog", "stmt-list", "stmt", "stmt-tail", 
                             "if-stmt", "loop-stmt", "break-stmt", "assign-stmt",
                             "read-stmt", "print-stmt", "expr", "else-part", 
                             "id-option", "atom-list-tail", "bool-term", 
@@ -45,97 +45,97 @@ public class Rowdy {
                             "params", "params-tail", "func-call", "stmt-id", "return-stmt",
                             "expr-list", "round-stmt", "isset-expr"};
     
-    private static final String[] terminals = {"PERIOD", ";", "if", "then", "else",
+    private static final String[] TERMINALS = {"PERIOD", ";", "if", "then", "else",
         "fi", "loop", "ID", ":", "repeat", "break", "=", "print",
         "read", ",", "or", "and", "<", "<=", "==", ">=",
         ">", "!=", "+", "-", "*", "/", "(", ")", "CONST", "^", "%", 
         "concat", "slice", "strcmp", "func", "->", "return", "isset", "round"};
     
-    private static String mSymbols=". ( ) ; + - * / != = >= <= < > : == , ^ % ->";
+    private static final String SPECIAL_SYMBOLS=". ( ) ; + - * / != = >= <= < > : == , ^ % ->";
     
     //Each element on the top most level is a production rule.
-    private static int[][] grammarRules = {
-    {def, PERIOD},
-    {stmt, stmt_tail},
-    {SEMICOLON, stmt, stmt_tail},
+    private static final int[][] GRAMMAR_RULES = {
+    {DEFINITION, PERIOD},
+    {STATEMENT, STMT_TAIL},
+    {SEMICOLON, STATEMENT, STMT_TAIL},
     {},
-    {if_stmt},
-    {loop_stmt},
-    {break_stmt},
-    {assign_stmt},
-    {read_stmt},
-    {print_stmt},
+    {IF_STMT},
+    {LOOP_STMT},
+    {BREAK_STMT},
+    {ASSIGN_STMT},
+    {READ_STMT},
+    {PRINT_STMT},
     {},//10
-    {IF, expr, THEN, stmt_list, else_part},
-    {ELSE, stmt_list, FI},
+    {IF, EXPRESSION, THEN, STMT_LIST, ELSE_PART},
+    {ELSE, STMT_LIST, FI},
     {FI},
-    {LOOP, ID, COLON, stmt_list, REPEAT},
-    {BREAK, id_option},
+    {LOOP, ID, COLON, STMT_LIST, REPEAT},
+    {BREAK, ID_OPTION},
     {ID}, 
     {}, 
-    {ID, BECOMES, expr},//18
-    {PRINT, expr, expr_list},//
-    {READ, ID, params_tail},//20
-    {COMMA, atom, atom_list_tail},
+    {ID, BECOMES, EXPRESSION},//18
+    {PRINT, EXPRESSION, EXPR_LIST},//
+    {READ, ID, PARAMS_TAIL},//20
+    {COMMA, ATOMIC, ATOM_LIST_TAIL},
     {},
-    {bool_term, bool_term_tail}, 
-    {OR, bool_term, bool_term_tail},
+    {BOOL_TERM, BOOL_TERM_TAIL}, 
+    {OR, BOOL_TERM, BOOL_TERM_TAIL},
     {},
-    {bool_factor, bool_factor_tail},
-    {AND, bool_factor, bool_factor_tail},
+    {BOOL_FACTOR, BOOL_FACTOR_TAIL},
+    {AND, BOOL_FACTOR, BOOL_FACTOR_TAIL},
     {},
-    {arith_expr, relation_option},
-    {LESS, arith_expr},//30
-    {LESSEQUAL, arith_expr},
-    {EQUAL, arith_expr},
-    {GREATEREQUAL, arith_expr},
-    {GREATER, arith_expr},
-    {NOTEQUAL, arith_expr},
+    {ARITHM_EXPR, RELATION_OPTION},
+    {LESS, ARITHM_EXPR},//30
+    {LESSEQUAL, ARITHM_EXPR},
+    {EQUAL, ARITHM_EXPR},
+    {GREATEREQUAL, ARITHM_EXPR},
+    {GREATER, ARITHM_EXPR},
+    {NOTEQUAL, ARITHM_EXPR},
     {},
-    {term, term_tail}, 
-    {PLUS, term, term_tail}, 
-    {MINUS, term, term_tail}, 
+    {TERM, TERM_TAIL}, 
+    {PLUS, TERM, TERM_TAIL}, 
+    {MINUS, TERM, TERM_TAIL}, 
     {},//40
-    {factor, factor_tail},
-    {MULTIPLY, factor, factor_tail},
-    {DIVIDE, factor, factor_tail},
+    {FACTOR, FACTOR_TAIL},
+    {MULTIPLY, FACTOR, FACTOR_TAIL},
+    {DIVIDE, FACTOR, FACTOR_TAIL},
     {},
-    {MINUS, factor},
-    {atom},
-    {OPENPAREN, expr, CLOSEDPAREN},
+    {MINUS, FACTOR},
+    {ATOMIC},
+    {OPENPAREN, EXPRESSION, CLOSEDPAREN},
     {ID},
     {CONST},
-    {POW, factor, factor_tail},// 50
-    {MOD, factor, factor_tail},
-    {CONCAT, expr, expr_list},
-    {SLICE, expr, COMMA, arith_expr, COMMA, arith_expr},
-    {STRCMP, expr, COMMA, expr},
+    {POW, FACTOR, FACTOR_TAIL},// 50
+    {MOD, FACTOR, FACTOR_TAIL},
+    {CONCAT, EXPRESSION, EXPR_LIST},
+    {SLICE, EXPRESSION, COMMA, ARITHM_EXPR, COMMA, ARITHM_EXPR},
+    {STRCMP, EXPRESSION, COMMA, EXPRESSION},
     
-    {func, def},//55
-    {assign_stmt, SEMICOLON, def}, //56
+    {FUNCTION, DEFINITION},//55
+    {ASSIGN_STMT, SEMICOLON, DEFINITION}, //56
     {},//57
-    {FUNC, ID, OPENPAREN, params, CLOSEDPAREN, stmt_list, PERIOD},//58
-    {ID, params_tail},//59
+    {FUNC, ID, OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_LIST, PERIOD},//58
+    {ID, PARAMS_TAIL},//59
     {},//60
-    {COMMA, ID, params_tail},//61
+    {COMMA, ID, PARAMS_TAIL},//61
     {},//62
-    {CALL, ID, OPENPAREN, expr, expr_list, CLOSEDPAREN},//63
-    {func_call},//64
-    {return_stmt},
-    {RETURN, expr},
-    {func_call, SEMICOLON, def},
-    {COMMA, expr, expr_list},//68
+    {CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN},//63
+    {FUNC_CALL},//64
+    {RETURN_STMT},
+    {RETURN, EXPRESSION},
+    {FUNC_CALL, SEMICOLON, DEFINITION},
+    {COMMA, EXPRESSION, EXPR_LIST},//68
     {},//69
     {ISSET, ID},
-    {round_stmt},
-    {ROUND, ID, COMMA, arith_expr},
-    {isset_expr}
+    {ROUND_STMT},
+    {ROUND, ID, COMMA, ARITHM_EXPR},
+    {ISSET_EXPR}
     };
     /**
      * Each hint maps respectively to nonTerminals list.
      * {<terminal>, <production rule>}
      */
-    private static int[][][] grammarHints ={
+    private static final int[][][] GRAMMAR_HINTS ={
     // prog
     {{FUNC, 0}, {ID, 0}},
     // stmt-list
@@ -206,25 +206,25 @@ public class Rowdy {
     public static void main(String[] args) {
         
         
-        Language rowdy = Language.build(terminals, nonTerminals, 
-                grammarRules, grammarHints);
+        Language rowdy = Language.build(TERMINALS, NON_TERMINALS, 
+                GRAMMAR_RULES, GRAMMAR_HINTS);
         
         ParseTree rowdyProgram = new ParseTree(rowdy);
-        rowdyProgram.build(args[0], terminals, mSymbols, CONST, ID);
+        rowdyProgram.build(args[0], TERMINALS, SPECIAL_SYMBOLS, CONST, ID);
         
-        List<Value> params = new ArrayList<>();
+        List<Value> programParameters = new ArrayList<>();
         
         for (int p = 1; p < args.length; p++){
         	String in = args[p];
         	if (Character.isDigit(in.charAt(0))){
-        		params.add(new Value(Float.parseFloat(args[p])));
+        		programParameters.add(new Value(Float.parseFloat(args[p])));
         	}else{
-        		params.add(new Value(args[p]));
+        		programParameters.add(new Value(args[p]));
         	}
         	
         }
         
-        rowdyProgram.execute(params);
+        rowdyProgram.execute(programParameters);
 
     }
     

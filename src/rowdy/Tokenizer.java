@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -19,13 +19,13 @@ import java.util.regex.Pattern;
 public class Tokenizer {
 
     private static final String DIGIT = "0123456789";
-    private final String OPERT;
+    private final String OPERATORS;
     
     private int identifierID, constantID;
     /**
      * The table of all the reserved words/symbols for the language.
      */
-    private Hashtable<String, Integer> reservedWords;
+    private final HashMap<String, Integer> RESERVED_WORDS;
     
     /**
      * Each pattern aids in parsing the file and fetching a token.
@@ -43,15 +43,21 @@ public class Tokenizer {
         tokenNumber = Pattern.compile("-?\\d+(\\.?\\d+)?(F|f|D|d)?");
     }
 
-    
-    public Tokenizer(String[] reserved, String opert, int idID, int constID){
+    /**
+     * Creates a new Tokenizer
+     * @param reserved The reserved words in the language
+     * @param operators The string containing all the operators
+     * @param idID The id of an identifier
+     * @param constID The id of a constant
+     */
+    public Tokenizer(String[] reserved, String operators, int idID, int constID){
 
-        reservedWords = new Hashtable<>();
-        OPERT = opert;
+        RESERVED_WORDS = new HashMap<>();
+        OPERATORS = operators;
         
         for (int i = 0; i < reserved.length; i++) {
             if (!reserved[i].isEmpty()) {
-                reservedWords.put(reserved[i], i);
+                RESERVED_WORDS.put(reserved[i], i);
             }
         }
         identifierID = idID;
@@ -83,7 +89,7 @@ public class Tokenizer {
     private Stack<String> parseFile(String fileName){
         
         Stack<String> symbols = new Stack<>();
-        String line = null;
+        String line;
         File file = new File(fileName);
         BufferedReader reader = null;
         boolean eoln = false;
@@ -134,7 +140,7 @@ public class Tokenizer {
                             cur = line.charAt(c);
                             word += cur;
                         }while (number.matcher(word).matches());
-                    }else if (OPERT.contains(Character.toString(cur))
+                    }else if (OPERATORS.contains(Character.toString(cur))
                                 && cur != ' '){
                         word += cur;
                         do{
@@ -145,7 +151,7 @@ public class Tokenizer {
                             }
                             cur = line.charAt(c);
                             word += cur;
-                        }while (OPERT.contains(word) && cur != ' ');
+                        }while (OPERATORS.contains(word) && cur != ' ');
                     }
                     
                     if (!word.isEmpty()) {
@@ -173,9 +179,7 @@ public class Tokenizer {
                 symbols.push("EOLN");
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             try {
                 if (reader != null) {
@@ -218,7 +222,7 @@ public class Tokenizer {
         }
         
         String symbol = fileStack.pop();
-        Integer tokenId = reservedWords.get(symbol);
+        Integer tokenId = RESERVED_WORDS.get(symbol);
         
         if (tokenId == null){
             

@@ -1,54 +1,41 @@
 package rowdy;
-
-
-
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
-
 import static rowdy.Rowdy.*;
-
 /**
  * Constructs a parse tree with the given language and then allows you to 
  * execute the parse tree. 
  * @author Richard DeSilvey
  */
 public class ParseTree {
-
     /**
      * Tree Node for the parse tree
      */
     private class Node {
-        
         private ArrayList<Node> children;
         private Symbol def;
         private Boolean seqActive;
-        
         public Node(Symbol def){
             children = new ArrayList<>();
             this.def = def;
             seqActive = false;
         }
-        
         public void addChild(Node child){
             children.add(child);
         }
-        
         public Symbol getSymbol(){
             return def;
         }
-        
         public boolean hasChildren(){
         	return !children.isEmpty();
         }
-        
         public Node getLeftMostChild(){
         	if (children.isEmpty()) return null;
         	return children.get(0);
         }
-        
         /**
          * Gets the child node with the id, only returns
          * the first occurance of the found child.
@@ -58,7 +45,6 @@ public class ParseTree {
         public Node getChild(int id){
         	return getChild(id, 0);
         }
-        
         /**
          * Gets the child node with the id. Since there could
          * be duplicates or multiple child nodes with the same ID,
@@ -82,55 +68,42 @@ public class ParseTree {
         	}
         	return null;
         }
-        
         public ArrayList<Node> getChildren(){
             return children;
         }
-        
         public String toString(){
             return def.toString() + " " + children.toString();
         }
-
     }
-    
     private Tokenizer parser;
     private Language language;
     private Node root;
     private Token currentToken;
     private int line;
-    
     /**
      * Stores the name of each identifier currently allocated in RAM.
      * Each id is associated with an index which maps to the actual value
      * of the id.
      */
-    private Hashtable<String, Value> globalSymbolTable;
-
+    private HashMap<String, Value> globalSymbolTable;
     /**
      * Keeps track of the level of loops the program is in.
      */
     private Stack<Node> activeLoops;
-    
     private Stack<Function> callStack;
-    
     private Node main;
-    
     public ParseTree(Language language) {
-
         this.language = language;
         this.root = null;
         this.line = 1;
         main = null;
-        
         callStack = new Stack<>();
         activeLoops = new Stack<>();
-        globalSymbolTable = new Hashtable<>();
+        globalSymbolTable = new HashMap<>();
     }
-    
     public void setLanguage(Language language){
         this.language = language;
     }
-    
     /**
      * Builds the parse tree with the given program file and language 
      * definitions.
@@ -143,40 +116,28 @@ public class ParseTree {
      */
     public void build(String fileName, String[] terminals, String mSymbols, 
             int idID, int constID){
-        
         parser = new Tokenizer(terminals, mSymbols, constID, idID);
-        
         parser.parse(fileName);
-        
-        NonTerminal program = (NonTerminal)language.getSymbol(prog);
+        NonTerminal program = (NonTerminal)language.getSymbol(PROGRAM);
         root = new Node(program);
         currentToken = parser.getToken();
-        
         while(currentToken.getID() == 200){
             if (currentToken.getID() == 200) line++;
             currentToken = parser.getToken();
         }
-        
         int id = currentToken.getID();
-
         add(root, getRule(program, id));
-        
         build(root);
-        
     }
-    
     public void print(){
         print(root);
     }
-    
     /**
      * Prints the tree
      * @param parent from
      */
     private void print(Node parent){
-        
         List<Node> children = parent.getChildren();
-        
         for (int i = 0; i < children.size(); i++){
             if (children.get(i).getSymbol() instanceof NonTerminal){
                 print(children.get(i));
@@ -185,42 +146,31 @@ public class ParseTree {
             }
         }
     }
-    
     /**
      * Walks through the tree recursively building on non-terminals. If a syntax error is detected the line
      * number is printed out.
      * @param parent 
      */
     private void build(Node parent){
-        
         Symbol symbol;
-
         Rule rule = null;
         List<Node> children = parent.getChildren();
         Node current;
-        
         for (int i = 0; i < children.size();i++){
             current = children.get(i);
             symbol = current.getSymbol();
             if (symbol instanceof NonTerminal){
-
                 rule = getRule((NonTerminal)symbol, currentToken.getID());
                 add(current, rule);
-
                 build(current);
-
             }else{
-
                 if (symbol.getId() != currentToken.getID()){
                     throw new RuntimeException("Syntax error, unexpected token '" 
                             + currentToken.getSymbol() + "' on Line " + line);
                 }
-                
                 children.remove(i); 
                 children.add(i, new Node(new Terminal(symbol.getName(), currentToken.getID(), currentToken.getSymbol())));
-                
                 currentToken = parser.getToken();
-                
                 while (currentToken != null && currentToken.getID() == 200) {
                     if (currentToken.getID() == 200) line++;
                     currentToken = parser.getToken();
@@ -228,7 +178,6 @@ public class ParseTree {
             }
         }
     }
-    
     /**
      * Builds a rule from the given NonTerminal using the id to map onto a hint.
      * @param symbol The NonTerminal for reference
@@ -239,7 +188,6 @@ public class ParseTree {
         Hint productionHint = symbol.getHint(terminal);
         return language.getProductionRule(productionHint);
     }
-    
     /**
      * Adds to the parent node the production rules. Each child is
      * from the production rule.
@@ -248,31 +196,25 @@ public class ParseTree {
      */
     private void add(Node parent, Rule rule){
         Symbol[] symbols = rule.getSymbols();
-        
         for (int i = 0; i < symbols.length; i++){
             Symbol symbol = symbols[i];
             Node node = new Node(symbol);
             parent.addChild(node);
         }
     }
-    
     /**
      * Runs the program loaded into the parse tree.
      * @param programParams The program parameters
      */
     public void execute(List<Value> programParams){
-    	
     	// Declare global variables
     	declareGlobals(root, programParams);
-    	
     	if (main == null){
     		throw new RuntimeException("main method not found");
     	}
-    	
     	// Run the main method
         executeStmt(main, null);
     }
-    
     /**
      * Scans the program looking for global variables and function declarations.
      * Each global is allocated in the main symbol table and functions are
@@ -280,62 +222,45 @@ public class ParseTree {
      * @param parent
      */
     private void declareGlobals(Node parent, List<Value> programParams){
-    	
     	Node cur;
         ArrayList<Node> children = parent.getChildren();
-        int curID;
+        int currentID;
         Value rightValue;
-        
         for (int i = 0; i < children.size(); i++){
             cur = children.get(i);
-            curID = cur.getSymbol().getId();
-            switch(curID){
-                
-                case assign_stmt:
-
-                    rightValue = getValue(cur.getChild(expr));
-
+            currentID = cur.getSymbol().getId();
+            switch(currentID){
+                case ASSIGN_STMT:
+                    rightValue = getValue(cur.getChild(EXPRESSION));
                     setAsGlobal((Terminal)cur.getChild(ID).getSymbol(), rightValue);
-                    
                     break;
-                case func:
-                	
+                case FUNCTION:
                 	String idName = ((Terminal)cur.getChild(ID).getSymbol()).getName();
-                	
-                	Node paramsNode = cur.getChild(params); 
-                	
+                	Node paramsNode = cur.getChild(PARAMETERS); 
                 	if (!idName.equals("main")){
                 		setAsGlobal(idName, new Value(cur));
                 	}else{
-                		
                 		if (globalSymbolTable.get(idName) != null){
                 			throw new RuntimeException("main method already defined");
                 		}
-                		
                 		List<String> paramsList = new ArrayList<>();
-                		 
                 		if (!programParams.isEmpty()){
                         	paramsList.add(((Terminal)executeExpr(paramsNode.getChild(ID), null).getObject()).getName());
-                        	Node n1 = paramsNode.getChild(params_tail);
-                        	
+                        	Node n1 = paramsNode.getChild(PARAMS_TAIL);
                         	if (n1.hasChildren()){
-	                            if (n1.getChild(params_tail).getSymbol().getId() == params_tail){
-	                                
-	                                Node tail = n1.getChild(params_tail);
+	                            if (n1.getChild(PARAMS_TAIL).getSymbol().getId() == PARAMS_TAIL){
+	                                Node tail = n1.getChild(PARAMS_TAIL);
 	                                paramsList.add(((Terminal)executeExpr(n1.getChild(ID), null).getObject()).getName());
-	                                
 	                                while (tail.hasChildren()){
 	                                	paramsList.add(((Terminal)executeExpr(tail.getChild(ID), null).getObject()).getName());
-	                                	tail = tail.getChild(params_tail);
+	                                	tail = tail.getChild(PARAMS_TAIL);
 	                                }
 	                            }
                         	}
                     	}
-                    	
                         // 2. Copy actual parameters to formal parameters
-                    	Hashtable<String, Value> params = new Hashtable<>();
+                    	HashMap<String, Value> params = new HashMap<>();
                     	String paramName;
-                    	
                     	for (int p = 0; p < paramsList.size(); p++){
                     		paramName = paramsList.get(p); 
                     		params.put(paramName, programParams.get(p));
@@ -344,16 +269,12 @@ public class ParseTree {
                     	callStack.push(function);
                 		main = parent;
                 	}
-                	
                 	break;
-                    
                 default:
                 	declareGlobals(cur, programParams);
             }
         }
     }
-    
-    
     /**
      * Executes program statements
      * @param parent The start of execution
@@ -363,54 +284,35 @@ public class ParseTree {
      * sequence control is given back to the original caller.
      */
     private void executeStmt(Node parent, Node seqControl){
-        
         Node cur;
         ArrayList<Node> children = parent.getChildren();
         Value rightValue;
         for (int i = 0, curID; i < children.size(); i++){
-        	
             cur = children.get(i);
             curID = cur.getSymbol().getId();
-            
             switch(curID){
-                
-	            case func:
-	            	
+	            case FUNCTION:
 	            	// Should only execute the main method
-	            	executeStmt(cur.getChild(stmt_list), null);
-	            	
+	            	executeStmt(cur.getChild(STMT_LIST), null);
 	            	// When main is finished, exit the program
 	            	System.exit(0);
-            
-                case assign_stmt:
-
+                case ASSIGN_STMT:
                     Terminal idTerminal = (Terminal)cur.getChild(ID).getSymbol();
-                    
-                    rightValue = getValue(cur.getChild(expr));
-
+                    rightValue = getValue(cur.getChild(EXPRESSION));
                     allocate(idTerminal, rightValue);
-                    
                     break;
-                
-                case if_stmt:
-
-                    Node ifExpr = cur.getChild(expr); 
+                case IF_STMT:
+                    Node ifExpr = cur.getChild(EXPRESSION); 
                     Value ifExprValue = (Value)executeExpr(ifExpr, null);
-                    
                     if (ifExprValue.valueToBoolean()){
-                        executeStmt(cur.getChild(stmt_list), seqControl);
+                        executeStmt(cur.getChild(STMT_LIST), seqControl);
                     }else{
-                        executeStmt(cur.getChild(else_part), seqControl); 
+                        executeStmt(cur.getChild(ELSE_PART), seqControl); 
                     }
-                    
                     break;
-                    
-                case loop_stmt:
-
+                case LOOP_STMT:
                     String idName = ((Terminal)cur.getChild(ID).getSymbol()).getName();
-
                     Value curValue = globalSymbolTable.get(idName);
-
                     if (curValue == null){
                         globalSymbolTable.put(idName, new Value());
                         activeLoops.push(cur);
@@ -418,34 +320,24 @@ public class ParseTree {
                     }else{
                         throw new RuntimeException("Label '"+idName+"' already exists");
                     }
-                    
-                    
                     boolean done = false;
-                    
-                    Node loopStmtList = cur.getChild(stmt_list);
-                    
+                    Node loopStmtList = cur.getChild(STMT_LIST);
                     while(!done){
                         executeStmt(loopStmtList, cur);
                         curValue = globalSymbolTable.get(idName);
                         done = (curValue == null);
                     }
-                    
                     break;
-                    
-                case break_stmt: 
-                     
-                    if (!cur.getChild(id_option).hasChildren()){
+                case BREAK_STMT: 
+                    if (!cur.getChild(ID_OPTION).hasChildren()){
                     	Node idOption = activeLoops.peek();
                         idName = ((Terminal)idOption.getChild(ID).getSymbol()).getName();
                     }else{  
-                        idName = ((Terminal)cur.getChild(id_option).getChild(ID).getSymbol()).getName();
+                        idName = ((Terminal)cur.getChild(ID_OPTION).getChild(ID).getSymbol()).getName();
                     }
-                    
                     if (globalSymbolTable.get(idName) == null){
                     	throw new RuntimeException("The label '" + idName + "' is not used");
                     }
-                    
-                    
                     for(;;){
                     	Node lp = activeLoops.pop();
                     	lp.seqActive = false; 
@@ -455,88 +347,57 @@ public class ParseTree {
                             break;
                         }
                     }
-                    
                     break;
-                    
-                case round_stmt:
-                	
+                case ROUND_STMT:
                 	Value idToRound = getValue(cur.getChild(ID));
-                	
                 	double val = idToRound.valueToNumber();
-                	int precision = getValueAsNumber(cur.getChild(arith_expr)).intValue();
+                	int precision = getValueAsNumber(cur.getChild(ARITHM_EXPR)).intValue();
                 	double factor = 1;
-                	
                 	while(precision > 0){
                 		factor *= 10;
                 		precision--;
                 	}
-                	
                 	val = (double)Math.round(val * factor) / factor;
-                	
                 	allocate((Terminal)cur.getChild(ID).getSymbol(), new Value(val));
-                	
                 	break;
-                
-                case read_stmt:
+                case READ_STMT:
                     Scanner keys = new Scanner(System.in);
                     String inValue = "";
-                    
                     Node firstID = cur.getChild(ID);
-                    
                     Terminal t = (Terminal)executeExpr(firstID, null).getObject();
                     allocate(t, new Value(keys.nextLine()));
-                    
                     if (cur.hasChildren()){
-                        Node paramsTail = cur.getChild(params_tail);
-                         
+                        Node paramsTail = cur.getChild(PARAMS_TAIL);
                         while (paramsTail.hasChildren()){
                             cur = paramsTail.getChild(ID);
                             Value v = executeExpr(cur, null);
                             inValue = keys.nextLine();
                             allocate((Terminal)v.getObject(), new Value(inValue));
-                            paramsTail = paramsTail.getChild(params_tail);
+                            paramsTail = paramsTail.getChild(PARAMS_TAIL);
                         }
-                        
                     }
-                    
                     break;
-
-                case func_call:
-                	
+                case FUNC_CALL:
                 	String funcName = ((Terminal)cur.getChild(ID).getSymbol()).getName();
-                	
                 	if (funcName.equals("main")){
                 		throw new RuntimeException("Can't recur on main");
                 	}
-                	
                 	executeFunc(cur);
-                	
                 	break;
-                    
-                case return_stmt:
-                	
+                case RETURN_STMT:
                 	Function functionReturning = callStack.peek();
                 	seqControl.seqActive = false;
-                	Value toSet = getValue(cur.getChild(expr));
-                	
+                	Value toSet = getValue(cur.getChild(EXPRESSION));
                 	functionReturning.setReturnValue(toSet);
-                	
                 	break;
-                    
-                case print_stmt:
-                    
+                case PRINT_STMT:
                     String printValue = "";
-   
-                    printValue += getValueAsString(cur.getChild(expr));
-                    
-                    Node atomTailNode = cur.getChild(expr_list);
-                    
+                    printValue += getValueAsString(cur.getChild(EXPRESSION));
+                    Node atomTailNode = cur.getChild(EXPR_LIST);
                     while (atomTailNode.hasChildren()){
-                        printValue += getValueAsString(atomTailNode.getChild(expr));
-                        atomTailNode = atomTailNode.getChild(expr_list);
+                        printValue += getValueAsString(atomTailNode.getChild(EXPRESSION));
+                        atomTailNode = atomTailNode.getChild(EXPR_LIST);
                     }
-                    
-                    
                     char c;
                     String temp= "";
                     for (int l = 0; l < printValue.length(); l++){
@@ -548,11 +409,8 @@ public class ParseTree {
                     		temp += c;
                     	}
                     }
-                    
                     System.out.print(temp);
-                    
                     break;
-                    
                 default:
                 	if (seqControl != null){
 	                	if (seqControl.seqActive)
@@ -560,11 +418,9 @@ public class ParseTree {
                 	}else{
                 		executeStmt(cur, null);
                 	}
-	                		
             }
         }
     }
-
     /**
      * When a function is called, and not allocated, the method
      * will collect the actual parameters being passed into the
@@ -580,74 +436,52 @@ public class ParseTree {
      */
     private Value executeFunc(Node cur){
     	// 1. Collect parameters
-    	
     	String funcName = ((Terminal)cur.getChild(ID).getSymbol()).getName();
-    	
     	if (globalSymbolTable.get(funcName) == null){
     		throw new RuntimeException("Function '" + funcName + "' not defined");
     	}
-    	
     	List<Value> ids = new ArrayList<>();
-
-    	if (cur.getChild(expr).hasChildren()){
-            ids.add(getValue(cur.getChild(expr)));
-            
-            Node atomTailNode = cur.getChild(expr_list);
-            
+    	if (cur.getChild(EXPRESSION).hasChildren()){
+            ids.add(getValue(cur.getChild(EXPRESSION)));
+            Node atomTailNode = cur.getChild(EXPR_LIST);
             while (atomTailNode.hasChildren()){
-                ids.add(getValue(atomTailNode.getChild(expr)));
-                atomTailNode = atomTailNode.getChild(expr_list);
+                ids.add(getValue(atomTailNode.getChild(EXPRESSION)));
+                atomTailNode = atomTailNode.getChild(EXPR_LIST);
             }
-        	
     	}
-    	
-    	
     	Value funcVal = globalSymbolTable.get(funcName);
     	Node functionNode = (Node)funcVal.getObject();
     	List<String> paramsList = new ArrayList<>();
-    	
     	if (!ids.isEmpty()){
-    		Node paramsNode = functionNode.getChild(params);
+    		Node paramsNode = functionNode.getChild(PARAMETERS);
         	paramsList.add(((Terminal)executeExpr(paramsNode, null).getObject()).getName());
-        	
-            Node paramsTailNode = paramsNode.getChild(params_tail);
-            
+            Node paramsTailNode = paramsNode.getChild(PARAMS_TAIL);
             while (paramsTailNode.hasChildren()){ 
             	paramsList.add(((Terminal)executeExpr(paramsTailNode.getChild(ID), null).getObject()).getName());
-            	paramsTailNode = paramsTailNode.getChild(params_tail);
+            	paramsTailNode = paramsTailNode.getChild(PARAMS_TAIL);
             }
     	}
-    	
         // 2. Copy actual parameters to formal parameters
-    	Hashtable<String, Value> params = new Hashtable<>();
+    	HashMap<String, Value> params = new HashMap<>();
     	String paramName;
-    	
     	for (int p = 0; p < paramsList.size(); p++){
     		paramName = paramsList.get(p); 
     		params.put(paramName, ids.get(p));
     	}
-    	
     	// 3. Push the function onto the call stack
     	Function function = new Function(funcName, params);
-    	
     	callStack.push(function);
-    	
     	// 4. Get and execute the stmt-list
-    	Node stmtList = functionNode.getChild(stmt_list), seqControl = new Node(null);
+    	Node stmtList = functionNode.getChild(STMT_LIST), seqControl = new Node(null);
     	seqControl.seqActive = true;
-    	
     	executeStmt(stmtList, seqControl);
-    	
     	// When finished, remove the function from the
     	// call stack and free it's memory then return
     	// it's value.
     	function = callStack.pop();
-    	
     	function.free();
-    	
     	return function.getReturnValue();
     }
-    
     /**
      * Allocates new memory for an ID. If the variable is not a global
      * variable it will allocate the variable to the current function.
@@ -657,7 +491,6 @@ public class ParseTree {
      */
     private void allocate(Terminal idTerminal, Value value){
     	Value exists = globalSymbolTable.get(idTerminal.getName());
-        
         if (exists != null){
         	setAsGlobal(idTerminal, value);
         }else{
@@ -665,8 +498,6 @@ public class ParseTree {
         	currentFunction.setIDValue(idTerminal, value);
         }
     }
-    
-    
     /**
      * allocates/sets memory using the name of the symbol and a given value
      * @param idName The variable being set
@@ -674,7 +505,6 @@ public class ParseTree {
      */
     private void setAsGlobal(String idName, Value value){
     	Value curValue;
-            
         curValue = globalSymbolTable.get(idName);
         if (curValue == null){
             globalSymbolTable.put(idName, value);
@@ -683,34 +513,23 @@ public class ParseTree {
         	globalSymbolTable.put(idName, value);
         }
     }
-    
     private void setAsGlobal(Terminal cur, Value value) {
         setAsGlobal(cur.getName(), value);
     }
-    
     private boolean isset(Node cur){
     	Value o = (Value)executeExpr(cur, null);
         return isset(o);
     }
-    
     private boolean isset(Value value){
-    	
     	if (value == null) return false;
-    	
         String v = ((Terminal)value.getObject()).getName();
-        
         Value val = globalSymbolTable.get(v);
-        
         if (val == null){
-        	
         	Function currentFunction = callStack.peek();
-            
             return (currentFunction.getValue(value, false) != null);
-        	
         }
         return true;
     }
-    
     /**
      * Fetches the value stored or returns 'value' if no ID is stored in it.
      * @param value The Value object that holds an atomic symbol. May
@@ -718,20 +537,13 @@ public class ParseTree {
      * @return A value object with an atomic symbol stored in it.
      */
     private Value getValue(Value value){
-    	
     	if (value == null) return null;
-    	
         if (((Value) value).getObject() instanceof Terminal){
             String v = ((Terminal)value.getObject()).getName();
-            
             Value val = globalSymbolTable.get(v);
-            
             if (val == null){
-            	
             	Function currentFunction = callStack.peek();
-                
                 return currentFunction.getValue(value, true);
-            	
             }
             return val;
         }else{
@@ -748,7 +560,6 @@ public class ParseTree {
         Value o = (Value)executeExpr(cur, null);
         return getValue(o);
     }
-    
     private String getValueAsString(Node cur) {
         return getValue(cur).valueToString().replaceAll("\"", "");
     }
@@ -761,15 +572,12 @@ public class ParseTree {
     private Double getValueAsNumber(Node cur) {
         return getValue(cur).valueToNumber();
     }
-    
     private Boolean getValueAsBoolean(Value cur) {
         return getValue(cur).valueToBoolean();
     }
     private Double getValueAsNumber(Value cur) {
         return getValue(cur).valueToNumber();
     }
-    
-    
     /**
      * Fetches a value from the tree by either accessing an ID, a CONST, or
      * evaluating an expression.
@@ -778,7 +586,6 @@ public class ParseTree {
      * @return The value of the expression
      */
     private Value executeExpr(Node cur, Value leftValue){
-        
     	Node parent = cur;
         ArrayList<Node> children = cur.getChildren();
         double left, right;
@@ -789,91 +596,57 @@ public class ParseTree {
         Symbol operator;
         int curID = cur.getSymbol().getId();
         switch(curID){
-                
-	        case func_call:
-	        	
+	        case FUNC_CALL:
 	        	return executeFunc(cur);
-        
-            case expr:
-                    
+            case EXPRESSION:
                 Node leftChild = cur.getLeftMostChild();
-
                 if (leftChild == null) return null;
-                
                 switch (leftChild.getSymbol().getId()){
-	                case bool_term:
+	                case BOOL_TERM:
 	                	leftValue = executeExpr(leftChild, leftValue);
-	                    return executeExpr(cur.getChild(bool_term_tail), leftValue);
-	                case func_call:
+	                    return executeExpr(cur.getChild(BOOL_TERM_TAIL), leftValue);
+	                case FUNC_CALL:
 	                	return executeExpr(leftChild, leftValue);
-	                case isset_expr:
+	                case ISSET_EXPR:
 	                	return executeExpr(leftChild, leftValue);
                 }
-                
-                
                 Symbol symbolType = cur.getLeftMostChild().getSymbol();
-                
                 switch (symbolType.getId()){
                     case CONCAT:
-
                         String concatValue = "";
-                        
-                        concatValue += getValueAsString(executeExpr(cur.getChild(expr), leftValue));
-                        
-                        Node atomTailNode = cur.getChild(expr_list);
-                       
+                        concatValue += getValueAsString(executeExpr(cur.getChild(EXPRESSION), leftValue));
+                        Node atomTailNode = cur.getChild(EXPR_LIST);
                         while (atomTailNode.hasChildren()){
-                            concatValue += getValueAsString(executeExpr(atomTailNode.getChild(expr), leftValue));
-                            atomTailNode = atomTailNode.getChild(expr_list);
+                            concatValue += getValueAsString(executeExpr(atomTailNode.getChild(EXPRESSION), leftValue));
+                            atomTailNode = atomTailNode.getChild(EXPR_LIST);
                         }
-                        
-                        
                         return new Value(concatValue);
-
                     case SLICE:
-                        
                         String slice = "";
-                        
-                        slice = getValueAsString(cur.getChild(expr));
-                        
-                        int leftBound = getValueAsNumber(cur.getChild(arith_expr)).intValue();
-                        int rightBound = getValueAsNumber(cur.getChild(arith_expr, 1)).intValue();
-
+                        slice = getValueAsString(cur.getChild(EXPRESSION));
+                        int leftBound = getValueAsNumber(cur.getChild(ARITHM_EXPR)).intValue();
+                        int rightBound = getValueAsNumber(cur.getChild(ARITHM_EXPR, 1)).intValue();
                         return new Value(slice.substring(leftBound, rightBound));
-
                     case STRCMP:
-
                         String v1, v2;
-                        
-                        v1 = getValueAsString(cur.getChild(expr));
-                        v2 = getValueAsString(cur.getChild(expr, 1));
-
+                        v1 = getValueAsString(cur.getChild(EXPRESSION));
+                        v2 = getValueAsString(cur.getChild(EXPRESSION, 1));
                         return new Value(v1.compareTo(v2));
                 }
-                
-            case isset_expr:
-            	
+            case ISSET_EXPR:
             	Value resultBoolean = new Value(isset(cur.getChild(ID)));
-            	
             	return resultBoolean;
-            	
-            case bool_term_tail:
-            case bool_factor_tail:
-
+            case BOOL_TERM_TAIL:
+            case BOOL_FACTOR_TAIL:
                 ArrayList<Node> boolChildren = cur.getChildren();
-
                 if (boolChildren.isEmpty()){
                     return leftValue;
                 }
-
                 cur = boolChildren.get(0);
                 operator = cur.getSymbol();
-
                 bLeft = getValueAsBoolean(leftValue);
-                
                 cur = boolChildren.get(1);
                 bRight = getValueAsBoolean(cur);
-                
                 switch(operator.getId()){
                     case AND:
                         bReslt = bLeft && bRight;
@@ -886,25 +659,17 @@ public class ParseTree {
                 }
                 cur = boolChildren.get(2);
                 return executeExpr(cur, new Value(bReslt));
-                
-            case relation_option:
-                    
+            case RELATION_OPTION:
                 ArrayList<Node> relationChildren = cur.getChildren();
-
                 if (relationChildren.isEmpty()){
                     return leftValue;
                 }
-
                 cur = relationChildren.get(0);
                 operator = cur.getSymbol();
-
                 left = getValueAsNumber(leftValue);
-                
                 cur = relationChildren.get(1);
                 right = getValueAsNumber(cur);
-
                 bReslt = null;
-
                 switch(operator.getId()){
                     case LESS:
                         bReslt = left < right;
@@ -925,11 +690,8 @@ public class ParseTree {
                         bReslt = left != right;
                         break;
                 }
-
                 return new Value(bReslt);
-            
-            case factor:
-
+            case FACTOR:
                 ArrayList<Node> factorChildren = cur.getChildren();
                 if (factorChildren.size() > 0){
 	                cur = factorChildren.get(0);
@@ -938,51 +700,39 @@ public class ParseTree {
 	                    cur = factorChildren.get(1);
 	                    switch(operator.getId()){
 	                        case MINUS:
-	
 	                            rightValue = (Value)executeExpr(cur, leftValue);
-	
 	                            left = leftValue.valueToNumber();
 	                            right = rightValue.valueToNumber();
 	                            reslt = null;
-	
 	                            reslt = left - right;
 	                            return new Value(reslt);
 	                        default:
 	                            return executeExpr(cur, leftValue);
 	                    }
-	
 	                }else{
 	                    return executeExpr(cur, leftValue);
 	                }
                 }else{
                 	throw new RuntimeException("Factors not found");
                 }
-            case factor_tail:
+            case FACTOR_TAIL:
                 ArrayList<Node> factorTailChildren = cur.getChildren();
-                
                 if (factorTailChildren.isEmpty()){
                     return leftValue;
                 }
-                
                 cur = factorTailChildren.get(0);
-
                 if (cur.getSymbol() instanceof NonTerminal){
                     return executeExpr(cur, leftValue);
                 }
                 operator = cur.getSymbol();
-
                 if (operator.getId() == OPENPAREN){
                     cur = factorTailChildren.get(1);
                     return executeExpr(cur, leftValue);
                 }
-                
                 cur = factorTailChildren.get(1);
-
                 left = getValueAsNumber(leftValue);
                 right = getValueAsNumber(cur);
-                
                 reslt = null;
-
                 switch(operator.getId()){
                     case MULTIPLY:
                         reslt = left * right;
@@ -997,23 +747,17 @@ public class ParseTree {
                         reslt = left % right;
                         break;
                 }
-
                 return executeExpr(children.get(2), new Value(reslt));
-            
-            case term_tail:
+            case TERM_TAIL:
                 ArrayList<Node> termChildren = cur.getChildren();
-
                 if (termChildren.size() < 1) {
                     return leftValue;
                 }
-
                 operator = termChildren.get(0).getSymbol();
-
                 cur = termChildren.get(1);
                 left = getValueAsNumber(leftValue);
                 right = getValueAsNumber(cur);
                 reslt = null;
-
                 switch(operator.getId()){
                     case PLUS:
                         reslt = left + right;
@@ -1022,48 +766,38 @@ public class ParseTree {
                         reslt = left - right;
                         break;
                 }
-
                 return executeExpr(termChildren.get(2), new Value(reslt));
-                
-            case term:
-            case bool_term:
-            case bool_factor:
-            case arith_expr:
-
+            case TERM:
+            case BOOL_TERM:
+            case BOOL_FACTOR:
+            case ARITHM_EXPR:
                 leftValue = (Value) executeExpr(children.get(0), leftValue);
-
                 return executeExpr(children.get(1), leftValue);
-            case id_option:   
-            case params:
-            case atom:
-                
+            case ID_OPTION:   
+            case PARAMETERS:
+            case ATOMIC:
                 return executeExpr(parent.getLeftMostChild(), leftValue);
             case ID:
                 return new Value(cur.getSymbol());
             case CONST:
                 return new Value(((Terminal)cur.getSymbol()).getName());
-            	
             default:
                 return leftValue;
         }
     }
-    
     public void collect(List<Symbol> program){
         collectInOrder(program, root);
     }
     public void collectTerminals(List<Terminal> program){
         collectTerminals(program, root);
     }
-    
     /**
      * Grabs all the leaf nodes in the tree for execution.
      * @param program
      * @param parent The root of the tree
      */
     private void collectTerminals(List<Terminal> program, Node parent){
-        
         List<Node> children = parent.getChildren();
-        
         for (int i = 0; i < children.size(); i++){
             if (children.get(i).getSymbol() instanceof NonTerminal){
                 collectTerminals(program, children.get(i));
@@ -1072,21 +806,16 @@ public class ParseTree {
             }
         }
     }
-    
     /**
      * Grabs all the leaf nodes in the tree for execution.
      * @param program
      * @param parent The root of the tree
      */
     private void collectInOrder(List<Symbol> program, Node parent){
-        
         List<Node> children = parent.getChildren();
-        
         for (int i = 0; i < children.size(); i++){
             program.add(children.get(i).getSymbol());
             collectInOrder(program, children.get(i));
-            
         }
     }
-    
 }
