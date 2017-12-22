@@ -1,0 +1,27 @@
+
+	// Rowdy demo
+
+	func func1(). // Define this as a function
+	func func2(a, b)
+	  print "Function adds ", a, " and ", b, " to get: ", a + b, "\n";
+	.
+	
+	func main()
+		print (->myfunc(1, 3)), "\n";
+		nullValue = ->noReturn();
+		print nullValue, "\n";
+		
+		func1 = func2;
+		
+		->func2(2, 8);
+	.
+	
+	func noReturn ()
+	  // do something then don't return anything
+	.
+	
+	func myfunc(a, b)
+		return a + b;
+	.
+	
+.

@@ -4,6 +4,8 @@
 	// to help fix floating point errors.
 	
 	change = 0;
+	// Functions can be assigned to other functions
+	func funcPointer(denom).
 	
 	func main (price, amt)
 	
@@ -12,7 +14,11 @@
 		
 		chg = change;
 		
-		twenties	= ->getChange(20);
+		twenties = ->funcPointer(20);
+		
+		funcPointer = getChange;
+		
+		twenties	= ->funcPointer(20);
 		tens 		= ->getChange(10);
 		fives 		= ->getChange(5);
 		ones	 	= ->getChange(1);
@@ -55,7 +61,7 @@
 				qty = qty + 1;
 				round change, 2;
 			else
-				break;
+				break
 			fi
 		
 		repeat
