@@ -1,0 +1,37 @@
+
+
+	func main()
+	
+		l = 1;
+		loop l1:
+			print "Start l1\n";
+			loop l2:
+				print "Start l2\n";
+				loop l3:
+					print "Start l3\n";
+					loop l4:
+						print "Start l4\n";
+						if l == 1 then
+							break;// equivalent to BREAK l4;
+						fi
+						if l == 2 then
+							break l3;
+						fi
+						if l == 3 then
+							break l2;
+						fi
+						if l == 4 then
+							break l1;
+						fi
+					
+					repeat;
+					l = 2;
+				repeat;
+				l = 3
+			repeat;
+			l = 4;
+		repeat;
+		print "Done\n";
+	.
+	
+.
