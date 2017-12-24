@@ -14,6 +14,24 @@
 		func1 = func2;
 		
 		->func2(2, 8);
+		
+		// Strings
+		print concat "These are ", "Concatenated", "\n";
+		print "These are ", "Concatenated", "\n"; // Equivalent  to the above line
+		
+		str1 = "Hello ";
+		str2 = "World!\n";
+		
+		str3 = concat str1, str2;
+		print str3;
+		
+		// Slicing Strings
+		str4 = slice str3, 0, 5; // [0, 5)
+		print concat str4, "\n";
+		v1 = 0; v2 = 5;
+		
+		str4 = slice str3, v1, v2; // [0, 5)
+		print concat str4, "\n";
 	.
 	
 	func noReturn ()
