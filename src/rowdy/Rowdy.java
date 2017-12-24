@@ -6,7 +6,9 @@ import java.util.List;
 /**
  * Main driver class. The grammar, terminals/non-terminals and the hint table
  * are all defined here.
- *
+ * This whole construction is VERY confusing and needs help. It makes it
+ * harder to add to the Rowdy language and needs better abstraction.
+ * 
  * @author Richard DeSilvey
  */
 public class Rowdy {
