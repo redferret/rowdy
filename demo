@@ -16,7 +16,7 @@
 		->func2(2, 8);
 		
 		// Strings
-		print concat "These are ", "Concatenated", "\n";
+		print ( concat "These are ", "Concatenated" ), "\n";
 		print "These are ", "Concatenated", "\n"; // Equivalent  to the above line
 		
 		str1 = "Hello ";
@@ -31,7 +31,7 @@
 		v1 = 0; v2 = 5;
 		
 		str4 = slice str3, v1, v2; // [0, 5)
-		print concat str4, "\n";
+		print ( concat str4, " World!" ), "\n";
 	.
 	
 	func noReturn ()
