@@ -13,7 +13,7 @@ import static rowdy.Rowdy.*;
  *
  * @author Richard DeSilvey
  */
-public class ParseTree {
+public class RowdyParseTree {
 
   /**
    * Tree Node for the parse tree
@@ -108,7 +108,7 @@ public class ParseTree {
   private Stack<Function> callStack;
   private Node main;
 
-  public ParseTree(Language language) {
+  public RowdyParseTree(Language language) {
     this.language = language;
     this.root = null;
     this.line = 1;

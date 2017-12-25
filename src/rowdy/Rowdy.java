@@ -201,7 +201,7 @@ public class Rowdy {
     Language rowdy = Language.build(TERMINALS, NON_TERMINALS,
             GRAMMAR_RULES, GRAMMAR_HINTS);
 
-    ParseTree rowdyProgram = new ParseTree(rowdy);
+    RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
     rowdyProgram.build(args[0], TERMINALS, SPECIAL_SYMBOLS, CONST, ID);
 
     List<Value> programParameters = new ArrayList<>();
