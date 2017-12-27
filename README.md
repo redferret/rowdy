@@ -15,13 +15,13 @@ Some key parts to the interpreter are:
 * Value
 
 ### Structures/Submodules
-RowdyParseTree
-Tokenizer - Similar to Lex or a lexer
-Language
+* RowdyParseTree
+* Tokenizer - Similar to Lex or a lexer
+* Language
 
-The Tokenizer is a lexer that parses Rowdy code and places all the tokens into a stack to be later consumed.
-Language takes structured arrays representing the grammar for the language. When you build the language everything from
-the structured grammar array is pieced together into two maps, the grammar and the symbols being used. The purpose of the language is to aid the RowdyParseTree when the parse tree is being constructed.
+The `Tokenizer` is a lexer that parses Rowdy code and places all the tokens into a stack to be later consumed.
+`Language` takes structured arrays representing the grammar for the language. When you build the language everything from
+the structured grammar array is pieced together into two maps, the grammar and the symbols being used. The purpose of the language is to aid the `RowdyParseTree` when the parse tree is being constructed.
 The parse tree will then use the tokeniser to pop off each token and uses that token to get a production rule from the language and adds the correct symbols to the parse tree.
 Once the tree is constructed the main function node is executed. 
 
