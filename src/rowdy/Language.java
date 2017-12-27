@@ -69,9 +69,6 @@ public class Language {
    * @return
    */
   public Rule getProductionRule(Hint productionHint) {
-    if (productionHint == null) {
-      return new Rule();
-    }
     return (productionHint == null) ? new Rule() : GRAMMAR.get(productionHint.getHint());
   }
 
