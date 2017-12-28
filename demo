@@ -13,7 +13,7 @@
 		
 		func1 = func2;
 		
-		->func2(2, 8);
+		->func1(2, 8);
 		count = 1;
 		// Strings, print statements have concat built into them, so it's not always 
 		// needed and may be more efficient to not use concat statements inside print statements
