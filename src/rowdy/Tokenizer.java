@@ -6,7 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Stack;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -33,7 +34,7 @@ public class Tokenizer {
    */
   private static final Pattern id, number, tokenNumber, whiteSpace, tokenString;
 
-  private Stack<String> fileStack;
+  private List<String> fileStack;
 
   static {
     // Set up each regular expression
@@ -85,15 +86,15 @@ public class Tokenizer {
   }
 
   /**
-   * Gets the contents of a file and pushes all relevant groupings of characters
+   * Gets the contents of a file and addes all relevant groupings of characters
    * to a stack.
    *
    * @param fileName The file name for the datafile
    * @return The stack of grouped characters
    */
-  private Stack<String> parseFile(String fileName) {
+  private List<String> parseFile(String fileName) {
 
-    Stack<String> symbols = new Stack<>();
+    List<String> symbols = new LinkedList<>();
     String line;
     File file = new File(fileName);
     BufferedReader reader = null;
@@ -160,7 +161,7 @@ public class Tokenizer {
           }
 
           if (!word.isEmpty()) {
-            symbols.push(
+            symbols.add(
                     (eoln)
                             ? word
                             :// Else
@@ -181,7 +182,7 @@ public class Tokenizer {
           word = "";
         }
 
-        symbols.push("EOLN");
+        symbols.add("EOLN");
       }
     } catch (FileNotFoundException e) {
     } catch (IOException e) {
@@ -193,18 +194,7 @@ public class Tokenizer {
       } catch (IOException e) {
       }
     }
-
-    // Flip the contents of the stack ignoring any possible empty strings
-    Stack<String> temp = new Stack<>();
-    while (!symbols.isEmpty()) {
-      String s = symbols.pop();
-      if (!s.isEmpty()) {
-        temp.push(s);
-      }
-    }
-
-    return temp;
-
+    return symbols;
   }
 
   /**
@@ -227,7 +217,7 @@ public class Tokenizer {
       return null;
     }
 
-    String symbol = fileStack.pop();
+    String symbol = fileStack.remove(0);
     Integer tokenId = RESERVED_WORDS.get(symbol);
 
     if (tokenId == null) {

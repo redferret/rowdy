@@ -203,7 +203,7 @@ public class Rowdy {
               GRAMMAR_RULES, GRAMMAR_HINTS);
 
       RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
-      Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, CONST, ID);
+      Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
       String programFileName = args[0];
       parser.parse(programFileName);
       rowdyProgram.build(parser);
