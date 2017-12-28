@@ -20,8 +20,8 @@ public class RowdyParseTree {
    */
   private class Node {
 
-    private ArrayList<Node> children;
-    private Symbol def;
+    private final ArrayList<Node> children;
+    private final Symbol def;
     private Boolean seqActive;
 
     public Node(Symbol def) {
@@ -87,6 +87,7 @@ public class RowdyParseTree {
       return children;
     }
 
+    @Override
     public String toString() {
       return def.toString() + " " + children.toString();
     }
@@ -100,12 +101,12 @@ public class RowdyParseTree {
    * Stores the name of each identifier currently allocated in RAM. Each id is
    * associated with an index which maps to the actual value of the id.
    */
-  private HashMap<String, Value> globalSymbolTable;
+  private final HashMap<String, Value> globalSymbolTable;
   /**
    * Keeps track of the level of loops the program is in.
    */
-  private Stack<Node> activeLoops;
-  private Stack<Function> callStack;
+  private final Stack<Node> activeLoops;
+  private final Stack<Function> callStack;
   private Node main;
 
   public RowdyParseTree(Language language) {
@@ -124,25 +125,18 @@ public class RowdyParseTree {
 
   /**
    * Builds the parse tree with the given program file and language definitions.
-   *
-   * @param fileName The program file
-   * @param terminals The terminal symbols for the language
-   * @param mSymbols Helps with parsing
-   * @param idID The id for identifiers
-   * @param constID The id for constants
+   * @param parser
    */
-  public void build(String fileName, String[] terminals, String mSymbols,
-          int idID, int constID) {
-    parser = new Tokenizer(terminals, mSymbols, constID, idID);
-    parser.parse(fileName);
+  public void build(Tokenizer parser) {
+    this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(PROGRAM);
     root = new Node(program);
-    currentToken = parser.getToken();
+    currentToken = this.parser.getToken();
     while (currentToken.getID() == 200) {
       if (currentToken.getID() == 200) {
         line++;
       }
-      currentToken = parser.getToken();
+      currentToken = this.parser.getToken();
     }
     int id = currentToken.getID();
     add(root, getRule(program, id));
@@ -177,7 +171,7 @@ public class RowdyParseTree {
    */
   private void build(Node parent) {
     Symbol symbol;
-    Rule rule = null;
+    Rule rule;
     List<Node> children = parent.getChildren();
     Node current;
     for (int i = 0; i < children.size(); i++) {
@@ -193,7 +187,8 @@ public class RowdyParseTree {
                   + currentToken.getSymbol() + "' on Line " + line);
         }
         children.remove(i);
-        children.add(i, new Node(new Terminal(symbol.getName(), currentToken.getID(), currentToken.getSymbol())));
+        Terminal terminal = new Terminal(symbol.getName(), currentToken.getID(), currentToken.getSymbol());
+        children.add(i, new Node(terminal));
         currentToken = parser.getToken();
         while (currentToken != null && isCurTokenEOLN()) {
           if (isCurTokenEOLN()) {
@@ -401,7 +396,7 @@ public class RowdyParseTree {
           break;
         case READ_STMT:
           Scanner keys = new Scanner(System.in);
-          String inValue = "";
+          String inValue;
           Node firstID = currentTreeNode.getChild(ID);
           Terminal t = (Terminal) executeExpr(firstID, null).getObject();
           allocate(t, new Value(keys.nextLine()));
@@ -686,7 +681,7 @@ public class RowdyParseTree {
             }
             return new Value(concatValue);
           case SLICE:
-            String slice = "";
+            String slice;
             slice = getValueAsString(cur.getChild(EXPRESSION));
             int leftBound = getValueAsNumber(cur.getChild(ARITHM_EXPR)).intValue();
             int rightBound = getValueAsNumber(cur.getChild(ARITHM_EXPR, 1)).intValue();
@@ -768,7 +763,6 @@ public class RowdyParseTree {
                 rightValue = (Value) executeExpr(cur, leftValue);
                 left = leftValue.valueToNumber();
                 right = rightValue.valueToNumber();
-                reslt = null;
                 reslt = left - right;
                 return new Value(reslt);
               default:
