@@ -1,0 +1,19 @@
+
+	// This program contains no semicolons, they are optional
+	func main()
+		print "Enter the number of stars (max 1000): " read numberOfStars
+		if (numberOfStars > 1000) then
+			numberOfStars = 1000
+		fi
+		actualNumberOfStars = numberOfStars
+		loop m:
+			print "*"
+			numberOfStars = numberOfStars - 1
+			if (numberOfStars <= 0) then
+				break m
+			fi
+		repeat
+		print "\n", "We printed your ", actualNumberOfStars, " stars", "\n"
+	.
+	
+.

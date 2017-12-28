@@ -12,7 +12,7 @@
 					loop l4:
 						print "Start l4\n";
 						if l == 1 then
-							break;// equivalent to BREAK l4;
+							break // equivalent to BREAK l4;
 						fi
 						if l == 2 then
 							break l3;
@@ -24,13 +24,13 @@
 							break l1;
 						fi
 					
-					repeat;
+					repeat
 					l = 2;
-				repeat;
+				repeat
 				l = 3
-			repeat;
+			repeat
 			l = 4;
-		repeat;
+		repeat
 		print "Done\n";
 	.
 	
