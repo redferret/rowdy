@@ -198,25 +198,29 @@ public class Rowdy {
    */
   public static void main(String[] args) {
 
-    Language rowdy = Language.build(TERMINALS, NON_TERMINALS,
-            GRAMMAR_RULES, GRAMMAR_HINTS);
+    try {
+      Language rowdy = Language.build(TERMINALS, NON_TERMINALS,
+              GRAMMAR_RULES, GRAMMAR_HINTS);
 
-    RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
-    rowdyProgram.build(args[0], TERMINALS, SPECIAL_SYMBOLS, CONST, ID);
+      RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
+      rowdyProgram.build(args[0], TERMINALS, SPECIAL_SYMBOLS, CONST, ID);
 
-    List<Value> programParameters = new ArrayList<>();
+      List<Value> programParameters = new ArrayList<>();
 
-    for (int p = 1; p < args.length; p++) {
-      String in = args[p];
-      if (Character.isDigit(in.charAt(0))) {
-        programParameters.add(new Value(Float.parseFloat(args[p])));
-      } else {
-        programParameters.add(new Value(args[p]));
+      for (int p = 1; p < args.length; p++) {
+        String in = args[p];
+        if (Character.isDigit(in.charAt(0))) {
+          programParameters.add(new Value(Float.parseFloat(args[p])));
+        } else {
+          programParameters.add(new Value(args[p]));
+        }
+
       }
 
+      rowdyProgram.execute(programParameters);
+    }catch (Exception e) {
+      System.out.println(e.getMessage());
     }
-
-    rowdyProgram.execute(programParameters);
 
   }
 
