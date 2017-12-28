@@ -14,10 +14,17 @@
 		func1 = func2;
 		
 		->func2(2, 8);
-		
-		// Strings
-		print ( concat "These are ", "Concatenated" ), "\n";
-		print "These are ", "Concatenated", "\n"; // Equivalent  to the above line
+		count = 1;
+		// Strings, print statements have concat built into them, so it's not always 
+		// needed and may be more efficient to not use concat statements inside print statements
+		print ( concat "These are ", "Concatenated ", count ), "\n";
+		count = count + 1;
+		print "These are ", ( concat "Concatenated ", count, "\n");
+		count = count + 1;
+		print "These are ", "Concatenated ", count, "\n";
+		count = count + 1;
+		// Above same as below
+		print ( concat "These are ", "Concatenated ", count, "\n" );
 		
 		str1 = "Hello ";
 		str2 = "World!\n";
@@ -27,11 +34,12 @@
 		
 		// Slicing Strings
 		str4 = slice str3, 0, 5; // [0, 5)
-		print concat str4, "\n";
+		print ( concat str4, "\n" );
 		v1 = 0; v2 = 5;
 		
 		str4 = slice str3, v1, v2; // [0, 5)
 		print ( concat str4, " World!" ), "\n";
+		->noReturn();
 	.
 	
 	func noReturn ()
