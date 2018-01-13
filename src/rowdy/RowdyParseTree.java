@@ -494,19 +494,19 @@ public class RowdyParseTree {
         funcVal = globalSymbolTable.get(funcName);
       }
     }
-    List<Value> ids = new ArrayList<>();
+    List<Value> parameterValues = new ArrayList<>();
     if (cur.get(EXPRESSION).hasChildren()) {
-      ids.add(getValue(cur.get(EXPRESSION)));
+      parameterValues.add(getValue(cur.get(EXPRESSION)));
       Node atomTailNode = cur.get(EXPR_LIST);
       while (atomTailNode.hasChildren()) {
-        ids.add(getValue(atomTailNode.get(EXPRESSION)));
+        parameterValues.add(getValue(atomTailNode.get(EXPRESSION)));
         atomTailNode = atomTailNode.get(EXPR_LIST);
       }
     }
     
     Node functionNode = (Node) funcVal.getValue();
     List<String> paramsList = new ArrayList<>();
-    if (!ids.isEmpty()) {
+    if (!parameterValues.isEmpty()) {
       Node paramsNode = functionNode.get(PARAMETERS);
       paramsList.add(((Terminal) executeExpr(paramsNode, null).getValue()).getName());
       Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
@@ -520,7 +520,7 @@ public class RowdyParseTree {
     String paramName;
     for (int p = 0; p < paramsList.size(); p++) {
       paramName = paramsList.get(p);
-      params.put(paramName, ids.get(p));
+      params.put(paramName, parameterValues.get(p));
     }
     // 3. Push the function onto the call stack
     Function function = new Function(funcName, params);
