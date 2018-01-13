@@ -25,7 +25,7 @@ public abstract class Symbol {
     id = token.getID();
   }
 
-  public int getId() {
+  public int id() {
     return id;
   }
 

@@ -19,6 +19,9 @@ public class Function {
   }
 
   public void allocate(String idName, Value value) {
+    if (idName.equals("true") || idName.equals("false")) {
+      return;
+    }
     Value curValue;
     if (value == null) {
       value = new Value("null");
@@ -58,19 +61,23 @@ public class Function {
     if (value == null) {
       return null;
     }
-    if (((Value) value).getObject() instanceof Terminal) {
-      String v = ((Terminal) value.getObject()).getName();
-      Value val = symbolTable.get(v);
-      if (val == null && error) {
-        throw new RuntimeException("Unknown "
-                + "identifier: " + v);
-      } else if (val == null && !error) {
-        return null;
-      }
-      return val;
+    if (value.getValue() instanceof Terminal) {
+      String idName = ((Terminal) value.getValue()).getName();
+      return getValue(idName, error);
     } else {
       return value;
     }
+  }
+  
+  public Value getValue(String idName, boolean error) {
+    Value val = symbolTable.get(idName);
+    if (val == null && error) {
+      throw new RuntimeException("Unknown "
+              + "identifier: " + idName);
+    } else if (val == null && !error) {
+      return null;
+    }
+    return val;
   }
 
   public String getName() {

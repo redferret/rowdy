@@ -25,7 +25,7 @@ public class NonTerminal extends Symbol {
     }
     for (int i = 0; i < hints.size(); i++) {
       if (hints.get(i).getTerminal() != null) {
-        if (hints.get(i).getTerminal().getId() == id) {
+        if (hints.get(i).getTerminal().id() == id) {
           return hints.get(i);
         }
       }

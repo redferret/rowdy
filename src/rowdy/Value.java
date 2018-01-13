@@ -62,7 +62,7 @@ public class Value {
     return (Boolean) value;
   }
 
-  public Object getObject() {
+  public Object getValue() {
     return value;
   }
 

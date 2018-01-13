@@ -222,7 +222,7 @@ public class Rowdy {
 
       rowdyProgram.execute(programParameters);
     }catch (Exception e) {
-      System.out.println(e.getMessage());
+      System.out.println("Runtime Exception: " + e.getMessage());
     }
 
   }

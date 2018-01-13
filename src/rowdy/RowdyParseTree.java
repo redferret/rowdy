@@ -1,6 +1,7 @@
 package rowdy;
 
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -34,7 +35,7 @@ public class RowdyParseTree {
       children.add(child);
     }
 
-    public Symbol getSymbol() {
+    public Symbol symbol() {
       return def;
     }
 
@@ -56,7 +57,7 @@ public class RowdyParseTree {
      * @param id The child's ID to search for
      * @return The found child, null if nothing was found
      */
-    public Node getChild(int id) {
+    public Node get(int id) {
       return getChild(id, 0);
     }
 
@@ -72,10 +73,10 @@ public class RowdyParseTree {
      */
     public Node getChild(int id, int occur) {
       for (int c = 0; c < children.size(); c++) {
-        if (children.get(c).getSymbol().getId() == id
+        if (children.get(c).symbol().id() == id
                 && occur == 0) {
           return children.get(c);
-        } else if (children.get(c).getSymbol().getId() == id
+        } else if (children.get(c).symbol().id() == id
                 && occur > 0) {
           occur--;
         }
@@ -98,14 +99,16 @@ public class RowdyParseTree {
   private Token currentToken;
   private int line;
   /**
-   * Stores the name of each identifier currently allocated in RAM. Each id is
-   * associated with an index which maps to the actual value of the id.
+   * Stores the name of each identifier or function
    */
   private final HashMap<String, Value> globalSymbolTable;
   /**
    * Keeps track of the level of loops the program is in.
    */
   private final Stack<Node> activeLoops;
+  /**
+   * Keeps track of the functions currently being called.
+   */
   private final Stack<Function> callStack;
   private Node main;
 
@@ -155,10 +158,10 @@ public class RowdyParseTree {
   private void print(Node parent) {
     List<Node> children = parent.getChildren();
     for (int i = 0; i < children.size(); i++) {
-      if (children.get(i).getSymbol() instanceof NonTerminal) {
+      if (children.get(i).symbol() instanceof NonTerminal) {
         print(children.get(i));
       } else {
-        System.out.println(children.get(i).getSymbol());
+        System.out.println(children.get(i).symbol());
       }
     }
   }
@@ -176,13 +179,13 @@ public class RowdyParseTree {
     Node current;
     for (int i = 0; i < children.size(); i++) {
       current = children.get(i);
-      symbol = current.getSymbol();
+      symbol = current.symbol();
       if (symbol instanceof NonTerminal) {
         rule = getRule((NonTerminal) symbol, currentToken.getID());
         add(current, rule);
         build(current);
       } else {
-        if (symbol.getId() != currentToken.getID()) {
+        if (symbol.id() != currentToken.getID()) {
           throw new RuntimeException("Syntax error, unexpected token '"
                   + currentToken.getSymbol() + "' on Line " + line);
         }
@@ -253,39 +256,43 @@ public class RowdyParseTree {
    *
    * @param parent
    */
-  private void declareGlobals(Node parent, List<Value> programParams) {
+  private void declareGlobals(Node parent, List<Value> programParamValues) {
     Node currentTreeNode;
     ArrayList<Node> children = parent.getChildren();
     int currentID;
     Value rightValue;
+    
+    setAsGlobal("true", new Value(1));
+    setAsGlobal("false", new Value(0));
+    
     for (int i = 0; i < children.size(); i++) {
       currentTreeNode = children.get(i);
-      currentID = currentTreeNode.getSymbol().getId();
+      currentID = currentTreeNode.symbol().id();
       switch (currentID) {
         case ASSIGN_STMT:
-          rightValue = getValue(currentTreeNode.getChild(EXPRESSION));
-          setAsGlobal((Terminal) currentTreeNode.getChild(ID).getSymbol(), rightValue);
+          rightValue = getValue(currentTreeNode.get(EXPRESSION));
+          setAsGlobal((Terminal) currentTreeNode.get(ID).symbol(), rightValue);
           break;
         case FUNCTION:
-          String idName = ((Terminal) currentTreeNode.getChild(ID).getSymbol()).getName();
-          Node paramsNode = currentTreeNode.getChild(PARAMETERS);
-          if (!idName.equals("main")) {
-            setAsGlobal(idName, new Value(currentTreeNode));
+          String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
+          Node paramsNode = currentTreeNode.get(PARAMETERS);
+          if (!functionName.equals("main")) {
+            setAsGlobal(functionName, new Value(currentTreeNode));
           } else {
-            if (globalSymbolTable.get(idName) != null) {
+            if (globalSymbolTable.get(functionName) != null) {
               throw new RuntimeException("main method already defined");
             }
             List<String> paramsList = new ArrayList<>();
-            if (!programParams.isEmpty()) {
-              paramsList.add(((Terminal) executeExpr(paramsNode.getChild(ID), null).getObject()).getName());
-              Node n1 = paramsNode.getChild(PARAMS_TAIL);
-              if (n1.hasChildren()) {
-                if (n1.getChild(PARAMS_TAIL).getSymbol().getId() == PARAMS_TAIL) {
-                  Node tail = n1.getChild(PARAMS_TAIL);
-                  paramsList.add(((Terminal) executeExpr(n1.getChild(ID), null).getObject()).getName());
+            if (!programParamValues.isEmpty()) {
+              paramsList.add(((Terminal) executeExpr(paramsNode.get(ID), null).getValue()).getName());
+              Node paramTail = paramsNode.get(PARAMS_TAIL);
+              if (paramTail.hasChildren()) {
+                if (paramTail.get(PARAMS_TAIL).symbol().id() == PARAMS_TAIL) {
+                  Node tail = paramTail.get(PARAMS_TAIL);
+                  paramsList.add(((Terminal) executeExpr(paramTail.get(ID), null).getValue()).getName());
                   while (tail.hasChildren()) {
-                    paramsList.add(((Terminal) executeExpr(tail.getChild(ID), null).getObject()).getName());
-                    tail = tail.getChild(PARAMS_TAIL);
+                    paramsList.add(((Terminal) executeExpr(tail.get(ID), null).getValue()).getName());
+                    tail = tail.get(PARAMS_TAIL);
                   }
                 }
               }
@@ -295,15 +302,15 @@ public class RowdyParseTree {
             String paramName;
             for (int p = 0; p < paramsList.size(); p++) {
               paramName = paramsList.get(p);
-              params.put(paramName, programParams.get(p));
+              params.put(paramName, programParamValues.get(p));
             }
-            Function function = new Function(idName, params);
+            Function function = new Function(functionName, params);
             callStack.push(function);
             main = parent;
           }
           break;
         default:
-          declareGlobals(currentTreeNode, programParams);
+          declareGlobals(currentTreeNode, programParamValues);
       }
     }
   }
@@ -323,29 +330,33 @@ public class RowdyParseTree {
     Value rightValue;
     for (int i = 0, curID; i < children.size(); i++) {
       currentTreeNode = children.get(i);
-      curID = currentTreeNode.getSymbol().getId();
+      curID = currentTreeNode.symbol().id();
       switch (curID) {
         case FUNCTION:
           // Should only execute the main method
-          executeStmt(currentTreeNode.getChild(STMT_LIST), null);
+          executeStmt(currentTreeNode.get(STMT_LIST), null);
           // When main is finished, exit the program
           System.exit(0);
         case ASSIGN_STMT:
-          Terminal idTerminal = (Terminal) currentTreeNode.getChild(ID).getSymbol();
-          rightValue = getValue(currentTreeNode.getChild(EXPRESSION));
+          Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
+          rightValue = getValue(currentTreeNode.get(EXPRESSION));
+          String idNameToAssign = idTerminal.getName();
+          if (idNameToAssign.equals("true") || idNameToAssign.equals("false")) {
+            throw new RuntimeException("Can't assign value to constant '" + idNameToAssign + "'");
+          }
           allocate(idTerminal, rightValue);
           break;
         case IF_STMT:
-          Node ifExpr = currentTreeNode.getChild(EXPRESSION);
+          Node ifExpr = currentTreeNode.get(EXPRESSION);
           Value ifExprValue = (Value) executeExpr(ifExpr, null);
           if (ifExprValue.valueToBoolean()) {
-            executeStmt(currentTreeNode.getChild(STMT_LIST), seqControl);
+            executeStmt(currentTreeNode.get(STMT_LIST), seqControl);
           } else {
-            executeStmt(currentTreeNode.getChild(ELSE_PART), seqControl);
+            executeStmt(currentTreeNode.get(ELSE_PART), seqControl);
           }
           break;
         case LOOP_STMT:
-          String idName = ((Terminal) currentTreeNode.getChild(ID).getSymbol()).getName();
+          String idName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
           Value curValue = globalSymbolTable.get(idName);
           if (curValue == null) {
             globalSymbolTable.put(idName, new Value());
@@ -355,7 +366,7 @@ public class RowdyParseTree {
             throw new RuntimeException("Label '" + idName + "' already exists");
           }
           boolean done = false;
-          Node loopStmtList = currentTreeNode.getChild(STMT_LIST);
+          Node loopStmtList = currentTreeNode.get(STMT_LIST);
           while (!done) {
             executeStmt(loopStmtList, currentTreeNode);
             curValue = globalSymbolTable.get(idName);
@@ -363,11 +374,11 @@ public class RowdyParseTree {
           }
           break;
         case BREAK_STMT:
-          if (!currentTreeNode.getChild(ID_OPTION).hasChildren()) {
+          if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
             Node idOption = activeLoops.peek();
-            idName = ((Terminal) idOption.getChild(ID).getSymbol()).getName();
+            idName = ((Terminal) idOption.get(ID).symbol()).getName();
           } else {
-            idName = ((Terminal) currentTreeNode.getChild(ID_OPTION).getChild(ID).getSymbol()).getName();
+            idName = ((Terminal) currentTreeNode.get(ID_OPTION).get(ID).symbol()).getName();
           }
           if (globalSymbolTable.get(idName) == null) {
             throw new RuntimeException("The label '" + idName + "' is not used");
@@ -375,7 +386,7 @@ public class RowdyParseTree {
           for (;;) {
             Node lp = activeLoops.pop();
             lp.seqActive = false;
-            String tempBinding = ((Terminal) lp.getChild(ID).getSymbol()).getName();
+            String tempBinding = ((Terminal) lp.get(ID).symbol()).getName();
             globalSymbolTable.remove(tempBinding);
             if (idName.equals(tempBinding)) {
               break;
@@ -383,54 +394,54 @@ public class RowdyParseTree {
           }
           break;
         case ROUND_STMT:
-          Value idToRound = getValue(currentTreeNode.getChild(ID));
+          Value idToRound = getValue(currentTreeNode.get(ID));
           double val = idToRound.valueToNumber();
-          int precision = getValueAsNumber(currentTreeNode.getChild(ARITHM_EXPR)).intValue();
+          int precision = getValueAsNumber(currentTreeNode.get(ARITHM_EXPR)).intValue();
           double factor = 1;
           while (precision > 0) {
             factor *= 10;
             precision--;
           }
           val = (double) Math.round(val * factor) / factor;
-          allocate((Terminal) currentTreeNode.getChild(ID).getSymbol(), new Value(val));
+          allocate((Terminal) currentTreeNode.get(ID).symbol(), new Value(val));
           break;
         case READ_STMT:
           Scanner keys = new Scanner(System.in);
           String inValue;
-          Node firstID = currentTreeNode.getChild(ID);
-          Terminal t = (Terminal) executeExpr(firstID, null).getObject();
+          Node firstID = currentTreeNode.get(ID);
+          Terminal t = (Terminal) executeExpr(firstID, null).getValue();
           allocate(t, new Value(keys.nextLine()));
           if (currentTreeNode.hasChildren()) {
-            Node paramsTail = currentTreeNode.getChild(PARAMS_TAIL);
+            Node paramsTail = currentTreeNode.get(PARAMS_TAIL);
             while (paramsTail.hasChildren()) {
-              currentTreeNode = paramsTail.getChild(ID);
+              currentTreeNode = paramsTail.get(ID);
               Value v = executeExpr(currentTreeNode, null);
               inValue = keys.nextLine();
-              allocate((Terminal) v.getObject(), new Value(inValue));
-              paramsTail = paramsTail.getChild(PARAMS_TAIL);
+              allocate((Terminal) v.getValue(), new Value(inValue));
+              paramsTail = paramsTail.get(PARAMS_TAIL);
             }
           }
           break;
         case FUNC_CALL:
-          String funcName = ((Terminal) currentTreeNode.getChild(ID).getSymbol()).getName();
+          String funcName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
           if (funcName.equals("main")) {
-            throw new RuntimeException("Can't recur on main");
+            throw new RuntimeException("Can't recurse on main");
           }
           executeFunc(currentTreeNode);
           break;
         case RETURN_STMT:
           Function functionReturning = callStack.peek();
           seqControl.seqActive = false;
-          Value toSet = getValue(currentTreeNode.getChild(EXPRESSION));
+          Value toSet = getValue(currentTreeNode.get(EXPRESSION));
           functionReturning.setReturnValue(toSet);
           break;
         case PRINT_STMT:
           String printValue = "";
-          printValue += getValueAsString(currentTreeNode.getChild(EXPRESSION));
-          Node atomTailNode = currentTreeNode.getChild(EXPR_LIST);
+          printValue += getValueAsString(currentTreeNode.get(EXPRESSION));
+          Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasChildren()) {
-            printValue += getValueAsString(atomTailNode.getChild(EXPRESSION));
-            atomTailNode = atomTailNode.getChild(EXPR_LIST);
+            printValue += getValueAsString(atomTailNode.get(EXPRESSION));
+            atomTailNode = atomTailNode.get(EXPR_LIST);
           }
           char c;
           String temp = "";
@@ -471,29 +482,37 @@ public class RowdyParseTree {
    */
   private Value executeFunc(Node cur) {
     // 1. Collect parameters
-    String funcName = ((Terminal) cur.getChild(ID).getSymbol()).getName();
-    if (globalSymbolTable.get(funcName) == null) {
-      throw new RuntimeException("Function '" + funcName + "' not defined");
-    }
-    List<Value> ids = new ArrayList<>();
-    if (cur.getChild(EXPRESSION).hasChildren()) {
-      ids.add(getValue(cur.getChild(EXPRESSION)));
-      Node atomTailNode = cur.getChild(EXPR_LIST);
-      while (atomTailNode.hasChildren()) {
-        ids.add(getValue(atomTailNode.getChild(EXPRESSION)));
-        atomTailNode = atomTailNode.getChild(EXPR_LIST);
+    Value funcVal = null;
+    String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+    if (!callStack.isEmpty()){
+      funcVal = callStack.peek().getValue(funcName, false);
+    } 
+    if (funcVal == null) {
+      if (globalSymbolTable.get(funcName) == null) {
+        throw new RuntimeException("Function '" + funcName + "' not defined");
+      } else {
+        funcVal = globalSymbolTable.get(funcName);
       }
     }
-    Value funcVal = globalSymbolTable.get(funcName);
-    Node functionNode = (Node) funcVal.getObject();
+    List<Value> ids = new ArrayList<>();
+    if (cur.get(EXPRESSION).hasChildren()) {
+      ids.add(getValue(cur.get(EXPRESSION)));
+      Node atomTailNode = cur.get(EXPR_LIST);
+      while (atomTailNode.hasChildren()) {
+        ids.add(getValue(atomTailNode.get(EXPRESSION)));
+        atomTailNode = atomTailNode.get(EXPR_LIST);
+      }
+    }
+    
+    Node functionNode = (Node) funcVal.getValue();
     List<String> paramsList = new ArrayList<>();
     if (!ids.isEmpty()) {
-      Node paramsNode = functionNode.getChild(PARAMETERS);
-      paramsList.add(((Terminal) executeExpr(paramsNode, null).getObject()).getName());
-      Node paramsTailNode = paramsNode.getChild(PARAMS_TAIL);
+      Node paramsNode = functionNode.get(PARAMETERS);
+      paramsList.add(((Terminal) executeExpr(paramsNode, null).getValue()).getName());
+      Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
       while (paramsTailNode.hasChildren()) {
-        paramsList.add(((Terminal) executeExpr(paramsTailNode.getChild(ID), null).getObject()).getName());
-        paramsTailNode = paramsTailNode.getChild(PARAMS_TAIL);
+        paramsList.add(((Terminal) executeExpr(paramsTailNode.get(ID), null).getValue()).getName());
+        paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
       }
     }
     // 2. Copy actual parameters to formal parameters
@@ -507,7 +526,7 @@ public class RowdyParseTree {
     Function function = new Function(funcName, params);
     callStack.push(function);
     // 4. Get and execute the stmt-list
-    Node stmtList = functionNode.getChild(STMT_LIST), seqControl = new Node(null);
+    Node stmtList = functionNode.get(STMT_LIST), seqControl = new Node(null);
     seqControl.seqActive = true;
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
@@ -519,19 +538,22 @@ public class RowdyParseTree {
   }
 
   /**
-   * Allocates new memory for an ID. If the variable is not a global variable it
-   * will allocate the variable to the current function.
+   * If the variable is not a global variable it
+   * will allocate the variable to the current function if it doesn't exist.
+   * If the variable exists the value passed in will overwrite the current value.
    *
-   * @param idTerminal
-   * @param value
+   * @param idTerminal The variable to allocate or change
+   * @param value The Value being allocated or changed
    */
   private void allocate(Terminal idTerminal, Value value) {
     Value exists = globalSymbolTable.get(idTerminal.getName());
     if (exists != null) {
       setAsGlobal(idTerminal, value);
     } else {
-      Function currentFunction = callStack.peek();
-      currentFunction.allocate(idTerminal, value);
+      try {
+        Function currentFunction = callStack.peek();
+        currentFunction.allocate(idTerminal, value);
+      } catch (EmptyStackException e) {}
     }
   }
 
@@ -565,7 +587,7 @@ public class RowdyParseTree {
     if (value == null) {
       return false;
     }
-    String v = ((Terminal) value.getObject()).getName();
+    String v = ((Terminal) value.getValue()).getName();
     Value val = globalSymbolTable.get(v);
     if (val == null) {
       Function currentFunction = callStack.peek();
@@ -585,8 +607,8 @@ public class RowdyParseTree {
     if (value == null) {
       return null;
     }
-    if (((Value) value).getObject() instanceof Terminal) {
-      String v = ((Terminal) value.getObject()).getName();
+    if (((Value) value).getValue() instanceof Terminal) {
+      String v = ((Terminal) value.getValue()).getName();
       Value val = globalSymbolTable.get(v);
       if (val == null) {
         Function currentFunction = callStack.peek();
@@ -651,7 +673,7 @@ public class RowdyParseTree {
     Value rightValue;
     Double reslt;
     Symbol operator;
-    int curID = cur.getSymbol().getId();
+    int curID = cur.symbol().id();
     switch (curID) {
       case FUNC_CALL:
         return executeFunc(cur);
@@ -660,41 +682,41 @@ public class RowdyParseTree {
         if (leftChild == null) {
           return null;
         }
-        switch (leftChild.getSymbol().getId()) {
+        switch (leftChild.symbol().id()) {
           case BOOL_TERM:
             leftValue = executeExpr(leftChild, leftValue);
-            return executeExpr(cur.getChild(BOOL_TERM_TAIL), leftValue);
+            return executeExpr(cur.get(BOOL_TERM_TAIL), leftValue);
           case FUNC_CALL:
             return executeExpr(leftChild, leftValue);
           case ISSET_EXPR:
             return executeExpr(leftChild, leftValue);
         }
-        Symbol symbolType = cur.getLeftMostChild().getSymbol();
-        switch (symbolType.getId()) {
+        Symbol symbolType = cur.getLeftMostChild().symbol();
+        switch (symbolType.id()) {
           case CONCAT:
             String concatValue = "";
-            concatValue += getValueAsString(executeExpr(cur.getChild(EXPRESSION), leftValue));
-            Node atomTailNode = cur.getChild(EXPR_LIST);
+            concatValue += getValueAsString(executeExpr(cur.get(EXPRESSION), leftValue));
+            Node atomTailNode = cur.get(EXPR_LIST);
             while (atomTailNode.hasChildren()) {
-              concatValue += getValueAsString(executeExpr(atomTailNode.getChild(EXPRESSION), leftValue));
-              atomTailNode = atomTailNode.getChild(EXPR_LIST);
+              concatValue += getValueAsString(executeExpr(atomTailNode.get(EXPRESSION), leftValue));
+              atomTailNode = atomTailNode.get(EXPR_LIST);
             }
             return new Value(concatValue);
           case SLICE:
             String slice;
-            slice = getValueAsString(cur.getChild(EXPRESSION));
-            int leftBound = getValueAsNumber(cur.getChild(ARITHM_EXPR)).intValue();
+            slice = getValueAsString(cur.get(EXPRESSION));
+            int leftBound = getValueAsNumber(cur.get(ARITHM_EXPR)).intValue();
             int rightBound = getValueAsNumber(cur.getChild(ARITHM_EXPR, 1)).intValue();
             return new Value(slice.substring(leftBound, rightBound));
           case STRCMP:
             String v1,
              v2;
-            v1 = getValueAsString(cur.getChild(EXPRESSION));
+            v1 = getValueAsString(cur.get(EXPRESSION));
             v2 = getValueAsString(cur.getChild(EXPRESSION, 1));
             return new Value(v1.compareTo(v2));
         }
       case ISSET_EXPR:
-        Value resultBoolean = new Value(isset(cur.getChild(ID)));
+        Value resultBoolean = new Value(isset(cur.get(ID)));
         return resultBoolean;
       case BOOL_TERM_TAIL:
       case BOOL_FACTOR_TAIL:
@@ -703,11 +725,11 @@ public class RowdyParseTree {
           return leftValue;
         }
         cur = boolChildren.get(0);
-        operator = cur.getSymbol();
+        operator = cur.symbol();
         bLeft = getValueAsBoolean(leftValue);
         cur = boolChildren.get(1);
         bRight = getValueAsBoolean(cur);
-        switch (operator.getId()) {
+        switch (operator.id()) {
           case AND:
             bReslt = bLeft && bRight;
             break;
@@ -725,12 +747,13 @@ public class RowdyParseTree {
           return leftValue;
         }
         cur = relationChildren.get(0);
-        operator = cur.getSymbol();
+        operator = cur.symbol();
+        
         left = getValueAsNumber(leftValue);
         cur = relationChildren.get(1);
         right = getValueAsNumber(cur);
         bReslt = null;
-        switch (operator.getId()) {
+        switch (operator.id()) {
           case LESS:
             bReslt = left < right;
             break;
@@ -755,10 +778,10 @@ public class RowdyParseTree {
         ArrayList<Node> factorChildren = cur.getChildren();
         if (factorChildren.size() > 0) {
           cur = factorChildren.get(0);
-          if (cur.getSymbol() instanceof Terminal) {
-            operator = cur.getSymbol();
+          if (cur.symbol() instanceof Terminal) {
+            operator = cur.symbol();
             cur = factorChildren.get(1);
-            switch (operator.getId()) {
+            switch (operator.id()) {
               case MINUS:
                 rightValue = (Value) executeExpr(cur, leftValue);
                 left = leftValue.valueToNumber();
@@ -780,11 +803,11 @@ public class RowdyParseTree {
           return leftValue;
         }
         cur = factorTailChildren.get(0);
-        if (cur.getSymbol() instanceof NonTerminal) {
+        if (cur.symbol() instanceof NonTerminal) {
           return executeExpr(cur, leftValue);
         }
-        operator = cur.getSymbol();
-        if (operator.getId() == OPENPAREN) {
+        operator = cur.symbol();
+        if (operator.id() == OPENPAREN) {
           cur = factorTailChildren.get(1);
           return executeExpr(cur, leftValue);
         }
@@ -792,7 +815,7 @@ public class RowdyParseTree {
         left = getValueAsNumber(leftValue);
         right = getValueAsNumber(cur);
         reslt = null;
-        switch (operator.getId()) {
+        switch (operator.id()) {
           case MULTIPLY:
             reslt = left * right;
             break;
@@ -812,12 +835,12 @@ public class RowdyParseTree {
         if (termChildren.size() < 1) {
           return leftValue;
         }
-        operator = termChildren.get(0).getSymbol();
+        operator = termChildren.get(0).symbol();
         cur = termChildren.get(1);
         left = getValueAsNumber(leftValue);
         right = getValueAsNumber(cur);
         reslt = null;
-        switch (operator.getId()) {
+        switch (operator.id()) {
           case PLUS:
             reslt = left + right;
             break;
@@ -837,9 +860,9 @@ public class RowdyParseTree {
       case ATOMIC:
         return executeExpr(parent.getLeftMostChild(), leftValue);
       case ID:
-        return new Value(cur.getSymbol());
+        return new Value(cur.symbol());
       case CONST:
-        return new Value(((Terminal) cur.getSymbol()).getName());
+        return new Value(((Terminal) cur.symbol()).getName());
       default:
         return leftValue;
     }
@@ -862,10 +885,10 @@ public class RowdyParseTree {
   private void collectTerminals(List<Terminal> program, Node parent) {
     List<Node> children = parent.getChildren();
     for (int i = 0; i < children.size(); i++) {
-      if (children.get(i).getSymbol() instanceof NonTerminal) {
+      if (children.get(i).symbol() instanceof NonTerminal) {
         collectTerminals(program, children.get(i));
       } else {
-        program.add((Terminal) children.get(i).getSymbol());
+        program.add((Terminal) children.get(i).symbol());
       }
     }
   }
@@ -879,7 +902,7 @@ public class RowdyParseTree {
   private void collectInOrder(List<Symbol> program, Node parent) {
     List<Node> children = parent.getChildren();
     for (int i = 0; i < children.size(); i++) {
-      program.add(children.get(i).getSymbol());
+      program.add(children.get(i).symbol());
       collectInOrder(program, children.get(i));
     }
   }
