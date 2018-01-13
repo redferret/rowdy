@@ -40,9 +40,34 @@
 		str4 = slice str3, v1, v2; // [0, 5)
 		print ( concat str4, " World!" ), "\n";
 		
+		print slice ( slice "This will be cut into pieces", 0, 16), 5, 16, "\n";
+		print ( strcmp "AAA", "AAA"), "\n";
+		print (( ( strcmp "AAA", "AAA") == false ) ), "\n";
+		print "STRCMP: ", ( ( strcmp "AAA", "AAA") == 0), "\n";
+		
 		->numberProgram();
+		->vars();
 	.
 	
+	// vars will print the following:
+	// 12
+	// 100
+	// 12
+	func vars()
+		print "Variables\n";
+		->f2();
+	.
+	func f1(v1)
+		v1 = 100;
+		print v1, "\n"; // 100
+	.
+	func f2()
+		v1 = 12;
+		print v1, "\n"; // 12
+		->f1(v1);
+		print v1, "\n"; // Still 12
+	.
+
 	func noReturn ()
 	  // do something then don't return anything
 	.
@@ -54,7 +79,7 @@
 	func numberProgram()
 		print 1 + 4 ^ (5 - 2), "\n"; // Evaluates to 1 + 4 ^ 3 => 1 + 64 => 65.0
 		print (1 + 4) ^ (5 - 2), "\n"; // Evaluates to 5 ^ 3 => 125.0
-		print 5 % 10 + 1; // Evaluates to 6
+		print 5 % 10 + 1, "\n"; // Evaluates to 6
 	.
 	
 .

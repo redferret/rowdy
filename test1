@@ -1,11 +1,30 @@
 
 	// This program contains no semicolons, they are optional
 	func main()
-		print "Enter the number of stars (max 1000): " read numberOfStars
+		loop program:
+			->printingStars()
+			print "Continue (n = no)?: " read continue
+			if (->equals("n", continue)) then
+				print "Goodbye\n"
+				break
+			fi
+		repeat
+	.
+	
+	func equals(string1, string2) 
+		return ( strcmp string1, string2 ) == 0 
+	.
+	
+	func printingStars()
+		print "Enter the number of stars to print (max 1000): " read numberOfStars
 		if (numberOfStars > 1000) then
 			numberOfStars = 1000
 		fi
-		actualNumberOfStars = numberOfStars
+		->printStars(numberOfStars);
+		print "\n", "We printed your ", numberOfStars, " stars", "\n"
+	.
+	
+	func printStars(numberOfStars)
 		loop m:
 			print "*"
 			numberOfStars = numberOfStars - 1
@@ -13,7 +32,5 @@
 				break m
 			fi
 		repeat
-		print "\n", "We printed your ", actualNumberOfStars, " stars", "\n"
 	.
-	
 .
