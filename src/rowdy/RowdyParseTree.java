@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.Rowdy.*;
@@ -127,6 +128,16 @@ public class RowdyParseTree {
   }
 
   /**
+   * Only call this method if the program has stopped executing.
+   */
+  public void dumpCallStack() {
+    System.out.print("Exception in: ");
+    while(!callStack.isEmpty()){
+      System.out.println("->" + callStack.pop().getName());
+    }
+  }
+  
+  /**
    * Builds the parse tree with the given program file and language definitions.
    * @param parser
    */
@@ -142,7 +153,7 @@ public class RowdyParseTree {
       currentToken = this.parser.getToken();
     }
     int id = currentToken.getID();
-    add(root, getRule(program, id));
+    addToNode(root, getRule(program, id));
     build(root);
   }
 
@@ -181,8 +192,9 @@ public class RowdyParseTree {
       current = children.get(i);
       symbol = current.symbol();
       if (symbol instanceof NonTerminal) {
+        if (currentToken == null) break;
         rule = getRule((NonTerminal) symbol, currentToken.getID());
-        add(current, rule);
+        addToNode(current, rule);
         build(current);
       } else {
         if (symbol.id() != currentToken.getID()) {
@@ -199,6 +211,7 @@ public class RowdyParseTree {
           }
           currentToken = parser.getToken();
         }
+        if (currentToken == null) break;
       }
     }
   }
@@ -226,7 +239,7 @@ public class RowdyParseTree {
    * @param parent The parent being added to
    * @param rule The production rule.
    */
-  private void add(Node parent, Rule rule) {
+  private void addToNode(Node parent, Rule rule) {
     Symbol[] symbols = rule.getSymbols();
     for (Symbol symbol : symbols) {
       Node node = new Node(symbol);
@@ -262,8 +275,8 @@ public class RowdyParseTree {
     int currentID;
     Value rightValue;
     
-    setAsGlobal("true", new Value(1));
-    setAsGlobal("false", new Value(0));
+    setAsGlobal("true", new Value(true));
+    setAsGlobal("false", new Value(false));
     
     for (int i = 0; i < children.size(); i++) {
       currentTreeNode = children.get(i);
@@ -326,6 +339,8 @@ public class RowdyParseTree {
    */
   private void executeStmt(Node parent, Node seqControl) {
     Node currentTreeNode;
+    if (parent == null) 
+      throw new IllegalArgumentException("parent node is null");
     ArrayList<Node> children = parent.getChildren();
     Value rightValue;
     for (int i = 0, curID; i < children.size(); i++) {
@@ -334,7 +349,8 @@ public class RowdyParseTree {
       switch (curID) {
         case FUNCTION:
           // Should only execute the main method
-          executeStmt(currentTreeNode.get(STMT_LIST), null);
+          Node funcStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
+          executeStmt(funcStmtList, null);
           // When main is finished, exit the program
           System.exit(0);
         case ASSIGN_STMT:
@@ -342,7 +358,7 @@ public class RowdyParseTree {
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
           String idNameToAssign = idTerminal.getName();
           if (idNameToAssign.equals("true") || idNameToAssign.equals("false")) {
-            throw new RuntimeException("Can't assign value to constant '" + idNameToAssign + "'");
+            throw new RuntimeException("Can't assign new value to constant '" + idNameToAssign + "'");
           }
           allocate(idTerminal, rightValue);
           break;
@@ -350,7 +366,8 @@ public class RowdyParseTree {
           Node ifExpr = currentTreeNode.get(EXPRESSION);
           Value ifExprValue = (Value) executeExpr(ifExpr, null);
           if (ifExprValue.valueToBoolean()) {
-            executeStmt(currentTreeNode.get(STMT_LIST), seqControl);
+            Node ifStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
+            executeStmt(ifStmtList, seqControl);
           } else {
             executeStmt(currentTreeNode.get(ELSE_PART), seqControl);
           }
@@ -366,7 +383,7 @@ public class RowdyParseTree {
             throw new RuntimeException("Label '" + idName + "' already exists");
           }
           boolean done = false;
-          Node loopStmtList = currentTreeNode.get(STMT_LIST);
+          Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
           while (!done) {
             executeStmt(loopStmtList, currentTreeNode);
             curValue = globalSymbolTable.get(idName);
@@ -375,6 +392,9 @@ public class RowdyParseTree {
           break;
         case BREAK_STMT:
           if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
+            if (activeLoops.isEmpty()) {
+              throw new RuntimeException("No loop to break");
+            }
             Node idOption = activeLoops.peek();
             idName = ((Terminal) idOption.get(ID).symbol()).getName();
           } else {
@@ -526,7 +546,8 @@ public class RowdyParseTree {
     Function function = new Function(funcName, params);
     callStack.push(function);
     // 4. Get and execute the stmt-list
-    Node stmtList = functionNode.get(STMT_LIST), seqControl = new Node(null);
+    
+    Node stmtList = functionNode.get(STMT_BLOCK).get(STMT_LIST), seqControl = new Node(null);
     seqControl.seqActive = true;
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
@@ -749,9 +770,24 @@ public class RowdyParseTree {
         cur = relationChildren.get(0);
         operator = cur.symbol();
         
-        left = getValueAsNumber(leftValue);
+        Object leftValueObject = getValue(leftValue).getValue();
         cur = relationChildren.get(1);
-        right = getValueAsNumber(cur);
+        Object rightValueObject = getValue(cur).getValue();
+        
+        Boolean leftAsBool = null, rightAsBool = null;
+        if (leftValueObject instanceof Boolean){
+          leftAsBool = (Boolean)leftValueObject;
+          left = 0;
+        } else {
+          left = getValueAsNumber(leftValue);
+        }
+        if (rightValueObject instanceof Boolean){
+          rightAsBool = (Boolean)leftValueObject;
+          right = 0;
+        } else {
+          right = getValueAsNumber(cur);
+        }
+        
         bReslt = null;
         switch (operator.id()) {
           case LESS:
@@ -761,7 +797,11 @@ public class RowdyParseTree {
             bReslt = left <= right;
             break;
           case EQUAL:
-            bReslt = left == right;
+            if (leftAsBool != null && rightAsBool != null) {
+              bReslt = Objects.equals(leftAsBool, rightAsBool);
+            } else {
+              bReslt = left == right;
+            }
             break;
           case GREATEREQUAL:
             bReslt = left >= right;
@@ -770,7 +810,11 @@ public class RowdyParseTree {
             bReslt = left > right;
             break;
           case NOTEQUAL:
-            bReslt = left != right;
+            if (leftAsBool != null && rightAsBool != null) {
+              bReslt = !Objects.equals(leftAsBool, rightAsBool);
+            } else {
+              bReslt = left != right;
+            }
             break;
         }
         return new Value(bReslt);

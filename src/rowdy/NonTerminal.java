@@ -1,7 +1,7 @@
 package rowdy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -9,14 +9,16 @@ import java.util.Arrays;
  */
 public class NonTerminal extends Symbol {
 
-  private ArrayList<Hint> hints;
+  private List<Hint> hints;
 
-  public NonTerminal(String symbol, int id) {
+  public NonTerminal(String symbol, int id, int[][] hints) {
     super(symbol, id);
-  }
-
-  public void setHints(Hint[] hints) {
-    this.hints = new ArrayList<>(Arrays.asList(hints));
+    this.hints = new ArrayList<>();
+    final int TERMINAL = 0, PRODUCTION_RULE = 1;
+    for (int[] hint : hints) {
+      Hint h = new Hint(hint[TERMINAL], hint[PRODUCTION_RULE]);
+      this.hints.add(h);
+    }
   }
 
   public Hint getHint(int id) {
@@ -24,10 +26,8 @@ public class NonTerminal extends Symbol {
       return null;
     }
     for (int i = 0; i < hints.size(); i++) {
-      if (hints.get(i).getTerminal() != null) {
-        if (hints.get(i).getTerminal().id() == id) {
-          return hints.get(i);
-        }
+      if (hints.get(i).getTerminalId() == id) {
+        return hints.get(i);
       }
     }
     return null;

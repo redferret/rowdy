@@ -9,19 +9,19 @@ package rowdy;
  */
 public class Hint {
 
-  private final Terminal terminal;
+  private final int terminalId;
   private final int hint;
 
-  public Hint(Terminal terminal, int hint) {
-    this.terminal = terminal;
-    this.hint = hint;
+  public Hint(int terminalId, int productionRule) {
+    this.terminalId = terminalId;
+    this.hint = productionRule;
   }
 
-  public int getHint() {
+  public int getProductionHint() {
     return hint;
   }
 
-  public Terminal getTerminal() {
-    return terminal;
+  public int getTerminalId() {
+    return terminalId;
   }
 }

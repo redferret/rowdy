@@ -22,39 +22,137 @@ public class Rowdy {
           MINUS = 24, MULTIPLY = 25, DIVIDE = 26, OPENPAREN = 27,
           CLOSEDPAREN = 28, CONST = 29, POW = 30, MOD = 31, CONCAT = 32,
           SLICE = 33, STRCMP = 34, FUNC = 35, CALL = 36, RETURN = 37,
-          ISSET = 38, ROUND = 39;
+          ISSET = 38, ROUND = 39, RCURLY = 40, LCURLY = 41;
 
-  public static final int PROGRAM = 40, STMT_LIST = 41, STATEMENT = 42,
-          STMT_TAIL = 43, IF_STMT = 44, LOOP_STMT = 45, BREAK_STMT = 46,
-          ASSIGN_STMT = 47, READ_STMT = 48, PRINT_STMT = 49, EXPRESSION = 50,
-          ELSE_PART = 51, ID_OPTION = 52, ATOM_LIST_TAIL = 53, BOOL_TERM = 54,
-          BOOL_TERM_TAIL = 55, BOOL_FACTOR = 56, BOOL_FACTOR_TAIL = 57,
-          ARITHM_EXPR = 58, RELATION_OPTION = 59, TERM = 60, TERM_TAIL = 61,
-          FACTOR = 62, FACTOR_TAIL = 63, ATOMIC = 64, DEFINITION = 65, FUNCTION = 66,
-          FUNC_TAIL = 67, PARAMETERS = 68, PARAMS_TAIL = 69, FUNC_CALL = 70, STMT_ID = 71,
-          RETURN_STMT = 72, EXPR_LIST = 73, ROUND_STMT = 74, ISSET_EXPR = 75;
+  public static final int PROGRAM = 400, STMT_LIST = 410, STATEMENT = 420,
+          STMT_TAIL = 430, IF_STMT = 440, LOOP_STMT = 450, BREAK_STMT = 460,
+          ASSIGN_STMT = 470, READ_STMT = 480, PRINT_STMT = 490, EXPRESSION = 500,
+          ELSE_PART = 510, ID_OPTION = 520, ATOM_LIST_TAIL = 530, BOOL_TERM = 540,
+          BOOL_TERM_TAIL = 550, BOOL_FACTOR = 560, BOOL_FACTOR_TAIL = 570,
+          ARITHM_EXPR = 580, RELATION_OPTION = 590, TERM = 600, TERM_TAIL = 610,
+          FACTOR = 620, FACTOR_TAIL = 630, ATOMIC = 640, DEFINITION = 650, FUNCTION = 660,
+          FUNC_TAIL = 670, PARAMETERS = 680, PARAMS_TAIL = 690, FUNC_CALL = 700, STMT_ID = 710,
+          RETURN_STMT = 720, EXPR_LIST = 730, ROUND_STMT = 740, ISSET_EXPR = 750,
+          STMT_BLOCK = 751,
+          END = 1000;
 
-  private static final String[] NON_TERMINALS = {"prog", "stmt-list", "stmt", "stmt-tail",
-    "if-stmt", "loop-stmt", "break-stmt", "assign-stmt",
-    "read-stmt", "print-stmt", "expr", "else-part",
-    "id-option", "atom-list-tail", "bool-term",
-    "bool-term-tail", "bool-factor", "bool-factor-tail",
-    "arith-expr", "relation-option", "term", "term-tail",
-    "factor", "factor-tail", "atom", "def", "func", "func-tail",
-    "params", "params-tail", "func-call", "stmt-id", "return-stmt",
-    "expr-list", "round-stmt", "isset-expr"};
-
-  private static final String[] TERMINALS = {"PERIOD", ";", "if", "then", "else",
+  private static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
     "fi", "loop", "ID", ":", "repeat", "break", "=", "print",
     "read", ",", "or", "and", "<", "<=", "==", ">=",
     ">", "!=", "+", "-", "*", "/", "(", ")", "CONST", "^", "%",
-    "concat", "slice", "strcmp", "func", "->", "return", "isset", "round"};
+    "concat", "slice", "strcmp", "func", "->", "return", "isset", "round",
+    "{", "}"};
 
-  private static final String SPECIAL_SYMBOLS = ". ( ) ; + - * / != = >= <= < > : == , ^ % ->";
+  private static final String SPECIAL_SYMBOLS = ". ( ) ; + - * / != = >= "
+          + "<= < > : == , ^ % -> { }";
 
+  private static final NonTerminal[] NONTERMINALS = {
+    new NonTerminal("prog", PROGRAM, 
+            new int[][]{{FUNC, 0}, {ID, 0}}),
+    new NonTerminal("stmt-block", STMT_BLOCK, 
+            new int[][]{{RCURLY, 74}, {LCURLY, 3}}),
+    new NonTerminal("stmt-list", STMT_LIST, 
+            new int[][]{{SEMICOLON, 1}, {IF, 1},{ELSE, 1},{FI, 1}, 
+                        {LOOP, 1}, {ID, 1}, {REPEAT, 1}, {BREAK, 1},{PRINT, 1}, 
+                        {READ, 1}, {CONCAT, 1}, {SLICE, 1},{STRCMP, 1}, 
+                        {CALL, 1}, {RETURN, 1}, {ROUND, 1}, {LCURLY, 3}}),
+    new NonTerminal("stmt", STATEMENT, 
+            new int[][]{{SEMICOLON, 10}, {IF, 4}, {ELSE, 10}, 
+                        {FI, 10}, {LOOP, 5}, {ID, 7}, {REPEAT, 10}, {BREAK, 6}, 
+                        {PRINT, 9}, {READ, 8}, {CALL, 64}, {RETURN, 65}, 
+                        {ROUND, 71}, {ISSET, 73}, {LCURLY, 3}}),
+    new NonTerminal("stmt-tail", STMT_TAIL, 
+            new int[][]{{SEMICOLON, 2}, {ELSE, 3}, {FI, 3}, 
+                        {REPEAT, 3}, {IF, 1}, {PRINT, 1}, {READ, 1}, {LOOP, 1}, 
+                        {ID, 1}, {CALL, 1},{RETURN, 1},{ROUND, 1},{LCURLY, 3}}),
+    new NonTerminal("if-stmt", IF_STMT, 
+            new int[][]{{IF, 11}}),
+    new NonTerminal("loop-stmt", LOOP_STMT, 
+            new int[][]{{LOOP, 14}}),
+    new NonTerminal("break-stmt", BREAK_STMT, 
+            new int[][]{{BREAK, 15}}),
+    new NonTerminal("assign-stmt", ASSIGN_STMT, 
+            new int[][]{{ID, 18}}),
+    new NonTerminal("read-stmt", READ_STMT, 
+            new int[][]{{READ, 20}}),
+    new NonTerminal("print-stmt", PRINT_STMT, 
+            new int[][]{{PRINT, 19}}),
+    new NonTerminal("expr", EXPRESSION, 
+            new int[][]{{ID, 23}, {MINUS, 23}, {OPENPAREN, 23}, {CONST, 23}, 
+                        {CONCAT, 52}, {SLICE, 53}, {STRCMP, 54}, {CALL, 64}, 
+                        {ISSET, 73}}),
+    new NonTerminal("else-part", ELSE_PART, 
+            new int[][]{{ELSE, 12}, {FI, 13}}),
+    new NonTerminal("id-option", ID_OPTION, 
+            new int[][]{{SEMICOLON, 17}, {ELSE, 17}, {FI, 17}, 
+                        {ID, 16}, {REPEAT, 17}}),
+    new NonTerminal("atom-list-tail", ATOM_LIST_TAIL, 
+            new int[][]{{SEMICOLON, 22}, {ELSE, 22}, {FI, 22}, 
+                        {REPEAT, 22}, {COMMA, 21}}),
+    new NonTerminal("bool-term", BOOL_TERM, 
+            new int[][]{{ID, 26}, {MINUS, 26}, {OPENPAREN, 26}, {CONST, 26}}),
+    new NonTerminal("bool-term-tail", BOOL_TERM_TAIL, 
+            new int[][]{{SEMICOLON, 25}, {THEN, 25}, {ELSE, 25}, 
+                        {FI, 25}, {REPEAT, 25}, {OR, 24}, {CLOSEDPAREN, 25}}),
+    new NonTerminal("bool-factor", BOOL_FACTOR, 
+            new int[][]{{ID, 29}, {MINUS, 29}, {OPENPAREN, 29}, {CONST, 29}}),
+    new NonTerminal("bool-factor-tail", BOOL_FACTOR_TAIL, 
+            new int[][]{{SEMICOLON, 28}, {THEN, 28}, {ELSE, 28}, 
+                        {FI, 28}, {REPEAT, 28}, {OR, 28}, {AND, 27}, 
+                        {CLOSEDPAREN, 28}}),
+    new NonTerminal("arith-expr", ARITHM_EXPR, 
+            new int[][]{{ID, 37}, {MINUS, 37}, {OPENPAREN, 37}, {CONST, 37}}),
+    new NonTerminal("relation-option", RELATION_OPTION, 
+            new int[][]{{SEMICOLON, 36}, {THEN, 36}, {ELSE, 36}, 
+                        {FI, 36}, {REPEAT, 36}, {OR, 36}, {AND, 36}, {LESS, 30}, 
+                        {LESSEQUAL, 31}, {EQUAL, 32}, {GREATEREQUAL, 33}, 
+                        {GREATER, 34}, {NOTEQUAL, 35}, {CLOSEDPAREN, 36}}),
+    new NonTerminal("term", TERM, 
+            new int[][]{{ID, 41}, {MINUS, 41}, {OPENPAREN, 41}, {CONST, 41}}),
+    new NonTerminal("term-tail", TERM_TAIL, 
+            new int[][]{{SEMICOLON, 40}, {THEN, 40}, {ELSE, 40}, 
+                        {FI, 40}, {REPEAT, 40},{OR, 40}, {AND, 40}, {LESS, 40}, 
+                        {LESSEQUAL, 40}, {EQUAL, 40}, {GREATEREQUAL, 40},
+                        {GREATER, 40}, {NOTEQUAL, 40}, {PLUS, 38}, {MINUS, 39}, 
+                        {CLOSEDPAREN, 40}}),
+    new NonTerminal("factor", FACTOR, 
+            new int[][]{{ID, 46}, {MINUS, 45}, {OPENPAREN, 47}, {CONST, 46}}),
+    new NonTerminal("factor-tail", FACTOR_TAIL, 
+            new int[][]{{SEMICOLON, 44}, {THEN, 44}, {ELSE, 44}, 
+                        {FI, 44}, {REPEAT, 44}, {OR, 44}, {AND, 44}, {LESS, 44}, 
+                        {LESSEQUAL, 44}, {EQUAL, 44}, {GREATEREQUAL, 44}, 
+                        {GREATER, 44},{NOTEQUAL, 44}, {PLUS, 44}, {MINUS, 44}, 
+                        {MULTIPLY, 42}, {DIVIDE, 43}, {POW, 50}, {MOD, 51}, 
+                        {CLOSEDPAREN, 44}}),
+    new NonTerminal("atom", ATOMIC, 
+            new int[][]{{ID, 48}, {CONST, 49}}),
+    new NonTerminal("def", DEFINITION, 
+            new int[][]{{FUNC, 55}, {ID, 56}, {LCURLY, 3}}),
+    new NonTerminal("func", FUNCTION, 
+            new int[][]{{FUNC, 58}}),
+    new NonTerminal("func-tail", FUNC_TAIL, 
+            new int[][]{}),
+    new NonTerminal("params", PARAMETERS, 
+            new int[][]{{ID, 59}, {CLOSEDPAREN, 60}}),
+    new NonTerminal("params-tail", PARAMS_TAIL, 
+            new int[][]{{COMMA, 61}, {CLOSEDPAREN, 60}}),
+    new NonTerminal("func-call", FUNC_CALL, 
+            new int[][]{{CALL, 63}}),
+    new NonTerminal("stmt-id", STMT_ID, 
+            new int[][]{{BECOMES, 18}, {OPENPAREN, 65}}),
+    new NonTerminal("return-stmt", RETURN_STMT, 
+            new int[][]{{RETURN, 66}}),
+    new NonTerminal("expr-list", EXPR_LIST, 
+            new int[][]{{COMMA, 68}}),
+    new NonTerminal("round-stmt", ROUND_STMT, 
+            new int[][]{{ROUND, 72}}),
+    new NonTerminal("isset-expr", ISSET_EXPR, 
+            new int[][]{{ISSET, 63}}),
+  };
+  
   //Each element on the top most level is a production rule.
   private static final int[][] GRAMMAR_RULES = {
-    {DEFINITION, PERIOD},
+    {DEFINITION},
     {STATEMENT, STMT_TAIL},
     {SEMICOLON, STATEMENT, STMT_TAIL},
     {},
@@ -65,10 +163,10 @@ public class Rowdy {
     {READ_STMT},
     {PRINT_STMT},
     {},//10
-    {IF, EXPRESSION, THEN, STMT_LIST, ELSE_PART},
-    {ELSE, STMT_LIST, FI},
+    {IF, EXPRESSION, STMT_BLOCK, ELSE_PART},
+    {ELSE, STMT_BLOCK},
     {FI},
-    {LOOP, ID, COLON, STMT_LIST, REPEAT},
+    {LOOP, ID, COLON, STMT_BLOCK},
     {BREAK, ID_OPTION},
     {ID},
     {},
@@ -112,7 +210,7 @@ public class Rowdy {
     {FUNCTION, DEFINITION},//55
     {ASSIGN_STMT, SEMICOLON, DEFINITION}, //56
     {},//57
-    {FUNC, ID, OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_LIST, PERIOD},//58
+    {FUNC, ID, OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK},//58
     {ID, PARAMS_TAIL},//59
     {},//60
     {COMMA, ID, PARAMS_TAIL},//61
@@ -127,70 +225,8 @@ public class Rowdy {
     {ISSET, ID},
     {ROUND_STMT},
     {ROUND, ID, COMMA, ARITHM_EXPR},
-    {ISSET_EXPR}
-  };
-  /**
-   * Each hint maps respectively to nonTerminals list. {<terminal>,
-   * <production rule>}
-   */
-  private static final int[][][] GRAMMAR_HINTS = {
-    // prog
-    {{FUNC, 0}, {ID, 0}},
-    // stmt-list
-    {{PERIOD, 3}, {SEMICOLON, 1}, {IF, 1}, {ELSE, 1}, {FI, 1}, {LOOP, 1}, {ID, 1},
-    {REPEAT, 1}, {BREAK, 1}, {PRINT, 1}, {READ, 1}, {CONCAT, 1}, {SLICE, 1},
-    {STRCMP, 1}, {CALL, 1}, {RETURN, 1}, {ROUND, 1}},
-    // stmt
-    {{PERIOD, 10}, {SEMICOLON, 10}, {IF, 4}, {ELSE, 10}, {FI, 10}, {LOOP, 5},
-    {ID, 7}, {REPEAT, 10}, {BREAK, 6}, {PRINT, 9}, {READ, 8}, {CALL, 64}, {RETURN, 65},
-    {ROUND, 71}, {ISSET, 73}},
-    // stmt-tail
-    {{PERIOD, 3}, {SEMICOLON, 2}, {ELSE, 3}, {FI, 3}, {REPEAT, 3}, {IF, 1},
-    {PRINT, 1}, {READ, 1}, {LOOP, 1}, {ID, 1}, {CALL, 1}, {RETURN, 1}, {ROUND, 1}},
-    {{IF, 11}},
-    {{LOOP, 14}},
-    {{BREAK, 15}},
-    {{ID, 18}},
-    {{READ, 20}},
-    {{PRINT, 19}},
-    // expr
-    {{ID, 23}, {MINUS, 23}, {OPENPAREN, 23}, {CONST, 23}, {CONCAT, 52},
-    {SLICE, 53}, {STRCMP, 54}, {CALL, 64}, {ISSET, 73}},
-    {{ELSE, 12}, {FI, 13}},
-    {{PERIOD, 17}, {SEMICOLON, 17}, {ELSE, 17}, {FI, 17},
-    {ID, 16}, {REPEAT, 17}},
-    {{PERIOD, 22}, {SEMICOLON, 22}, {ELSE, 22}, {FI, 22}, {REPEAT, 22}, {COMMA, 21}},
-    {{ID, 26}, {MINUS, 26}, {OPENPAREN, 26}, {CONST, 26}},
-    {{PERIOD, 25}, {SEMICOLON, 25}, {THEN, 25}, {ELSE, 25}, {FI, 25}, {REPEAT, 25},
-    {OR, 24}, {CLOSEDPAREN, 25}},
-    {{ID, 29}, {MINUS, 29}, {OPENPAREN, 29}, {CONST, 29}},
-    {{PERIOD, 28}, {SEMICOLON, 28}, {THEN, 28}, {ELSE, 28}, {FI, 28}, {REPEAT, 28},
-    {OR, 28}, {AND, 27}, {CLOSEDPAREN, 28}},
-    {{ID, 37}, {MINUS, 37}, {OPENPAREN, 37}, {CONST, 37}},
-    {{PERIOD, 36}, {SEMICOLON, 36}, {THEN, 36}, {ELSE, 36}, {FI, 36}, {REPEAT, 36},
-    {OR, 36}, {AND, 36}, {LESS, 30}, {LESSEQUAL, 31}, {EQUAL, 32}, {GREATEREQUAL, 33},
-    {GREATER, 34}, {NOTEQUAL, 35}, {CLOSEDPAREN, 36}},
-    {{ID, 41}, {MINUS, 41}, {OPENPAREN, 41}, {CONST, 41}},
-    {{PERIOD, 40}, {SEMICOLON, 40}, {THEN, 40}, {ELSE, 40}, {FI, 40}, {REPEAT, 40},
-    {OR, 40}, {AND, 40}, {LESS, 40}, {LESSEQUAL, 40}, {EQUAL, 40}, {GREATEREQUAL, 40},
-    {GREATER, 40}, {NOTEQUAL, 40}, {PLUS, 38}, {MINUS, 39}, {CLOSEDPAREN, 40}},
-    {{ID, 46}, {MINUS, 45}, {OPENPAREN, 47}, {CONST, 46}},
-    {{PERIOD, 44}, {SEMICOLON, 44}, {THEN, 44}, {ELSE, 44}, {FI, 44}, {REPEAT, 44},
-    {OR, 44}, {AND, 44}, {LESS, 44}, {LESSEQUAL, 44}, {EQUAL, 44}, {GREATEREQUAL, 44},
-    {GREATER, 44}, {NOTEQUAL, 44}, {PLUS, 44}, {MINUS, 44}, {MULTIPLY, 42}, {DIVIDE, 43},
-    {POW, 50}, {MOD, 51}, {CLOSEDPAREN, 44}},
-    {{ID, 48}, {CONST, 49}},
-    {{FUNC, 55}, {ID, 56}},//def
-    {{FUNC, 58}},//func
-    {},//func_tail
-    {{ID, 59}, {CLOSEDPAREN, 60}},//params
-    {{COMMA, 61}, {CLOSEDPAREN, 60}},//params_tail
-    {{CALL, 63}},//func_call
-    {{BECOMES, 18}, {OPENPAREN, 65}},//stmt_id
-    {{RETURN, 66}},// return-stmt
-    {{COMMA, 68}},// expr-list
-    {{ROUND, 72}},// round-stmt
-    {{ISSET, 70}}
+    {ISSET_EXPR},
+    {RCURLY, STMT_LIST, LCURLY}
   };
 
   /**
@@ -198,16 +234,15 @@ public class Rowdy {
    */
   public static void main(String[] args) {
 
-    try {
-      Language rowdy = Language.build(TERMINALS, NON_TERMINALS,
-              GRAMMAR_RULES, GRAMMAR_HINTS);
+    Language rowdy = Language.build(TERMINALS, GRAMMAR_RULES, NONTERMINALS);
 
-      RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
-      Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
-      String programFileName = args[0];
-      parser.parse(programFileName);
+    RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
+    Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
+    String programFileName = args[0];
+    parser.parse(programFileName);
+    
+//    try {
       rowdyProgram.build(parser);
-
       List<Value> programParameters = new ArrayList<>();
 
       for (int p = 1; p < args.length; p++) {
@@ -221,9 +256,10 @@ public class Rowdy {
       }
 
       rowdyProgram.execute(programParameters);
-    }catch (Exception e) {
-      System.out.println("Runtime Exception: " + e.getMessage());
-    }
+//    }catch (Exception e) {
+//      System.out.println("Runtime Exception: " + e.getMessage());
+//      rowdyProgram.dumpCallStack();
+//    }
 
   }
 
