@@ -1,28 +1,34 @@
 
 	// Demo to show how to setup callbacks
 
-	func f1(msg)
-		print "f1: ", msg, "\n";
-	.
-	func service1()
-		return 0;
-	.
-	func service2()
-		return 1;
-	.
+	func callbackFunc(msg) {
+	  print "Callback: ", msg, "\n";
+	}
 	
-	func sendRequest(callback, service)
-		opt = ->service();
-		if opt == 1 then
-			->callback("Request sent Successfully");
+	func main() {
+		
+		->service(callbackFunc);
+		
+		
+		->doSomething((response){
+			// On Success
+			print response, "\n";
+		}, (response){
+			// On Failure
+			print response, "\n";
+		});
+	}
+	
+	
+	
+	func service(callback) {
+	  ->callback("Hello World!");
+	}
+	
+	func doSomething(success, failure) {
+		if someConditionIsTrue then
+			->success();
 		else
-			->callback("Request Failed");
+			->failure();
 		fi
-	. 
-
-	func main()
-		->sendRequest(f1, service1);
-		->sendRequest(f1, service2);
-	.
-	
-.
+	}

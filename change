@@ -5,7 +5,7 @@
 	
 	change = 0;
 	
-	func main (price, amt)
+	func main (price, amt) {
 	
 		change = amt - price;
 		round change, 2;
@@ -22,6 +22,8 @@
 		pennies 	= ->getChange(0.01);
 		
 		print
+		"Amount Due: ", price,		"\n",
+		"Amount Given: ", amt,		"\n",
 		"\nChange Due: 	", chg, 	"\n",
 		"----------------------------\n",
 		"Twenties:	", twenties, 	"\n",
@@ -32,32 +34,30 @@
 		"Dimes:		", dimes, 		"\n",
 		"Nickels:	", nickels, 	"\n",
 		"Pennies:	", pennies, 	"\n\n";
-	.
+	}
 	
 	// With recursion
-	func getChange_recur (denom, qty)
-		if (change >= denom) then
+	func getChange_recur (denom, qty) {
+		if (change >= denom) {
 			change = change - denom;
 			round change, 2;
 			return ->getChange_recur(denom, qty + 1);
-		else
+		} else {
 			return qty;
-		fi
-	.
+		}
+	}
 	
 	// With a loop
-	func getChange (denom)
+	func getChange (denom) {
 		qty = 0;
-		loop q:
-			if (change >= denom) then
+		loop q: {
+			if (change >= denom) {
 				change = change - denom;
 				qty = qty + 1;
 				round change, 2;
-			else
+			} else {
 				break
-			fi
-		repeat
+			}
+		}
 		return qty;
-	.
-	
-.
+	}
