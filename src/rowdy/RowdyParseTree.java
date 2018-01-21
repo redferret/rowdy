@@ -177,8 +177,9 @@ public class RowdyParseTree {
    * Runs the program loaded into the parse tree.
    *
    * @param programParams The program parameters
+   * @throws java.lang.Exception
    */
-  public void execute(List<Value> programParams) {
+  public void execute(List<Value> programParams) throws Exception {
     // Declare global variables
     declareGlobals(root, programParams);
     if (main == null) {
@@ -274,11 +275,11 @@ public class RowdyParseTree {
       curID = currentTreeNode.symbol().id();
       switch (curID) {
         case FUNCTION:
-          // Should only execute the main method
+          // This should only execute the main function
           Node funcStmtBlock = currentTreeNode.get(FUNCTION_BODY).get(STMT_BLOCK);
           Node funcStmtList = funcStmtBlock.get(STMT_LIST);
           executeStmt(funcStmtList, null);
-          // When main is finished, exit the program
+          // After main has finished executing, the program is finished.
           System.exit(0);
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
