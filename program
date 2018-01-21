@@ -1,30 +1,31 @@
 
 	// Demo to show how to setup callbacks
-	someConditionIsTrue = true ;
+	someConditionIsTrue = true;
 	
 	func callbackFunc(msg) {
-	  print "Callback: ", msg, "\n";
-	}
-	
-	func main() {
-		anonymous = func () {
-			print "Hello Anonymous!\n";
-		}
-		->anonymous();
-		->service(callbackFunc);
-		->doSomething( func (response){
-			print "Success ", response, "\n";
-		}, func (response){
-			print "Failure ", response, "\n";
-		});
+		print "Callback: ", msg, "\n";
 	}
 	
 	func service(callback) {
-	  ->callback("Hello World!");
+		->callback("Hello World!");
+	}
+	
+	func main() {
+		anonymous = func() {
+			print "Hello Anonymous!\n";
+		}
+		->anonymous();
+		
+		->service(callbackFunc);
+		
+		->doSomething( func (response){
+			print "Success: ", response, "\n";
+		}, func (response){
+			print "Failure: ", response, "\n";
+		});
 	}
 	
 	func doSomething(success, failure) {
-		
 		if someConditionIsTrue {
 			->success("All is well");
 		} else {
