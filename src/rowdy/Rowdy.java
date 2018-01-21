@@ -33,7 +33,7 @@ public class Rowdy {
           FACTOR = 620, FACTOR_TAIL = 630, ATOMIC = 640, DEFINITION = 650, FUNCTION = 660,
           FUNC_TAIL = 670, PARAMETERS = 680, PARAMS_TAIL = 690, FUNC_CALL = 700, STMT_ID = 710,
           RETURN_STMT = 720, EXPR_LIST = 730, ROUND_STMT = 740, ISSET_EXPR = 750,
-          STMT_BLOCK = 751,
+          STMT_BLOCK = 751, FUNCTION_BODY = 752, ANONYMOUS_FUNC = 753,
           END = 1000;
 
   private static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
@@ -80,26 +80,31 @@ public class Rowdy {
     new NonTerminal("expr", EXPRESSION, 
             new int[][]{{ID, 23}, {MINUS, 23}, {OPENPAREN, 23}, {CONST, 23}, 
                         {CONCAT, 52}, {SLICE, 53}, {STRCMP, 54}, {CALL, 64}, 
-                        {ISSET, 73}}),
+                        {ISSET, 73}, {FUNC, 76}}),
     new NonTerminal("else-part", ELSE_PART, 
+            
             new int[][]{{ELSE, 12}, {FI, 13}}),
     new NonTerminal("id-option", ID_OPTION, 
             new int[][]{{SEMICOLON, 17}, {ELSE, 17}, {LCURLY, 3}, 
                         {ID, 16}, {REPEAT, 17}}),
+    
     new NonTerminal("atom-list-tail", ATOM_LIST_TAIL, 
             new int[][]{{SEMICOLON, 22}, {ELSE, 22}, {LCURLY, 3}, 
                         {REPEAT, 22}, {COMMA, 21}}),
+    
     new NonTerminal("bool-term", BOOL_TERM, 
             new int[][]{{ID, 26}, {MINUS, 26}, {OPENPAREN, 26}, {CONST, 26}}),
     new NonTerminal("bool-term-tail", BOOL_TERM_TAIL, 
             new int[][]{{SEMICOLON, 25}, {THEN, 25}, {ELSE, 25}, 
                         {LCURLY, 3}, {REPEAT, 25}, {OR, 24}, {CLOSEDPAREN, 25}}),
+    
     new NonTerminal("bool-factor", BOOL_FACTOR, 
             new int[][]{{ID, 29}, {MINUS, 29}, {OPENPAREN, 29}, {CONST, 29}}),
     new NonTerminal("bool-factor-tail", BOOL_FACTOR_TAIL, 
             new int[][]{{SEMICOLON, 28}, {THEN, 28}, {ELSE, 28}, 
                         {LCURLY, 3}, {REPEAT, 28}, {OR, 28}, {AND, 27}, 
                         {CLOSEDPAREN, 28}}),
+    
     new NonTerminal("arith-expr", ARITHM_EXPR, 
             new int[][]{{ID, 37}, {MINUS, 37}, {OPENPAREN, 37}, {CONST, 37}}),
     new NonTerminal("relation-option", RELATION_OPTION, 
@@ -107,6 +112,7 @@ public class Rowdy {
                         {LCURLY, 3}, {REPEAT, 36}, {OR, 36}, {AND, 36}, {LESS, 30}, 
                         {LESSEQUAL, 31}, {EQUAL, 32}, {GREATEREQUAL, 33}, 
                         {GREATER, 34}, {NOTEQUAL, 35}, {CLOSEDPAREN, 36}}),
+    
     new NonTerminal("term", TERM, 
             new int[][]{{ID, 41}, {MINUS, 41}, {OPENPAREN, 41}, {CONST, 41}}),
     new NonTerminal("term-tail", TERM_TAIL, 
@@ -115,6 +121,7 @@ public class Rowdy {
                         {EQUAL, 40}, {GREATEREQUAL, 40},{GREATER, 40}, 
                         {NOTEQUAL, 40}, {PLUS, 38}, {MINUS, 39}, 
                         {CLOSEDPAREN, 40}, {LCURLY, 3}}),
+    
     new NonTerminal("factor", FACTOR, 
             new int[][]{{ID, 46}, {MINUS, 45}, {OPENPAREN, 47}, {CONST, 46}}),
     new NonTerminal("factor-tail", FACTOR_TAIL, 
@@ -128,13 +135,20 @@ public class Rowdy {
             new int[][]{{ID, 48}, {CONST, 49}}),
     new NonTerminal("def", DEFINITION, 
             new int[][]{{FUNC, 55}, {ID, 56}, {LCURLY, 3}}),
+    
     new NonTerminal("func", FUNCTION, 
             new int[][]{{FUNC, 58}}),
     new NonTerminal("func-tail", FUNC_TAIL, 
             new int[][]{{LCURLY, 3}}),
+    new NonTerminal("func-body", FUNCTION_BODY,
+            new int[][]{{OPENPAREN, 75}}),
+    new NonTerminal("anonymous-func", ANONYMOUS_FUNC,
+            new int[][]{{OPENPAREN, 77}}),
+    
     new NonTerminal("params", PARAMETERS, 
             new int[][]{{ID, 59}, {CLOSEDPAREN, 60}}),
     new NonTerminal("params-tail", PARAMS_TAIL, 
+            
             new int[][]{{COMMA, 61}, {CLOSEDPAREN, 60}}),
     new NonTerminal("func-call", FUNC_CALL, 
             new int[][]{{CALL, 63}}),
@@ -210,7 +224,7 @@ public class Rowdy {
     {FUNCTION, DEFINITION},//55
     {ASSIGN_STMT, SEMICOLON, DEFINITION}, //56
     {},//57
-    {FUNC, ID, OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK},//58
+    {FUNC, ID, FUNCTION_BODY},//58
     {ID, PARAMS_TAIL},//59
     {},//60
     {COMMA, ID, PARAMS_TAIL},//61
@@ -226,7 +240,10 @@ public class Rowdy {
     {ROUND_STMT},
     {ROUND, ID, COMMA, ARITHM_EXPR},
     {ISSET_EXPR},
-    {RCURLY, STMT_LIST, LCURLY}
+    {RCURLY, STMT_LIST, LCURLY},
+    {OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK},//75
+    {FUNC, ANONYMOUS_FUNC},
+    {FUNCTION_BODY}
   };
 
   /**

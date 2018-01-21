@@ -1,4 +1,7 @@
 
 	func main() {
-		print "Does it work?\n";
+		loop x = range 0, 10, 1 { // x is between -1 and 10 incremented by 1
+			// Loop goes for 10 iterations
+			break x; // break out of this loop
+		}
 	}

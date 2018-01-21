@@ -17,83 +17,6 @@ import static rowdy.Rowdy.*;
  */
 public class RowdyParseTree {
 
-  /**
-   * Tree Node for the parse tree
-   */
-  private class Node {
-
-    private final ArrayList<Node> children;
-    private final Symbol def;
-    private Boolean seqActive;
-
-    public Node(Symbol def) {
-      children = new ArrayList<>();
-      this.def = def;
-      seqActive = false;
-    }
-
-    public void addChild(Node child) {
-      children.add(child);
-    }
-
-    public Symbol symbol() {
-      return def;
-    }
-
-    public boolean hasChildren() {
-      return !children.isEmpty();
-    }
-
-    public Node getLeftMostChild() {
-      if (children.isEmpty()) {
-        return null;
-      }
-      return children.get(0);
-    }
-
-    /**
-     * Gets the child node with the id, only returns the first occurance of the
-     * found child.
-     *
-     * @param id The child's ID to search for
-     * @return The found child, null if nothing was found
-     */
-    public Node get(int id) {
-      return getChild(id, 0);
-    }
-
-    /**
-     * Gets the child node with the id. Since there could be duplicates or
-     * multiple child nodes with the same ID, occur will tell the method to skip
-     * a certain number of occurrences of the given ID. If occur is 1 then it
-     * will skip the first occurrence of the search.
-     *
-     * @param id The id to search for
-     * @param occur The number of times to skip a duplicate
-     * @return The child node of this parent, null if it doesn't exist.
-     */
-    public Node getChild(int id, int occur) {
-      for (int c = 0; c < children.size(); c++) {
-        if (children.get(c).symbol().id() == id
-                && occur == 0) {
-          return children.get(c);
-        } else if (children.get(c).symbol().id() == id
-                && occur > 0) {
-          occur--;
-        }
-      }
-      return null;
-    }
-
-    public ArrayList<Node> getChildren() {
-      return children;
-    }
-
-    @Override
-    public String toString() {
-      return def.toString() + " " + children.toString();
-    }
-  }
   private Tokenizer parser;
   private Language language;
   private Node root;
@@ -111,6 +34,9 @@ public class RowdyParseTree {
    * Keeps track of the functions currently being called.
    */
   private final Stack<Function> callStack;
+  /**
+   * Reference to the main function
+  */
   private Node main;
 
   public RowdyParseTree(Language language) {
@@ -153,7 +79,7 @@ public class RowdyParseTree {
       currentToken = this.parser.getToken();
     }
     int id = currentToken.getID();
-    addToNode(root, getRule(program, id));
+    addToNode(root, produce(program, id));
     build(root);
   }
 
@@ -193,7 +119,7 @@ public class RowdyParseTree {
       symbol = current.symbol();
       if (symbol instanceof NonTerminal) {
         if (currentToken == null) break;
-        rule = getRule((NonTerminal) symbol, currentToken.getID());
+        rule = produce((NonTerminal) symbol, currentToken.getID());
         addToNode(current, rule);
         build(current);
       } else {
@@ -227,7 +153,7 @@ public class RowdyParseTree {
    * @param terminal The id from a token, usually a terminal
    * @return Fetches a production rule from the language's grammar.
    */
-  private Rule getRule(NonTerminal symbol, int terminal) {
+  private Rule produce(NonTerminal symbol, int terminal) {
     Hint productionHint = symbol.getHint(terminal);
     return language.getProductionRule(productionHint);
   }
@@ -349,7 +275,8 @@ public class RowdyParseTree {
       switch (curID) {
         case FUNCTION:
           // Should only execute the main method
-          Node funcStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
+          Node funcStmtBlock = currentTreeNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+          Node funcStmtList = funcStmtBlock.get(STMT_LIST);
           executeStmt(funcStmtList, null);
           // When main is finished, exit the program
           System.exit(0);
@@ -364,7 +291,7 @@ public class RowdyParseTree {
           break;
         case IF_STMT:
           Node ifExpr = currentTreeNode.get(EXPRESSION);
-          Value ifExprValue = (Value) executeExpr(ifExpr, null);
+          Value ifExprValue = getValue(ifExpr);
           if (ifExprValue.valueToBoolean()) {
             Node ifStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
             executeStmt(ifStmtList, seqControl);
@@ -527,12 +454,17 @@ public class RowdyParseTree {
     Node functionNode = (Node) funcVal.getValue();
     List<String> paramsList = new ArrayList<>();
     if (!parameterValues.isEmpty()) {
-      Node paramsNode = functionNode.get(PARAMETERS);
-      paramsList.add(((Terminal) executeExpr(paramsNode, null).getValue()).getName());
-      Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
-      while (paramsTailNode.hasChildren()) {
-        paramsList.add(((Terminal) executeExpr(paramsTailNode.get(ID), null).getValue()).getName());
-        paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+      Node functionBody = functionNode.get(FUNCTION_BODY);
+      Node paramsNode = functionBody.get(PARAMETERS);
+      if (paramsNode.hasChildren()) {
+        Value paramValue = executeExpr(paramsNode, null);
+
+        paramsList.add(((Terminal) paramValue.getValue()).getName());
+        Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
+        while (paramsTailNode.hasChildren()) {
+          paramsList.add(((Terminal) executeExpr(paramsTailNode.get(ID), null).getValue()).getName());
+          paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+        }
       }
     }
     // 2. Copy actual parameters to formal parameters
@@ -546,8 +478,8 @@ public class RowdyParseTree {
     Function function = new Function(funcName, params);
     callStack.push(function);
     // 4. Get and execute the stmt-list
-    
-    Node stmtList = functionNode.get(STMT_BLOCK).get(STMT_LIST), seqControl = new Node(null);
+    Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null);
     seqControl.seqActive = true;
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
@@ -735,6 +667,9 @@ public class RowdyParseTree {
             v1 = getValueAsString(cur.get(EXPRESSION));
             v2 = getValueAsString(cur.getChild(EXPRESSION, 1));
             return new Value(v1.compareTo(v2));
+          case FUNC:
+            Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
+            return new Value(anonymousFunc);
         }
       case ISSET_EXPR:
         Value resultBoolean = new Value(isset(cur.get(ID)));
@@ -948,6 +883,84 @@ public class RowdyParseTree {
     for (int i = 0; i < children.size(); i++) {
       program.add(children.get(i).symbol());
       collectInOrder(program, children.get(i));
+    }
+  }
+  
+  /**
+   * Tree Node for the parse tree
+   */
+  private class Node {
+
+    private final ArrayList<Node> children;
+    private final Symbol def;
+    private Boolean seqActive;
+
+    public Node(Symbol def) {
+      children = new ArrayList<>();
+      this.def = def;
+      seqActive = false;
+    }
+
+    public void addChild(Node child) {
+      children.add(child);
+    }
+
+    public Symbol symbol() {
+      return def;
+    }
+
+    public boolean hasChildren() {
+      return !children.isEmpty();
+    }
+
+    public Node getLeftMostChild() {
+      if (children.isEmpty()) {
+        return null;
+      }
+      return children.get(0);
+    }
+
+    /**
+     * Gets the child node with the id, only returns the first occurance of the
+     * found child.
+     *
+     * @param id The child's ID to search for
+     * @return The found child, null if nothing was found
+     */
+    public Node get(int id) {
+      return getChild(id, 0);
+    }
+
+    /**
+     * Gets the child node with the id. Since there could be duplicates or
+     * multiple child nodes with the same ID, occur will tell the method to skip
+     * a certain number of occurrences of the given ID. If occur is 1 then it
+     * will skip the first occurrence of the search.
+     *
+     * @param id The id to search for
+     * @param occur The number of times to skip a duplicate
+     * @return The child node of this parent, null if it doesn't exist.
+     */
+    public Node getChild(int id, int occur) {
+      for (int c = 0; c < children.size(); c++) {
+        if (children.get(c).symbol().id() == id
+                && occur == 0) {
+          return children.get(c);
+        } else if (children.get(c).symbol().id() == id
+                && occur > 0) {
+          occur--;
+        }
+      }
+      return null;
+    }
+
+    public ArrayList<Node> getChildren() {
+      return children;
+    }
+
+    @Override
+    public String toString() {
+      return def.toString() + " " + children.toString();
     }
   }
 }
