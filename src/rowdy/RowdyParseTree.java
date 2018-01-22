@@ -399,7 +399,7 @@ public class RowdyParseTree {
           }
           char c;
           StringBuilder toPrint = new StringBuilder();
-          if (printValue.toString().contains("\n")){
+          if (printValue.toString().contains("\\n")){
             for (int l = 0; l < printValue.length(); l++) {
               c = printValue.charAt(l);
               if ((c == '\\') && (printValue.charAt(++l) == 'n')) {
