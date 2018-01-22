@@ -1,7 +1,7 @@
 	// Change Program
 	// Author: Richard DeSilvey
-	// Demonstrates the 'round' function
-	// to help fix floating point errors.
+	// Demonstrates the 'round' function to help fix floating point errors
+	// and recursion.
 	
 	change = 0;
 	

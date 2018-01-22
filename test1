@@ -1,4 +1,7 @@
 
+	// THIS FILE WILL NOT RUN PROPERLY
+	// This file is used for planning and working out new features
+
 	func main() {
 		loop x in range 0, 10, 1 { // x is between -1 and 11 incremented by 1
 			// Loop goes for 10 iterations
