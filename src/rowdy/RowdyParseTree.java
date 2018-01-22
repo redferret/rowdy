@@ -72,11 +72,17 @@ public class RowdyParseTree {
     NonTerminal program = (NonTerminal) language.getSymbol(PROGRAM);
     root = new Node(program);
     currentToken = this.parser.getToken();
+    if (currentToken == null){
+      return;
+    }
     while (currentToken.getID() == 200) {
       if (currentToken.getID() == 200) {
         line++;
       }
       currentToken = this.parser.getToken();
+      if (currentToken == null){
+        return;
+      }
     }
     int id = currentToken.getID();
     addToNode(root, produce(program, id));
@@ -676,7 +682,7 @@ public class RowdyParseTree {
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
             return new Value(anonymousFunc);
           case ARRAY_EXPR:
-            List<Object> array = new ArrayList<>();
+            List<Value> array = new ArrayList<>();
             Node arrayExpression = cur.getLeftMostChild();
             Value arrayValue = getValue(arrayExpression.get(EXPRESSION));
             Node arrayBody = arrayExpression.get(ARRAY_BODY);

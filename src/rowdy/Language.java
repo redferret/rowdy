@@ -24,7 +24,8 @@ public class Language {
    * @param nonterminals
    * @return A new language object.
    */
-  public static Language build(String[] terms, ProductionRule[] grammarRules, NonTerminal[] nonterminals) {
+  public static Language build(ProductionRule[] grammarRules, String[] terms, 
+          NonTerminal[] nonterminals) {
     return new Language(terms, grammarRules, nonterminals);
   }
 

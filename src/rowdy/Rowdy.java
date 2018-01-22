@@ -59,11 +59,6 @@ public class Rowdy {
           ARRAY_BODY = 754, ARRAY_LINEAR = 755, ARRAY_EXPR = 756, 
           ARRAY_LINEAR_BODY=757,
           END = 10;
-        // EXPRESSION => ARRAY_EXPR
-        // ARRAY_EXPR => ARRAY ( EXPRESSION ARRAY_BODY )
-		// ARRAY_BODY => , ARRAY_LINEAR
-		// ARRAY_LINEAR => EXPRESSION ARRAY_LINEAR_TAIL
-        // ARRAY_LINEAR_TAIL => , EXPRESSION ARRAY_LINEAR_TAIL
   private static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
     "fi", "loop", "ID", ":", "repeat", "break", "=", "print",
     "read", ",", "or", "and", "<", "<=", "==", ">=",
@@ -222,12 +217,11 @@ public class Rowdy {
     
     new NonTerminal("array-expr", ARRAY_EXPR, 
             new int[][]{{ARRAY, PRULE_ARRAY}}),
-    
     new NonTerminal("array-body", ARRAY_BODY, 
             new int[][]{{COMMA, PRULE_ARRAY_LINEAR_BODY}, {CLOSEDPAREN, END},
                         {COLON, -1}}),
     new NonTerminal("array-linear-tail", ARRAY_LINEAR_BODY, 
-            new int[][]{{COMMA, PRULE_ARRAY_LINEAR_TAIL}, {CLOSEDPAREN, END}}),
+            new int[][]{{COMMA, PRULE_ARRAY_LINEAR_BODY}, {CLOSEDPAREN, END}}),
 
   };
   
@@ -363,12 +357,11 @@ public class Rowdy {
         new int[]{ARRAY_EXPR}),
     new ProductionRule(PRULE_ARRAY,
         new int[]{ARRAY, OPENPAREN, EXPRESSION, ARRAY_BODY, CLOSEDPAREN}),
+    
     new ProductionRule(PRULE_ARRAY_LINEAR_BODY,
         new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY}),
     new ProductionRule(PRULE_ARRAY_LINEAR,
         new int[]{EXPRESSION, ARRAY_LINEAR_BODY}),
-    new ProductionRule(PRULE_ARRAY_LINEAR_TAIL,
-        new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY}),
     
     new ProductionRule(END, 
 		new int[]{}),
@@ -379,7 +372,7 @@ public class Rowdy {
    */
   public static void main(String[] args) {
 
-    Language rowdy = Language.build(TERMINALS, GRAMMAR, NONTERMINALS);
+    Language rowdy = Language.build(GRAMMAR, TERMINALS, NONTERMINALS);
 
     RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
     Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
