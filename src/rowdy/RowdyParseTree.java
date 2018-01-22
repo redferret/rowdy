@@ -215,7 +215,7 @@ public class RowdyParseTree {
           break;
         case FUNCTION:
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          Node paramsNode = currentTreeNode.get(PARAMETERS);
+          Node paramsNode = currentTreeNode.get(FUNCTION_BODY).get(PARAMETERS);
           if (!functionName.equals("main")) {
             setAsGlobal(functionName, new Value(currentTreeNode));
           } else {
@@ -952,7 +952,8 @@ public class RowdyParseTree {
           occur--;
         }
       }
-      return null;
+      throw new RuntimeException("The id '" + id + 
+              "' could not be found for the node '" + def + "'");
     }
 
     public ArrayList<Node> getChildren() {

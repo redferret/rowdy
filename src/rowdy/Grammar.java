@@ -1,6 +1,8 @@
 
 package rowdy;
 
+import java.util.Arrays;
+
 /**
  *
  * @author Richard
@@ -21,5 +23,9 @@ public class Grammar {
   public int[] getProductionSymbols() {
     return simpleProduction;
   }
-  
+ 
+  @Override
+  public String toString() {
+    return id + ": " + Arrays.toString(simpleProduction);
+  }
 }

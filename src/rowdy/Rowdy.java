@@ -31,7 +31,7 @@ public class Rowdy {
 	 PRULE_RETURN=66, PRULE_FUNC_ASSIGN_GLOBAL=67, PRULE_EXPR_LIST=68,
 	 PRULE_ISSET=70, PRULE_ROUND_STMT=71, PRULE_ROUND=72, PRULE_ISSET_EXPR=73,
 	 PRULE_STMT_BLOCK=74, PRULE_FUNCTION_BODY=75, PRULE_ANONYMOUS_FUNC=76,
-	 PRULE_FUNC_BODY_STMT=77;
+	 PRULE_ANONYMOUS_FUNC_BODY=77;
   
   public static final int PERIOD = 0, SEMICOLON = 1, IF = 2, THEN = 3,
           ELSE = 4, FI = 5, LOOP = 6, ID = 7,
@@ -191,7 +191,7 @@ public class Rowdy {
     new NonTerminal("func-body", FUNCTION_BODY,
             new int[][]{{OPENPAREN, PRULE_FUNCTION_BODY}}),
     new NonTerminal("anonymous-func", ANONYMOUS_FUNC,
-            new int[][]{{OPENPAREN, PRULE_FUNC_BODY_STMT}}),
+            new int[][]{{OPENPAREN, PRULE_ANONYMOUS_FUNC_BODY}}),
     
     new NonTerminal("params", PARAMETERS, 
             new int[][]{{ID, PRULE_ID_PARAM}, {CLOSEDPAREN, END}}),
@@ -275,7 +275,7 @@ public class Rowdy {
     new Grammar(PRULE_STMT_BLOCK, new int[]{RCURLY, STMT_LIST, LCURLY}),
     new Grammar(PRULE_FUNCTION_BODY, new int[]{OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK}),
     new Grammar(PRULE_ANONYMOUS_FUNC, new int[]{FUNC, ANONYMOUS_FUNC}),
-    new Grammar(PRULE_FUNC_BODY_STMT, new int[]{FUNCTION_BODY}),
+    new Grammar(PRULE_ANONYMOUS_FUNC_BODY, new int[]{FUNCTION_BODY}),
     new Grammar(END, new int[]{}),
   };
   
@@ -300,7 +300,12 @@ public class Rowdy {
         if (Character.isDigit(in.charAt(0))) {
           programParameters.add(new Value(Float.parseFloat(args[p])));
         } else {
-          programParameters.add(new Value(args[p]));
+          String argStr = args[p];
+          if (argStr.equals("true") || argStr.equals("false")){
+            programParameters.add(new Value(Boolean.valueOf(argStr)));
+          } else {
+            programParameters.add(new Value(args[p]));
+          }
         }
       }
       rowdyProgram.execute(programParameters);
