@@ -1,13 +1,6 @@
 
 	// Demo to show how to setup callbacks
 	someConditionIsTrue = false;
-	func callbackFunc(msg) {
-		print "Callback: ", msg, "\n";
-	}
-	
-	func service(callback) {
-		->callback("Hello World!");
-	}
 	
 	func main(bool) {
 		if (isset bool) {
@@ -25,6 +18,14 @@
 		}, func (response){
 			print "Failure: ", response, "\n";
 		});
+	}
+	
+	func callbackFunc(msg) {
+		print "Callback: ", msg, "\n";
+	}
+	
+	func service(callback) {
+		->callback("Hello World!");
 	}
 	
 	func doSomething(success, failure) {
