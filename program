@@ -1,7 +1,6 @@
 
 	// Demo to show how to setup callbacks
-	someConditionIsTrue = true;
-	
+	someConditionIsTrue = false;
 	func callbackFunc(msg) {
 		print "Callback: ", msg, "\n";
 	}
@@ -10,7 +9,10 @@
 		->callback("Hello World!");
 	}
 	
-	func main() {
+	func main(bool) {
+		if (isset bool) {
+			someConditionIsTrue = bool;
+		}
 		anonymous = func() {
 			print "Hello Anonymous!\n";
 		}
