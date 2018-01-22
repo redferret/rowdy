@@ -7,11 +7,11 @@ import java.util.Arrays;
  *
  * @author Richard
  */
-public class Grammar {
+public class ProductionRule {
   private final int id;
   private final int[] simpleProduction;
 
-  public Grammar(int id, int[] simpleProduction) {
+  public ProductionRule(int id, int[] simpleProduction) {
     this.id = id;
     this.simpleProduction = simpleProduction;
   }

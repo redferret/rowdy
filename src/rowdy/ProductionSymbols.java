@@ -8,15 +8,15 @@ import java.util.Arrays;
  *
  * @author Richard DeSilvey
  */
-public class Rule {
+public class ProductionSymbols {
 
   private Symbol[] defs;
 
-  public Rule() {
+  public ProductionSymbols() {
     defs = new Symbol[0];
   }
 
-  public Rule(Symbol[] defs) {
+  public ProductionSymbols(Symbol[] defs) {
     this.defs = new Symbol[defs.length];
     System.arraycopy(defs, 0, this.defs, 0, defs.length);
   }
