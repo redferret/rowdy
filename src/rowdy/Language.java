@@ -13,7 +13,7 @@ import java.util.HashMap;
  */
 public class Language {
 
-  private final HashMap<Integer, Rule> GRAMMAR;
+  private final HashMap<Integer, ProductionSymbols> GRAMMAR;
   private final HashMap<Integer, Symbol> SYMBOLS;
 
   /**
@@ -24,11 +24,11 @@ public class Language {
    * @param nonterminals
    * @return A new language object.
    */
-  public static Language build(String[] terms, Grammar[] grammarRules, NonTerminal[] nonterminals) {
+  public static Language build(String[] terms, ProductionRule[] grammarRules, NonTerminal[] nonterminals) {
     return new Language(terms, grammarRules, nonterminals);
   }
 
-  private Language(String[] terms, Grammar[] grammarRules, NonTerminal[] nonterminals) {
+  private Language(String[] terms, ProductionRule[] grammarRules, NonTerminal[] nonterminals) {
     GRAMMAR = new HashMap<>();
     SYMBOLS = new HashMap<>();
     for (int i = 0; i < terms.length; i++) {
@@ -38,7 +38,7 @@ public class Language {
       SYMBOLS.put(nonTerminal.id(), nonTerminal);
     }
     Symbol symbs[];
-    for (Grammar productionRule : grammarRules) {
+    for (ProductionRule productionRule : grammarRules) {
       int grammarId = productionRule.getId();
       int[] productionSymbols = productionRule.getProductionSymbols();
       symbs = new Symbol[productionSymbols.length];
@@ -46,7 +46,7 @@ public class Language {
         int symbolID = productionSymbols[j];
         symbs[j] = SYMBOLS.get(symbolID);
       }
-      GRAMMAR.put(grammarId, new Rule(symbs));
+      GRAMMAR.put(grammarId, new ProductionSymbols(symbs));
     }
   }
 
@@ -56,9 +56,9 @@ public class Language {
    * @param productionHint
    * @return
    */
-  public Rule getProductionRule(Hint productionHint) {
+  public ProductionSymbols getProductionSymbols(Hint productionHint) {
     return (productionHint == null) ? 
-            new Rule() 
+            new ProductionSymbols() 
             : 
             GRAMMAR.get(productionHint.getProductionHint());
   }

@@ -1,0 +1,6 @@
+
+	func main() {
+	
+		var1 = "Some value";
+		var = array(1, var1, 3 + 6, func (){});
+	}

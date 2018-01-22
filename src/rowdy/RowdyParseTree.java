@@ -111,7 +111,7 @@ public class RowdyParseTree {
    */
   private void build(Node parent) {
     Symbol symbol;
-    Rule rule;
+    ProductionSymbols rule;
     List<Node> children = parent.getChildren();
     Node current;
     for (int i = 0; i < children.size(); i++) {
@@ -153,9 +153,9 @@ public class RowdyParseTree {
    * @param terminal The id from a token, usually a terminal
    * @return Fetches a production rule from the language's grammar.
    */
-  private Rule produce(NonTerminal symbol, int terminal) {
+  private ProductionSymbols produce(NonTerminal symbol, int terminal) {
     Hint productionHint = symbol.getHint(terminal);
-    return language.getProductionRule(productionHint);
+    return language.getProductionSymbols(productionHint);
   }
 
   /**
@@ -165,7 +165,7 @@ public class RowdyParseTree {
    * @param parent The parent being added to
    * @param rule The production rule.
    */
-  private void addToNode(Node parent, Rule rule) {
+  private void addToNode(Node parent, ProductionSymbols rule) {
     Symbol[] symbols = rule.getSymbols();
     for (Symbol symbol : symbols) {
       Node node = new Node(symbol);
@@ -671,7 +671,28 @@ public class RowdyParseTree {
           case FUNC:
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
             return new Value(anonymousFunc);
+          case ARRAY_EXPR:
+            List<Object> array = new ArrayList<>();
+            Node arrayExpression = cur.getLeftMostChild();
+            Value arrayValue = getValue(arrayExpression.get(EXPRESSION));
+            Node arrayBody = arrayExpression.get(ARRAY_BODY);
+            
+            // For key-value paired arrays check the array body to see
+            // if it contains ARRAY_KEY_VALUE_BODY rather than ARRAY_LINEAR_BODY
+            
+            while (arrayValue != null){
+              array.add(arrayValue);
+              arrayValue = null;
+              if (arrayBody.hasChildren()) {
+                arrayValue = getValue(arrayBody.get(EXPRESSION));
+                arrayBody = arrayBody.get(ARRAY_LINEAR_BODY);
+              }
+            }
+            
+            return new Value(array);
         }
+        throw new RuntimeException("Couldn't get value, "
+                + "undefined Node '" + cur.getLeftMostChild()+"'");
       case ISSET_EXPR:
         Value resultBoolean = new Value(isset(cur.get(ID)));
         return resultBoolean;
