@@ -384,25 +384,29 @@ public class RowdyParseTree {
           functionReturning.setReturnValue(toSet);
           break;
         case PRINT_STMT:
-          String printValue = "";
-          printValue += getValueAsString(currentTreeNode.get(EXPRESSION));
+          StringBuilder printValue = new StringBuilder();
+          printValue.append(getValueAsString(currentTreeNode.get(EXPRESSION)));
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasChildren()) {
-            printValue += getValueAsString(atomTailNode.get(EXPRESSION));
+            printValue.append(getValueAsString(atomTailNode.get(EXPRESSION)));
             atomTailNode = atomTailNode.get(EXPR_LIST);
           }
           char c;
-          String temp = "";
-          for (int l = 0; l < printValue.length(); l++) {
-            c = printValue.charAt(l);
-            if ((c == '\\') && (printValue.charAt(++l) == 'n')) {
-              System.out.println(temp);
-              temp = "";
-            } else {
-              temp += c;
+          StringBuilder toPrint = new StringBuilder();
+          if (printValue.toString().contains("\n")){
+            for (int l = 0; l < printValue.length(); l++) {
+              c = printValue.charAt(l);
+              if ((c == '\\') && (printValue.charAt(++l) == 'n')) {
+                System.out.println(toPrint);
+                toPrint = new StringBuilder();
+              } else {
+                toPrint.append(c);
+              }
             }
+            System.out.print(toPrint);
+          } else {
+            System.out.print(printValue);
           }
-          System.out.print(temp);
           break;
         default:
           if (seqControl != null) {
