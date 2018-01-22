@@ -24,11 +24,11 @@ public class Language {
    * @param nonterminals
    * @return A new language object.
    */
-  public static Language build(String[] terms, int[][] grammarRules, NonTerminal[] nonterminals) {
+  public static Language build(String[] terms, Grammar[] grammarRules, NonTerminal[] nonterminals) {
     return new Language(terms, grammarRules, nonterminals);
   }
 
-  private Language(String[] terms, int[][] grammarRules, NonTerminal[] nonterminals) {
+  private Language(String[] terms, Grammar[] grammarRules, NonTerminal[] nonterminals) {
     GRAMMAR = new HashMap<>();
     SYMBOLS = new HashMap<>();
     for (int i = 0; i < terms.length; i++) {
@@ -38,13 +38,15 @@ public class Language {
       SYMBOLS.put(nonTerminal.id(), nonTerminal);
     }
     Symbol symbs[];
-    for (int i = 0; i < grammarRules.length; i++) {
-      symbs = new Symbol[grammarRules[i].length];
-      for (int j = 0; j < grammarRules[i].length; j++) {
-        int symbolID = grammarRules[i][j];
+    for (Grammar productionRule : grammarRules) {
+      int grammarId = productionRule.getId();
+      int[] productionSymbols = productionRule.getProductionSymbols();
+      symbs = new Symbol[productionSymbols.length];
+      for (int j = 0; j < productionSymbols.length; j++) {
+        int symbolID = productionSymbols[j];
         symbs[j] = SYMBOLS.get(symbolID);
       }
-      GRAMMAR.put(i, new Rule(symbs));
+      GRAMMAR.put(grammarId, new Rule(symbs));
     }
   }
 

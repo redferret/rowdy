@@ -82,7 +82,6 @@ public class Rowdy {
                         {CONCAT, 52}, {SLICE, 53}, {STRCMP, 54}, {CALL, 64}, 
                         {ISSET, 73}, {FUNC, 76}}),
     new NonTerminal("else-part", ELSE_PART, 
-            
             new int[][]{{ELSE, 12}, {FI, 13}}),
     new NonTerminal("id-option", ID_OPTION, 
             new int[][]{{SEMICOLON, END}, {ELSE, END}, {LCURLY, END}, 
@@ -227,90 +226,9 @@ public class Rowdy {
     new Grammar(73, new int[]{ISSET_EXPR}),
     new Grammar(74, new int[]{RCURLY, STMT_LIST, LCURLY}),
     new Grammar(75, new int[]{OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK}),
-    new Grammar(76, new int[]{RCURLY, STMT_LIST, LCURLY}),
+    new Grammar(76, new int[]{FUNC, ANONYMOUS_FUNC}),
+    new Grammar(77, new int[]{FUNCTION_BODY}),
     new Grammar(END, new int[]{}),
-  };
-  
-  //Each element on the top most level is a production rule.
-  private static final int[][] GRAMMAR_RULES = {
-    {DEFINITION},
-    {STATEMENT, STMT_TAIL},
-    {SEMICOLON, STATEMENT, STMT_TAIL},
-    {},//3
-    {IF_STMT},
-    {LOOP_STMT},
-    {BREAK_STMT},
-    {ASSIGN_STMT},
-    {READ_STMT},
-    {PRINT_STMT},
-    {},//10
-    {IF, EXPRESSION, STMT_BLOCK, ELSE_PART},
-    {ELSE, STMT_BLOCK},
-    {FI},
-    {LOOP, ID, COLON, STMT_BLOCK},
-    {BREAK, ID_OPTION},
-    {ID},
-    {},//17
-    {ID, BECOMES, EXPRESSION},//18
-    {PRINT, EXPRESSION, EXPR_LIST},//
-    {READ, ID, PARAMS_TAIL},//20
-    {COMMA, ATOMIC, ATOM_LIST_TAIL},
-    {},//22
-    {BOOL_TERM, BOOL_TERM_TAIL},
-    {OR, BOOL_TERM, BOOL_TERM_TAIL},
-    {},//25
-    {BOOL_FACTOR, BOOL_FACTOR_TAIL},
-    {AND, BOOL_FACTOR, BOOL_FACTOR_TAIL},
-    {},//28
-    {ARITHM_EXPR, RELATION_OPTION},
-    {LESS, ARITHM_EXPR},//30
-    {LESSEQUAL, ARITHM_EXPR},
-    {EQUAL, ARITHM_EXPR},
-    {GREATEREQUAL, ARITHM_EXPR},
-    {GREATER, ARITHM_EXPR},
-    {NOTEQUAL, ARITHM_EXPR},
-    {},//36
-    {TERM, TERM_TAIL},
-    {PLUS, TERM, TERM_TAIL},
-    {MINUS, TERM, TERM_TAIL},
-    {},//40
-    {FACTOR, FACTOR_TAIL},
-    {MULTIPLY, FACTOR, FACTOR_TAIL},
-    {DIVIDE, FACTOR, FACTOR_TAIL},
-    {},//44
-    {MINUS, FACTOR},
-    {ATOMIC},
-    {OPENPAREN, EXPRESSION, CLOSEDPAREN},
-    {ID},
-    {CONST},
-    {POW, FACTOR, FACTOR_TAIL},// 50
-    {MOD, FACTOR, FACTOR_TAIL},
-    {CONCAT, EXPRESSION, EXPR_LIST},
-    {SLICE, EXPRESSION, COMMA, ARITHM_EXPR, COMMA, ARITHM_EXPR},
-    {STRCMP, EXPRESSION, COMMA, EXPRESSION},
-    {FUNCTION, DEFINITION},//55
-    {ASSIGN_STMT, SEMICOLON, DEFINITION}, //56
-    {},//57
-    {FUNC, ID, FUNCTION_BODY},//58
-    {ID, PARAMS_TAIL},//59
-    {},//60
-    {COMMA, ID, PARAMS_TAIL},//61
-    {},//62
-    {CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN},//63
-    {FUNC_CALL},//64
-    {RETURN_STMT},
-    {RETURN, EXPRESSION},
-    {FUNC_CALL, SEMICOLON, DEFINITION},
-    {COMMA, EXPRESSION, EXPR_LIST},//68
-    {},//69
-    {ISSET, ID},
-    {ROUND_STMT},
-    {ROUND, ID, COMMA, ARITHM_EXPR},
-    {ISSET_EXPR},
-    {RCURLY, STMT_LIST, LCURLY},
-    {OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK},//75
-    {FUNC, ANONYMOUS_FUNC},
-    {FUNCTION_BODY}
   };
 
   /**
@@ -318,14 +236,14 @@ public class Rowdy {
    */
   public static void main(String[] args) {
 
-    Language rowdy = Language.build(TERMINALS, GRAMMAR_RULES, NONTERMINALS);
+    Language rowdy = Language.build(TERMINALS, GRAMMAR, NONTERMINALS);
 
     RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
     Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
     String programFileName = args[0];
     parser.parse(programFileName);
     
-    try {
+//    try {
       rowdyProgram.build(parser);
       List<Value> programParameters = new ArrayList<>();
 
@@ -338,10 +256,10 @@ public class Rowdy {
         }
       }
       rowdyProgram.execute(programParameters);
-    }catch (Exception e) {
-      System.out.println("Runtime Exception: " + e.getMessage());
-      rowdyProgram.dumpCallStack();
-    }
+//    }catch (Exception e) {
+//      System.out.println("Runtime Exception: " + e.getMessage());
+//      rowdyProgram.dumpCallStack();
+//    }
 
   }
 

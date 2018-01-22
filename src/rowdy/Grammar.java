@@ -18,7 +18,7 @@ public class Grammar {
     return id;
   }
 
-  public int[] getProductionRule() {
+  public int[] getProductionSymbols() {
     return simpleProduction;
   }
   

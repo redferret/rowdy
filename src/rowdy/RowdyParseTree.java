@@ -179,7 +179,7 @@ public class RowdyParseTree {
    * @param programParams The program parameters
    * @throws java.lang.Exception
    */
-  public void execute(List<Value> programParams) throws Exception {
+  public void execute(List<Value> programParams) {
     // Declare global variables
     declareGlobals(root, programParams);
     if (main == null) {
