@@ -682,24 +682,52 @@ public class RowdyParseTree {
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
             return new Value(anonymousFunc);
           case ARRAY_EXPR:
-            List<Value> array = new ArrayList<>();
             Node arrayExpression = cur.getLeftMostChild();
-            Value arrayValue = getValue(arrayExpression.get(EXPRESSION));
+            Value initArrayValue = getValue(arrayExpression.get(EXPRESSION));
             Node arrayBody = arrayExpression.get(ARRAY_BODY);
             
             // For key-value paired arrays check the array body to see
             // if it contains ARRAY_KEY_VALUE_BODY rather than ARRAY_LINEAR_BODY
-            
-            while (arrayValue != null){
-              array.add(arrayValue);
-              arrayValue = null;
-              if (arrayBody.hasChildren()) {
-                arrayValue = getValue(arrayBody.get(EXPRESSION));
-                arrayBody = arrayBody.get(ARRAY_LINEAR_BODY);
-              }
+            final int bodyTypeId;
+            Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
+            if (bodyType == null) {
+              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL);
+              bodyTypeId = ARRAY_KEY_VALUE_BODY_TAIL;
+            } else {
+              bodyTypeId = ARRAY_LINEAR_BODY;
             }
             
-            return new Value(array);
+            switch(bodyTypeId){
+              case ARRAY_LINEAR_BODY:
+                List<Value> array = new ArrayList<>();
+                Value arrayValue = initArrayValue;
+                while (arrayValue != null){
+                  array.add(arrayValue);
+                  arrayValue = null;
+                  if (bodyType.hasChildren()) {
+                    arrayValue = getValue(bodyType.get(EXPRESSION));
+                    bodyType = bodyType.get(ARRAY_LINEAR_BODY);
+                  }
+                }
+                return new Value(array);
+              case ARRAY_KEY_VALUE_BODY_TAIL:
+                HashMap<Value, Value> keypairArray = new HashMap<>();
+                Value key = initArrayValue;
+                Value keyValue = getValue(arrayBody.get(EXPRESSION));
+                keypairArray.put(key, keyValue);
+                
+                Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+                arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
+                while(arrayBody != null && bodyType != null){
+                  key = getValue(bodyTail.get(EXPRESSION));
+                  keyValue = getValue(arrayBody.get(EXPRESSION));
+                  keypairArray.put(key, keyValue);
+                  bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+                  arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
+                }
+                return new Value(keypairArray);
+            }
+            
         }
         throw new RuntimeException("Couldn't get value, "
                 + "undefined Node '" + cur.getLeftMostChild()+"'");
@@ -961,6 +989,18 @@ public class RowdyParseTree {
      */
     public Node get(int id) {
       return getChild(id, 0);
+    }
+    
+    public Node get(int id, boolean throwException) {
+      if (throwException){
+        return getChild(id, 0);
+      } else {
+        try {
+          return getChild(id, 0);
+        }catch (RuntimeException re){
+          return null;
+        }
+      }
     }
 
     /**
