@@ -1024,7 +1024,8 @@ public class RowdyParseTree {
 
     @Override
     public String toString() {
-      return def.toString() + " " + children.toString();
+      return def.toString() + " " + 
+              ((children.isEmpty())?"":(children.toString()));
     }
   }
 }

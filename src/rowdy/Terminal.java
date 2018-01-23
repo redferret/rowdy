@@ -41,6 +41,6 @@ public class Terminal extends Symbol {
   }
 
   public String toString() {
-    return getName() + "  " + realValue;
+    return realValue;
   }
 }
