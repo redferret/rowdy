@@ -1,0 +1,24 @@
+
+	func main() {
+		->f1();
+	}
+	
+	func f1(){
+		loop x: {
+			->f2();
+			break;
+		}
+	}
+	
+	func f2() {
+		loop x: {
+			x = 100;
+			print x, "\n";
+			break;
+		}
+		loop x: {
+			x = 500;
+			print x, "\n";
+			break;
+		}
+	}

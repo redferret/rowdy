@@ -79,6 +79,10 @@ public class Function {
     }
     return val;
   }
+  
+  public void unset(String idName) {
+    symbolTable.remove(idName);
+  }
 
   public String getName() {
     return name;

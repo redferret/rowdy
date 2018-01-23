@@ -308,13 +308,14 @@ public class RowdyParseTree {
           break;
         case LOOP_STMT:
           String idName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          Value curValue = globalSymbolTable.get(idName);
+          Function curFunction = callStack.peek();
+          Value curValue = curFunction.getValue(idName, false);
           if (curValue == null) {
-            globalSymbolTable.put(idName, new Value(0));
+            curFunction.allocate(idName, new Value(0));
             activeLoops.push(currentTreeNode);
             currentTreeNode.seqActive = true;
           } else {
-            throw new RuntimeException("Label '" + idName + "' already exists");
+            throw new RuntimeException("ID '" + idName + "' already in use");
           }
           boolean done = false;
           Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
@@ -322,7 +323,7 @@ public class RowdyParseTree {
             executeStmt(loopStmtList, currentTreeNode);
             done = !currentTreeNode.seqActive;
           }
-          globalSymbolTable.remove(idName);
+          curFunction.unset(idName);
           break;
         case BREAK_STMT:
           if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
@@ -334,14 +335,15 @@ public class RowdyParseTree {
           } else {
             idName = ((Terminal) currentTreeNode.get(ID_OPTION).get(ID).symbol()).getName();
           }
-          if (globalSymbolTable.get(idName) == null) {
-            throw new RuntimeException("The label '" + idName + "' is not used");
+          curFunction = callStack.peek();
+          if (curFunction.getValue(idName, false) == null) {
+            throw new RuntimeException("The ID '" + idName + "' doesn't exist");
           }
           for (;;) {
             Node lp = activeLoops.pop();
             lp.seqActive = false;
             String tempBinding = ((Terminal) lp.get(ID).symbol()).getName();
-            globalSymbolTable.remove(tempBinding);
+            curFunction.unset(tempBinding);
             if (idName.equals(tempBinding)) {
               break;
             }
