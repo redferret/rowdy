@@ -34,8 +34,8 @@ public class Rowdy {
 	PRULE_ANONYMOUS_FUNC_BODY=77, PRULE_ARRAY_EXPR = 78, PRULE_ARRAY = 79,
     PRULE_ARRAY_LINEAR_BODY = 80, PRULE_ARRAY_LINEAR=81,
     PRULE_ARRAY_LINEAR_TAIL=82, PRULE_ARRAY_KEY_VALUE_BODY=83,
-    PRULE_ARRAY_KEY_VALUE_BODY_TAIL=84;
-  
+    PRULE_ARRAY_KEY_VALUE_BODY_TAIL=84, PRULE_ARRAY_ACCESS=85;
+
   public static final int PERIOD = 0, SEMICOLON = 1, IF = 2, THEN = 3,
           ELSE = 4, FI = 5, LOOP = 6, ID = 7,
           COLON = 8, REPEAT = 9, BREAK = 10, BECOMES = 11, PRINT = 12,
@@ -45,7 +45,8 @@ public class Rowdy {
           MINUS = 24, MULTIPLY = 25, DIVIDE = 26, OPENPAREN = 27,
           CLOSEDPAREN = 28, CONST = 29, POW = 30, MOD = 31, CONCAT = 32,
           SLICE = 33, STRCMP = 34, FUNC = 35, CALL = 36, RETURN = 37,
-          ISSET = 38, ROUND = 39, RCURLY = 40, LCURLY = 41, ARRAY = 42;
+          ISSET = 38, ROUND = 39, RCURLY = 40, LCURLY = 41, ARRAY = 42,
+          GET = 43;
 
   public static final int PROGRAM = 400, STMT_LIST = 410, STATEMENT = 420,
           STMT_TAIL = 430, IF_STMT = 440, LOOP_STMT = 450, BREAK_STMT = 460,
@@ -59,14 +60,15 @@ public class Rowdy {
           STMT_BLOCK = 751, FUNCTION_BODY = 752, ANONYMOUS_FUNC = 753,
           ARRAY_BODY = 754, ARRAY_LINEAR = 755, ARRAY_EXPR = 756, 
           ARRAY_LINEAR_BODY=757,ARRAY_KEY_VALUE_BODY=758, 
-          ARRAY_KEY_VALUE_BODY_TAIL=759,
+          ARRAY_KEY_VALUE_BODY_TAIL=759,ARRAY_ACCESS=760, ID_EXPR=761,
+          ID_EXPR_TYPE=62,
           END = 10;
   private static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
     "fi", "loop", "ID", ":", "repeat", "break", "=", "print",
     "read", ",", "or", "and", "<", "<=", "==", ">=",
     ">", "!=", "+", "-", "*", "/", "(", ")", "CONST", "^", "%",
     "concat", "slice", "strcmp", "func", "->", "return", "isset", "round",
-    "{", "}", "array"};
+    "{", "}", "array", "get"};
 
   private static final String SPECIAL_SYMBOLS = ". ( ) ; + - * / != = >= "
           + "<= < > : == , ^ % -> { }";
@@ -121,40 +123,38 @@ public class Rowdy {
                         {CONCAT, PRULE_CONCAT}, {SLICE, PRULE_SLICE}, 
                         {STRCMP, PRULE_STRCMP}, {CALL, PRULE_FUNC_CALL_STMT}, 
                         {ISSET,PRULE_ISSET_EXPR},{FUNC,PRULE_ANONYMOUS_FUNC},
-                        {ARRAY, PRULE_ARRAY_EXPR}}),
+                        {ARRAY, PRULE_ARRAY_EXPR}, {GET, PRULE_ARRAY_ACCESS}}),
     new NonTerminal("else-part", ELSE_PART, 
             new int[][]{{ELSE, PRULE_ELSE}}),
     new NonTerminal("id-option", ID_OPTION, 
             new int[][]{{SEMICOLON, END}, {ELSE, END}, {LCURLY, END}, 
-                        {ID, PRULE_ID}, {REPEAT, END}}),
+                        {ID, PRULE_ID}}),
     
     new NonTerminal("atom-list-tail", ATOM_LIST_TAIL, 
             new int[][]{{SEMICOLON, END}, {ELSE, END}, {LCURLY, END}, 
-                        {REPEAT, END}, {COMMA, PRULE_ATOM_LIST_TAIL}}),
+                        {COMMA, PRULE_ATOM_LIST_TAIL}}),
     
     new NonTerminal("bool-term", BOOL_TERM, 
             new int[][]{{ID,PRULE_BOOL_FACTOR}, {MINUS,PRULE_BOOL_FACTOR}, 
                         {OPENPAREN,PRULE_BOOL_FACTOR}, 
                         {CONST,PRULE_BOOL_FACTOR}}),
     new NonTerminal("bool-term-tail", BOOL_TERM_TAIL, 
-            new int[][]{{SEMICOLON, END}, {THEN, END}, {ELSE, END}, 
-                        {LCURLY, END}, {REPEAT, END}, {OR, PRULE_BOOL_TERM_OR}, 
-                        {CLOSEDPAREN, END}}),
+            new int[][]{{SEMICOLON, END}, {ELSE, END},{LCURLY, END}, 
+                        {OR, PRULE_BOOL_TERM_OR},{CLOSEDPAREN, END}}),
     
     new NonTerminal("bool-factor", BOOL_FACTOR, 
             new int[][]{{ID,PRULE_ARITHM_EXPR}, {MINUS,PRULE_ARITHM_EXPR}, 
               {OPENPAREN,PRULE_ARITHM_EXPR}, {CONST,PRULE_ARITHM_EXPR}}),
     new NonTerminal("bool-factor-tail", BOOL_FACTOR_TAIL, 
-            new int[][]{{SEMICOLON, END}, {THEN, END}, {ELSE, END}, 
-                        {LCURLY, END}, {REPEAT, END}, {OR, END}, 
+            new int[][]{{SEMICOLON, END}, {ELSE, END},{LCURLY, END}, {OR, END}, 
                         {AND, PRULE_BOOL_FACTOR_AND},{CLOSEDPAREN, END}}),
     
     new NonTerminal("arith-expr", ARITHM_EXPR, 
             new int[][]{{ID,PRULE_TERM}, {MINUS,PRULE_TERM}, 
                         {OPENPAREN,PRULE_TERM}, {CONST,PRULE_TERM}}),
     new NonTerminal("relation-option", RELATION_OPTION, 
-            new int[][]{{SEMICOLON, END}, {THEN, END}, {ELSE, END}, 
-                        {LCURLY, END}, {REPEAT, END}, {OR, END}, {AND, END}, 
+            new int[][]{{SEMICOLON, END}, {ELSE, END}, 
+                        {LCURLY, END}, {OR, END}, {AND, END}, 
                         {LESS, PRULE_ARITHM_LESS}, 
                         {LESSEQUAL, PRULE_ARITHM_LESSEQUAL}, 
                         {EQUAL, PRULE_ARITHM_EQUAL}, 
@@ -230,6 +230,8 @@ public class Rowdy {
     new NonTerminal("array-key-value-body", ARRAY_KEY_VALUE_BODY, 
             new int[][]{{COLON, PRULE_ARRAY_KEY_VALUE_BODY}}),
 
+    new NonTerminal("array-access", ARRAY_ACCESS, 
+            new int[][]{}),
   };
   
   private static final ProductionRule[] GRAMMAR = {
@@ -372,6 +374,9 @@ public class Rowdy {
         new int[]{COLON, EXPRESSION, ARRAY_KEY_VALUE_BODY_TAIL}),
     new ProductionRule(PRULE_ARRAY_KEY_VALUE_BODY_TAIL,
         new int[]{COMMA, EXPRESSION, ARRAY_KEY_VALUE_BODY}),
+    
+    new ProductionRule(PRULE_ARRAY_ACCESS,
+        new int[]{GET, OPENPAREN, EXPRESSION, COMMA, EXPRESSION, CLOSEDPAREN}),
     
     new ProductionRule(END, 
 		new int[]{}),
