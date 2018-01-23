@@ -1,7 +1,43 @@
 
 	func main() {
-		var = array(0, 1, 2, array("A","B", array(100, 500), 90),4,5)
-		print var, "\n";
-		var = array(1:2, 10:6, "KEY":55);
-		print var, "\n";
+		a1 = array(0, 1, 2, array("A","B", array(100, 500), 90),4,5)
+		print a1, "\n";
+		
+		->printAll(a1, 6);
+		
+		a2 = array(1:2, 10:6, "KEY":55);
+		print a2, "\n";
+		print get(a2, "KEY"), "\n";
+		
+		functions = array(
+			func () {
+				print "First Function\n";
+			},
+			func () {
+				print "Second Function\n";
+			},
+		)
+		->executeAll(functions, 2);
+	}
+	
+	func executeAll(functions, length) {
+		loop i: {
+			function = get(functions, i);
+			->function();
+			i = i + 1;
+			if (i == length) {
+				break;
+			}
+		}
+	}
+	
+	func printAll(arr, length) {
+		loop a: {
+			print get(arr, a), ", ";
+			a = a+1;
+			if (a >= (length - 1)) {
+				break a;
+			}
+		}
+		print get(arr, length - 1), "\n";
 	}

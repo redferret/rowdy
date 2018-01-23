@@ -49,15 +49,13 @@
 	
 	// With a loop
 	func getChange (denom) {
-		qty = 0;
-		loop q: {
+		loop qty: {
 			if (change >= denom) {
 				change = change - denom;
 				qty = qty + 1;
 				round change, 2;
 			} else {
-				break
+				return qty;
 			}
 		}
-		return qty;
 	}

@@ -26,7 +26,7 @@
 		// ARRAY_PAIR_TAIL => , ARRAY_PAIR ARRAY_PAIR_TAIL
 		// ARRAY_VALUE => EXPRESSION
 		
-		var1 = array2["hello"] // assigns 1
+		var1 = get(array2, "hello") // assigns 1
 		// EXPRESSION => ID ARRAY_ACCESS  
 		// ARRAY_ACCESS => LBRACKET ARRAY_KEY RBRACKET
 		// ARRAY_KEY => EXPRESSION
