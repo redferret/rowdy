@@ -70,7 +70,7 @@ public class RowdyParseTree {
   public void build(Tokenizer parser) {
     this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(PROGRAM);
-    root = new Node(program);
+    root = new Node(program, 0);
     currentToken = this.parser.getToken();
     if (currentToken == null){
       return;
@@ -135,7 +135,7 @@ public class RowdyParseTree {
         }
         children.remove(i);
         Terminal terminal = new Terminal(symbol.getName(), currentToken.getID(), currentToken.getSymbol());
-        children.add(i, new Node(terminal));
+        children.add(i, new Node(terminal, line));
         currentToken = parser.getToken();
         while (currentToken != null && isCurTokenEOLN()) {
           if (isCurTokenEOLN()) {
@@ -174,7 +174,7 @@ public class RowdyParseTree {
   private void addToNode(Node parent, ProductionSymbols rule) {
     Symbol[] symbols = rule.getSymbols();
     for (Symbol symbol : symbols) {
-      Node node = new Node(symbol);
+      Node node = new Node(symbol, line);
       parent.addChild(node);
     }
   }
@@ -292,7 +292,8 @@ public class RowdyParseTree {
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
           String idNameToAssign = idTerminal.getName();
           if (idNameToAssign.equals("true") || idNameToAssign.equals("false")) {
-            throw new RuntimeException("Can't assign new value to constant '" + idNameToAssign + "'");
+            throw new RuntimeException("Can't assign new value to constant '" + 
+                    idNameToAssign + "' on line " + currentTreeNode.getLine());
           }
           allocate(idTerminal, rightValue);
           break;
@@ -315,7 +316,8 @@ public class RowdyParseTree {
             activeLoops.push(currentTreeNode);
             currentTreeNode.seqActive = true;
           } else {
-            throw new RuntimeException("ID '" + idName + "' already in use");
+            throw new RuntimeException("ID '" + idName + "' already in use "+
+                    "on line " + currentTreeNode.getLine());
           }
           boolean done = false;
           Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
@@ -328,7 +330,8 @@ public class RowdyParseTree {
         case BREAK_STMT:
           if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
             if (activeLoops.isEmpty()) {
-              throw new RuntimeException("No loop to break");
+              throw new RuntimeException("No loop to break. Line " 
+                      + currentTreeNode.getLine());
             }
             Node idOption = activeLoops.peek();
             idName = ((Terminal) idOption.get(ID).symbol()).getName();
@@ -337,7 +340,8 @@ public class RowdyParseTree {
           }
           curFunction = callStack.peek();
           if (curFunction.getValue(idName, false) == null) {
-            throw new RuntimeException("The ID '" + idName + "' doesn't exist");
+            throw new RuntimeException("The ID '" + idName + "' doesn't exist."
+                    + " Line " + currentTreeNode.getLine());
           }
           for (;;) {
             Node lp = activeLoops.pop();
@@ -381,7 +385,8 @@ public class RowdyParseTree {
         case FUNC_CALL:
           String funcName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
           if (funcName.equals("main")) {
-            throw new RuntimeException("Can't recurse on main");
+            throw new RuntimeException("Can't recurse on main. Line " 
+                    + currentTreeNode.getLine());
           }
           executeFunc(currentTreeNode);
           break;
@@ -449,7 +454,8 @@ public class RowdyParseTree {
     } 
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
-        throw new RuntimeException("Function '" + funcName + "' not defined");
+        throw new RuntimeException("Function '" + funcName + "' not defined on "
+                + "line " + cur.getLine());
       } else {
         funcVal = globalSymbolTable.get(funcName);
       }
@@ -492,7 +498,7 @@ public class RowdyParseTree {
     callStack.push(function);
     // 4. Get and execute the stmt-list
     Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null);
+    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
     seqControl.seqActive = true;
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
@@ -743,7 +749,8 @@ public class RowdyParseTree {
             }
         }
         throw new RuntimeException("Couldn't get value, "
-                + "undefined Node '" + cur.getLeftMostChild()+"'");
+                + "undefined Node '" + cur.getLeftMostChild()+"' on line " + 
+                cur.getLine());
       case ISSET_EXPR:
         Value resultBoolean = new Value(isset(cur.get(ID)));
         return resultBoolean;
@@ -967,11 +974,17 @@ public class RowdyParseTree {
     private final ArrayList<Node> children;
     private final Symbol def;
     private Boolean seqActive;
+    private int line;
 
-    public Node(Symbol def) {
+    public Node(Symbol def, int lineNumber) {
       children = new ArrayList<>();
       this.def = def;
       seqActive = false;
+      this.line = lineNumber;
+    }
+
+    public int getLine() {
+      return line;
     }
 
     public void addChild(Node child) {
@@ -1037,7 +1050,8 @@ public class RowdyParseTree {
         }
       }
       throw new RuntimeException("The id '" + id + 
-              "' could not be found for the node '" + def + "'");
+              "' could not be found for the node '" + def + "' on line " +
+              line);
     }
 
     public ArrayList<Node> getChildren() {
