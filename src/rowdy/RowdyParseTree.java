@@ -310,7 +310,7 @@ public class RowdyParseTree {
           String idName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
           Value curValue = globalSymbolTable.get(idName);
           if (curValue == null) {
-            globalSymbolTable.put(idName, new Value());
+            globalSymbolTable.put(idName, new Value(0));
             activeLoops.push(currentTreeNode);
             currentTreeNode.seqActive = true;
           } else {
@@ -320,9 +320,9 @@ public class RowdyParseTree {
           Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
           while (!done) {
             executeStmt(loopStmtList, currentTreeNode);
-            curValue = globalSymbolTable.get(idName);
-            done = (curValue == null);
+            done = !currentTreeNode.seqActive;
           }
+          globalSymbolTable.remove(idName);
           break;
         case BREAK_STMT:
           if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
@@ -689,27 +689,27 @@ public class RowdyParseTree {
             Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
             if (bodyType == null) {
               bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL);
-              HashMap<Value, Value> keypairArray = new HashMap<>();
+              HashMap<String, Object> keypairArray = new HashMap<>();
               Value key = firstValue;
               Value keyValue = getValue(arrayBody.get(EXPRESSION));
-              keypairArray.put(key, keyValue);
+              keypairArray.put(key.getValue().toString(), keyValue.getValue());
 
               Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
               arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
               while(arrayBody != null && bodyType != null){
                 key = getValue(bodyTail.get(EXPRESSION));
                 keyValue = getValue(arrayBody.get(EXPRESSION));
-                keypairArray.put(key, keyValue);
+                keypairArray.put(key.getValue().toString(), keyValue.getValue());
                 bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
                 arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
               }
               return new Value(keypairArray);
               
             } else {
-              List<Value> array = new ArrayList<>();
+              List<Object> array = new ArrayList<>();
                 Value arrayValue = firstValue;
                 while (arrayValue != null){
-                  array.add(arrayValue);
+                  array.add(arrayValue.getValue());
                   arrayValue = null;
                   if (arrayBody.hasChildren()) {
                     arrayValue = getValue(arrayBody.get(EXPRESSION));
@@ -718,7 +718,27 @@ public class RowdyParseTree {
                 }
                 return new Value(array);
             }
-            
+          case GET:
+            Value array = getValue(cur.get(EXPRESSION));
+            if (array.getValue() instanceof List){
+              List<Value> list = (List<Value>)array.getValue();
+              Object arrayIndexValue = getValue(cur.getChild(EXPRESSION, 1)).getValue();
+              int index;
+              if (arrayIndexValue instanceof Integer){
+                index = (Integer)arrayIndexValue;
+              }else if (arrayIndexValue instanceof Double){
+                index = ((Double)arrayIndexValue).intValue();
+              } else {
+                String strRep = (String) arrayIndexValue;
+                index = Integer.parseInt(strRep);
+              }
+              return new Value(list.get(index));
+            } else {
+              HashMap<String, Object> map = (HashMap)array.getValue();
+              Value key = getValue(cur.getChild(EXPRESSION, 1));
+              Value keyValue = new Value(map.get(key.getValue().toString()));
+              return keyValue;
+            }
         }
         throw new RuntimeException("Couldn't get value, "
                 + "undefined Node '" + cur.getLeftMostChild()+"'");
