@@ -683,49 +683,40 @@ public class RowdyParseTree {
             return new Value(anonymousFunc);
           case ARRAY_EXPR:
             Node arrayExpression = cur.getLeftMostChild();
-            Value initArrayValue = getValue(arrayExpression.get(EXPRESSION));
+            Value firstValue = getValue(arrayExpression.get(EXPRESSION));
             Node arrayBody = arrayExpression.get(ARRAY_BODY);
             
-            // For key-value paired arrays check the array body to see
-            // if it contains ARRAY_KEY_VALUE_BODY rather than ARRAY_LINEAR_BODY
-            final int bodyTypeId;
             Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
             if (bodyType == null) {
               bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL);
-              bodyTypeId = ARRAY_KEY_VALUE_BODY_TAIL;
+              HashMap<Value, Value> keypairArray = new HashMap<>();
+              Value key = firstValue;
+              Value keyValue = getValue(arrayBody.get(EXPRESSION));
+              keypairArray.put(key, keyValue);
+
+              Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+              arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
+              while(arrayBody != null && bodyType != null){
+                key = getValue(bodyTail.get(EXPRESSION));
+                keyValue = getValue(arrayBody.get(EXPRESSION));
+                keypairArray.put(key, keyValue);
+                bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+                arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
+              }
+              return new Value(keypairArray);
+              
             } else {
-              bodyTypeId = ARRAY_LINEAR_BODY;
-            }
-            
-            switch(bodyTypeId){
-              case ARRAY_LINEAR_BODY:
-                List<Value> array = new ArrayList<>();
-                Value arrayValue = initArrayValue;
+              List<Value> array = new ArrayList<>();
+                Value arrayValue = firstValue;
                 while (arrayValue != null){
                   array.add(arrayValue);
                   arrayValue = null;
-                  if (bodyType.hasChildren()) {
-                    arrayValue = getValue(bodyType.get(EXPRESSION));
-                    bodyType = bodyType.get(ARRAY_LINEAR_BODY);
+                  if (arrayBody.hasChildren()) {
+                    arrayValue = getValue(arrayBody.get(EXPRESSION));
+                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY);
                   }
                 }
                 return new Value(array);
-              case ARRAY_KEY_VALUE_BODY_TAIL:
-                HashMap<Value, Value> keypairArray = new HashMap<>();
-                Value key = initArrayValue;
-                Value keyValue = getValue(arrayBody.get(EXPRESSION));
-                keypairArray.put(key, keyValue);
-                
-                Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-                arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-                while(arrayBody != null && bodyType != null){
-                  key = getValue(bodyTail.get(EXPRESSION));
-                  keyValue = getValue(arrayBody.get(EXPRESSION));
-                  keypairArray.put(key, keyValue);
-                  bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-                  arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-                }
-                return new Value(keypairArray);
             }
             
         }
