@@ -1,6 +1,6 @@
 
 	func main() {
-		var = array(0, 1, 2, 3,4,5)
+		var = array(0, 1, 2, array("A","B", array(100, 500), 90),4,5)
 		print var, "\n";
 		var = array(1:2, 10:6, "KEY":55);
 		print var, "\n";
