@@ -604,31 +604,7 @@ public class RowdyParseTree {
       return value;
     }
   }
-//
-//  private String getValueAsString(Node cur) {
-//    return getValue(cur).valueToString();
-//  }
-//
-//  private String getValueAsString(Value cur) {
-//    return fetch(cur).valueToString().replaceAll("\"", "");
-//  }
-//
-//  private Boolean getValueAsBoolean(Node cur) {
-//    return getValue(cur).valueToBoolean();
-//  }
-//
-//  private Double getValueAsNumber(Node cur) {
-//    return getValue(cur).valueToNumber();
-//  }
-//
-//  private Boolean getValueAsBoolean(Value cur) {
-//    return fetch(cur).valueToBoolean();
-//  }
-//
-//  private Double getValueAsNumber(Value cur) {
-//    return fetch(cur).valueToNumber();
-//  }
-
+  
   /**
    * Fetches a value from the tree by either accessing an ID, a CONST, or
    * evaluating an expression.
