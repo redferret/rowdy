@@ -1,0 +1,19 @@
+
+	func main(max) {
+		if (isset max) == false {
+			max = 1000;
+		}
+		y = 1;
+		loop x: {
+			->println(x);
+			z = x + y;
+			x = y; y = z;
+			if (x >= max){
+				break;
+			}
+		}
+	}
+	
+	func println(p){
+		print p, "\n";
+	}
