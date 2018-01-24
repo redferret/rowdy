@@ -206,6 +206,10 @@ public class Tokenizer {
     return !fileStack.isEmpty();
   }
 
+  public int tokenCount() {
+    return fileStack.size();
+  }
+  
   /**
    * Fetches a token from the given file.
    *
@@ -224,8 +228,6 @@ public class Tokenizer {
 
       switch (symbol) {
 
-        case ".":
-          return new Token(0, "PERIOD");
         case "EOLN":
           return new Token(200, "EOLN");
         default:
