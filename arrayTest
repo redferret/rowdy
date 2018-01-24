@@ -18,6 +18,8 @@
 			},
 		)
 		->executeAll(functions, 2);
+		
+		print (concat get(array("first", "second"), 0), "\n");
 	}
 	
 	func executeAll(functions, length) {
