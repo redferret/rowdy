@@ -774,7 +774,7 @@ public class RowdyParseTree {
           left = fetch(leftValue, cur).valueToNumber();
         }
         if (rightValueObject instanceof Boolean){
-          rightAsBool = (Boolean)leftValueObject;
+          rightAsBool = (Boolean)rightValueObject;
           right = 0;
         } else {
           right = getValue(cur).valueToNumber();
