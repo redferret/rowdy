@@ -643,14 +643,14 @@ public class RowdyParseTree {
         Symbol symbolType = cur.getLeftMostChild().symbol();
         switch (symbolType.id()) {
           case CONCAT:
-            String concatValue = "";
-            concatValue += executeExpr(cur.get(EXPRESSION), leftValue).valueToString();
+            StringBuilder concatValue = new StringBuilder();
+            concatValue.append(executeExpr(cur.get(EXPRESSION), leftValue).valueToString());
             Node atomTailNode = cur.get(EXPR_LIST);
             while (atomTailNode.hasChildren()) {
-              concatValue += executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString();
+              concatValue.append(executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString());
               atomTailNode = atomTailNode.get(EXPR_LIST);
             }
-            return new Value(concatValue);
+            return new Value(concatValue.toString());
           case SLICE:
             String slice;
             slice = getValue(cur.get(EXPRESSION)).valueToString();
