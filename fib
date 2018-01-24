@@ -4,16 +4,9 @@
 			max = 1000;
 		}
 		y = 1;
-		loop x: {
-			->println(x);
+		loop x: { if x >= max {break}
+			print x, "\n";
 			z = x + y;
 			x = y; y = z;
-			if (x >= max){
-				break;
-			}
 		}
-	}
-	
-	func println(p){
-		print p, "\n";
 	}
