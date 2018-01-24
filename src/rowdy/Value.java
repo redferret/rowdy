@@ -27,7 +27,7 @@ public class Value {
     return value.toString().replaceAll("\"", "");
   }
 
-  public Double valueToNumber() {
+  public Double valueToDouble() {
     if (value == null) {
       return null;
     }

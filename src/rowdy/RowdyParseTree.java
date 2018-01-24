@@ -358,8 +358,8 @@ public class RowdyParseTree {
           break;
         case ROUND_STMT:
           Value idToRound = getValue(currentTreeNode.get(ID));
-          double val = idToRound.valueToNumber();
-          int precision = getValue(currentTreeNode.get(ARITHM_EXPR)).valueToNumber().intValue();
+          double val = idToRound.valueToDouble();
+          int precision = getValue(currentTreeNode.get(ARITHM_EXPR)).valueToDouble().intValue();
           double factor = 1;
           while (precision > 0) {
             factor *= 10;
@@ -654,8 +654,8 @@ public class RowdyParseTree {
           case SLICE:
             String slice;
             slice = getValue(cur.get(EXPRESSION)).valueToString();
-            int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToNumber().intValue();
-            int rightBound = getValue(cur.getChild(ARITHM_EXPR, 1)).valueToNumber().intValue();
+            int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToDouble().intValue();
+            int rightBound = getValue(cur.getChild(ARITHM_EXPR, 1)).valueToDouble().intValue();
             return new Value(slice.substring(leftBound, rightBound));
           case STRCMP:
             String v1,
@@ -771,13 +771,13 @@ public class RowdyParseTree {
           leftAsBool = (Boolean)leftValueObject;
           left = 0;
         } else {
-          left = fetch(leftValue, cur).valueToNumber();
+          left = fetch(leftValue, cur).valueToDouble();
         }
         if (rightValueObject instanceof Boolean){
           rightAsBool = (Boolean)rightValueObject;
           right = 0;
         } else {
-          right = getValue(cur).valueToNumber();
+          right = getValue(cur).valueToDouble();
         }
         
         bReslt = null;
@@ -820,8 +820,8 @@ public class RowdyParseTree {
             switch (operator.id()) {
               case MINUS:
                 rightValue = (Value) executeExpr(cur, leftValue);
-                left = leftValue.valueToNumber();
-                right = rightValue.valueToNumber();
+                left = leftValue.valueToDouble();
+                right = rightValue.valueToDouble();
                 reslt = left - right;
                 return new Value(reslt);
               default:
@@ -848,8 +848,8 @@ public class RowdyParseTree {
           return executeExpr(cur, leftValue);
         }
         cur = factorTailChildren.get(1);
-        left = fetch(leftValue, cur).valueToNumber();
-        right = getValue(cur).valueToNumber();
+        left = fetch(leftValue, cur).valueToDouble();
+        right = getValue(cur).valueToDouble();
         reslt = null;
         switch (operator.id()) {
           case MULTIPLY:
@@ -873,8 +873,8 @@ public class RowdyParseTree {
         }
         operator = termChildren.get(0).symbol();
         cur = termChildren.get(1);
-        left = fetch(leftValue, cur).valueToNumber();
-        right = getValue(cur).valueToNumber();
+        left = fetch(leftValue, cur).valueToDouble();
+        right = getValue(cur).valueToDouble();
         reslt = null;
         switch (operator.id()) {
           case PLUS:
