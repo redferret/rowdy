@@ -57,9 +57,11 @@ public class RowdyParseTree {
    * Only call this method if the program has stopped executing.
    */
   public void dumpCallStack() {
-    System.out.print("Exception in: ");
+    System.out.print("Exception: ");
     while(!callStack.isEmpty()){
-      System.out.println("->" + callStack.pop().getName());
+      Function function = callStack.pop();
+      System.out.println("->" + function.getName() + " line " + 
+              function.getLineCalledOn());
     }
   }
   
@@ -250,7 +252,8 @@ public class RowdyParseTree {
               paramName = paramsList.get(p);
               params.put(paramName, programParamValues.get(p));
             }
-            Function function = new Function(functionName, params);
+            Function function = new Function(functionName, params, 
+                    currentTreeNode.getLine());
             callStack.push(function);
             main = parent;
           }
@@ -310,7 +313,7 @@ public class RowdyParseTree {
         case LOOP_STMT:
           String idName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
           Function curFunction = callStack.peek();
-          Value curValue = curFunction.getValue(idName, false);
+          Value curValue = curFunction.getValue(idName);
           if (curValue == null) {
             curFunction.allocate(idName, new Value(0));
             activeLoops.push(currentTreeNode);
@@ -339,7 +342,7 @@ public class RowdyParseTree {
             idName = ((Terminal) currentTreeNode.get(ID_OPTION).get(ID).symbol()).getName();
           }
           curFunction = callStack.peek();
-          if (curFunction.getValue(idName, false) == null) {
+          if (curFunction.getValue(idName) == null) {
             throw new RuntimeException("The ID '" + idName + "' doesn't exist."
                     + " Line " + currentTreeNode.getLine());
           }
@@ -356,7 +359,7 @@ public class RowdyParseTree {
         case ROUND_STMT:
           Value idToRound = getValue(currentTreeNode.get(ID));
           double val = idToRound.valueToNumber();
-          int precision = getValueAsNumber(currentTreeNode.get(ARITHM_EXPR)).intValue();
+          int precision = getValue(currentTreeNode.get(ARITHM_EXPR)).valueToNumber().intValue();
           double factor = 1;
           while (precision > 0) {
             factor *= 10;
@@ -398,10 +401,10 @@ public class RowdyParseTree {
           break;
         case PRINT_STMT:
           StringBuilder printValue = new StringBuilder();
-          printValue.append(getValueAsString(currentTreeNode.get(EXPRESSION)));
+          printValue.append(getValue(currentTreeNode.get(EXPRESSION)).valueToString());
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasChildren()) {
-            printValue.append(getValueAsString(atomTailNode.get(EXPRESSION)));
+            printValue.append(getValue(atomTailNode.get(EXPRESSION)).valueToString());
             atomTailNode = atomTailNode.get(EXPR_LIST);
           }
           char c;
@@ -450,7 +453,7 @@ public class RowdyParseTree {
     Value funcVal = null;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
     if (!callStack.isEmpty()){
-      funcVal = callStack.peek().getValue(funcName, false);
+      funcVal = callStack.peek().getValue(funcName);
     } 
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
@@ -494,7 +497,7 @@ public class RowdyParseTree {
       params.put(paramName, parameterValues.get(p));
     }
     // 3. Push the function onto the call stack
-    Function function = new Function(funcName, params);
+    Function function = new Function(funcName, params, cur.getLine());
     callStack.push(function);
     // 4. Get and execute the stmt-list
     Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
@@ -563,33 +566,9 @@ public class RowdyParseTree {
     Value val = globalSymbolTable.get(v);
     if (val == null) {
       Function currentFunction = callStack.peek();
-      return (currentFunction.getValue(value, false) != null);
+      return (currentFunction.getValue(value) != null);
     }
     return true;
-  }
-
-  /**
-   * Fetches the value stored or returns 'value' if no ID is stored in it.
-   *
-   * @param value The Value object that holds an atomic symbol. May contain an
-   * ID or it may be a Constant.
-   * @return A value object with an atomic symbol stored in it.
-   */
-  private Value getValue(Value value) {
-    if (value == null) {
-      return null;
-    }
-    if (((Value) value).getValue() instanceof Terminal) {
-      String v = ((Terminal) value.getValue()).getName();
-      Value val = globalSymbolTable.get(v);
-      if (val == null) {
-        Function currentFunction = callStack.peek();
-        return currentFunction.getValue(value, true);
-      }
-      return val;
-    } else {
-      return value;
-    }
   }
 
   /**
@@ -600,33 +579,55 @@ public class RowdyParseTree {
    * @return A value object with an atom stored in it.
    */
   private Value getValue(Node cur) {
-    Value o = (Value) executeExpr(cur, null);
-    return getValue(o);
+    Value value = (Value) executeExpr(cur, null);
+    return fetch(value, cur);
   }
-
-  private String getValueAsString(Node cur) {
-    return getValue(cur).valueToString().replaceAll("\"", "");
+  
+  private Value fetch(Value value, Node curSeq) {
+    if (value == null) {
+      return null;
+    }
+    if (value.getValue() instanceof Terminal) {
+      String v = ((Terminal) value.getValue()).getName();
+      Value val = globalSymbolTable.get(v);
+      if (val == null) {
+        Function currentFunction = callStack.peek();
+        Value valueFromFunction = currentFunction.getValue(value);
+        if (valueFromFunction == null) {
+          throw new RuntimeException("The ID '" + value + "' doesn't exist "
+                  + "on line " + curSeq.getLine());
+        }
+        return currentFunction.getValue(value);
+      }
+      return val;
+    } else {
+      return value;
+    }
   }
-
-  private String getValueAsString(Value cur) {
-    return getValue(cur).valueToString().replaceAll("\"", "");
-  }
-
-  private Boolean getValueAsBoolean(Node cur) {
-    return getValue(cur).valueToBoolean();
-  }
-
-  private Double getValueAsNumber(Node cur) {
-    return getValue(cur).valueToNumber();
-  }
-
-  private Boolean getValueAsBoolean(Value cur) {
-    return getValue(cur).valueToBoolean();
-  }
-
-  private Double getValueAsNumber(Value cur) {
-    return getValue(cur).valueToNumber();
-  }
+//
+//  private String getValueAsString(Node cur) {
+//    return getValue(cur).valueToString();
+//  }
+//
+//  private String getValueAsString(Value cur) {
+//    return fetch(cur).valueToString().replaceAll("\"", "");
+//  }
+//
+//  private Boolean getValueAsBoolean(Node cur) {
+//    return getValue(cur).valueToBoolean();
+//  }
+//
+//  private Double getValueAsNumber(Node cur) {
+//    return getValue(cur).valueToNumber();
+//  }
+//
+//  private Boolean getValueAsBoolean(Value cur) {
+//    return fetch(cur).valueToBoolean();
+//  }
+//
+//  private Double getValueAsNumber(Value cur) {
+//    return fetch(cur).valueToNumber();
+//  }
 
   /**
    * Fetches a value from the tree by either accessing an ID, a CONST, or
@@ -667,24 +668,24 @@ public class RowdyParseTree {
         switch (symbolType.id()) {
           case CONCAT:
             String concatValue = "";
-            concatValue += getValueAsString(executeExpr(cur.get(EXPRESSION), leftValue));
+            concatValue += executeExpr(cur.get(EXPRESSION), leftValue).valueToString();
             Node atomTailNode = cur.get(EXPR_LIST);
             while (atomTailNode.hasChildren()) {
-              concatValue += getValueAsString(executeExpr(atomTailNode.get(EXPRESSION), leftValue));
+              concatValue += executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString();
               atomTailNode = atomTailNode.get(EXPR_LIST);
             }
             return new Value(concatValue);
           case SLICE:
             String slice;
-            slice = getValueAsString(cur.get(EXPRESSION));
-            int leftBound = getValueAsNumber(cur.get(ARITHM_EXPR)).intValue();
-            int rightBound = getValueAsNumber(cur.getChild(ARITHM_EXPR, 1)).intValue();
+            slice = getValue(cur.get(EXPRESSION)).valueToString();
+            int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToNumber().intValue();
+            int rightBound = getValue(cur.getChild(ARITHM_EXPR, 1)).valueToNumber().intValue();
             return new Value(slice.substring(leftBound, rightBound));
           case STRCMP:
             String v1,
              v2;
-            v1 = getValueAsString(cur.get(EXPRESSION));
-            v2 = getValueAsString(cur.getChild(EXPRESSION, 1));
+            v1 = getValue(cur.get(EXPRESSION)).valueToString();
+            v2 = getValue(cur.getChild(EXPRESSION, 1)).valueToString();
             return new Value(v1.compareTo(v2));
           case FUNC:
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
@@ -762,9 +763,9 @@ public class RowdyParseTree {
         }
         cur = boolChildren.get(0);
         operator = cur.symbol();
-        bLeft = getValueAsBoolean(leftValue);
+        bLeft = fetch(leftValue, cur).valueToBoolean();
         cur = boolChildren.get(1);
-        bRight = getValueAsBoolean(cur);
+        bRight = getValue(cur).valueToBoolean();
         switch (operator.id()) {
           case AND:
             bReslt = bLeft && bRight;
@@ -785,7 +786,7 @@ public class RowdyParseTree {
         cur = relationChildren.get(0);
         operator = cur.symbol();
         
-        Object leftValueObject = getValue(leftValue).getValue();
+        Object leftValueObject = fetch(leftValue, cur).getValue();
         cur = relationChildren.get(1);
         Object rightValueObject = getValue(cur).getValue();
         
@@ -794,13 +795,13 @@ public class RowdyParseTree {
           leftAsBool = (Boolean)leftValueObject;
           left = 0;
         } else {
-          left = getValueAsNumber(leftValue);
+          left = fetch(leftValue, cur).valueToNumber();
         }
         if (rightValueObject instanceof Boolean){
           rightAsBool = (Boolean)leftValueObject;
           right = 0;
         } else {
-          right = getValueAsNumber(cur);
+          right = getValue(cur).valueToNumber();
         }
         
         bReslt = null;
@@ -871,8 +872,8 @@ public class RowdyParseTree {
           return executeExpr(cur, leftValue);
         }
         cur = factorTailChildren.get(1);
-        left = getValueAsNumber(leftValue);
-        right = getValueAsNumber(cur);
+        left = fetch(leftValue, cur).valueToNumber();
+        right = getValue(cur).valueToNumber();
         reslt = null;
         switch (operator.id()) {
           case MULTIPLY:
@@ -896,8 +897,8 @@ public class RowdyParseTree {
         }
         operator = termChildren.get(0).symbol();
         cur = termChildren.get(1);
-        left = getValueAsNumber(leftValue);
-        right = getValueAsNumber(cur);
+        left = fetch(leftValue, cur).valueToNumber();
+        right = getValue(cur).valueToNumber();
         reslt = null;
         switch (operator.id()) {
           case PLUS:

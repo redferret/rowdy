@@ -394,7 +394,7 @@ public class Rowdy {
     String programFileName = args[0];
     parser.parse(programFileName);
     
-//    try {
+    try {
       rowdyProgram.build(parser);
       List<Value> programParameters = new ArrayList<>();
 
@@ -412,10 +412,10 @@ public class Rowdy {
         }
       }
       rowdyProgram.execute(programParameters);
-//    }catch (Exception e) {
-//      System.out.println("Runtime Exception: " + e.getMessage());
-//      rowdyProgram.dumpCallStack();
-//    }
+    }catch (Exception e) {
+      System.out.println("Runtime Exception: " + e.getMessage());
+      rowdyProgram.dumpCallStack();
+    }
 
   }
 

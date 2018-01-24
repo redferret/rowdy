@@ -24,7 +24,7 @@ public class Value {
     if (value == null) {
       return null;
     }
-    return value.toString();
+    return value.toString().replaceAll("\"", "");
   }
 
   public Double valueToNumber() {

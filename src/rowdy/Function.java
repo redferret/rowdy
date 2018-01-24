@@ -5,13 +5,19 @@ import java.util.HashMap;
 public class Function {
 
   private Value funcReturnValue;
-  private String name;
+  private final String name;
   private HashMap<String, Value> symbolTable;
+  private final int lineCalledOn;
 
-  public Function(String name, HashMap<String, Value> params) {
+  public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
     this.name = name;
     this.symbolTable = params;
     funcReturnValue = null;
+    this.lineCalledOn = lineCalledOn;
+  }
+
+  public int getLineCalledOn() {
+    return lineCalledOn;
   }
 
   public void setReturnValue(Value value) {
@@ -57,26 +63,20 @@ public class Function {
    * @param error throw any RuntimeExceptions or not
    * @return A value object with an atomic symbol stored in it.
    */
-  public Value getValue(Value value, boolean error) {
+  public Value getValue(Value value) {
     if (value == null) {
       return null;
     }
     if (value.getValue() instanceof Terminal) {
       String idName = ((Terminal) value.getValue()).getName();
-      return getValue(idName, error);
+      return getValue(idName);
     } else {
       return value;
     }
   }
   
-  public Value getValue(String idName, boolean error) {
+  public Value getValue(String idName) {
     Value val = symbolTable.get(idName);
-    if (val == null && error) {
-      throw new RuntimeException("Unknown "
-              + "identifier: " + idName);
-    } else if (val == null && !error) {
-      return null;
-    }
     return val;
   }
   
