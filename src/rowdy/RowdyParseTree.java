@@ -57,10 +57,10 @@ public class RowdyParseTree {
    * Only call this method if the program has stopped executing.
    */
   public void dumpCallStack() {
-    System.out.print("Exception: ");
+    System.out.print("Call Stack:\n");
     while(!callStack.isEmpty()){
       Function function = callStack.pop();
-      System.out.println("->" + function.getName() + " line " + 
+      System.out.println("->" + function.getName() + ": line " + 
               function.getLineCalledOn());
     }
   }
