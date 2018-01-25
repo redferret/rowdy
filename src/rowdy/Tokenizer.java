@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,14 +68,6 @@ public class Tokenizer {
     constantID = constID;
   }
 
-  public void setIdentifiersAs(int id) {
-    this.identifierID = id;
-  }
-
-  public void setConstantsAs(int id) {
-    this.constantID = id;
-  }
-
   /**
    * Parses the code file given. New tokens will be generated each time parse is
    * called on a given file.
@@ -104,7 +97,7 @@ public class Tokenizer {
       char cur;
       String word = "";
       while ((line = reader.readLine()) != null) {
-
+        
         for (int c = 0, prev = 0; c < line.length(); c++) {
           cur = line.charAt(c);
 

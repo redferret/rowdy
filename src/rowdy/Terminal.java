@@ -40,6 +40,7 @@ public class Terminal extends Symbol {
     return boundTo;
   }
 
+  @Override
   public String toString() {
     return realValue;
   }

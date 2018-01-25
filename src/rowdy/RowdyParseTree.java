@@ -100,7 +100,7 @@ public class RowdyParseTree {
    *
    * @param parent from
    */
-  private void print(Node parent) {
+  public void print(Node parent) {
     List<Node> children = parent.getChildren();
     for (int i = 0; i < children.size(); i++) {
       if (children.get(i).symbol() instanceof NonTerminal) {
@@ -117,7 +117,7 @@ public class RowdyParseTree {
    *
    * @param parent
    */
-  private void build(Node parent) {
+  public void build(Node parent) {
     Symbol symbol;
     ProductionSymbols rule;
     List<Node> children = parent.getChildren();
@@ -136,7 +136,7 @@ public class RowdyParseTree {
                   + currentToken.getSymbol() + "' on Line " + line);
         }
         children.remove(i);
-        Terminal terminal = new Terminal(symbol.getName(), currentToken.getID(), currentToken.getSymbol());
+        Terminal terminal = new Terminal(symbol.getSymbol(), currentToken.getID(), currentToken.getSymbol());
         children.add(i, new Node(terminal, line));
         currentToken = parser.getToken();
         while (currentToken != null && isCurTokenEOLN()) {
@@ -161,7 +161,7 @@ public class RowdyParseTree {
    * @param terminal The id from a token, usually a terminal
    * @return Fetches a production rule from the language's grammar.
    */
-  private ProductionSymbols produce(NonTerminal symbol, int terminal) {
+  public ProductionSymbols produce(NonTerminal symbol, int terminal) {
     Hint productionHint = symbol.getHint(terminal);
     return language.getProductionSymbols(productionHint);
   }
@@ -173,7 +173,7 @@ public class RowdyParseTree {
    * @param parent The parent being added to
    * @param rule The production rule.
    */
-  private void addToNode(Node parent, ProductionSymbols rule) {
+  public void addToNode(Node parent, ProductionSymbols rule) {
     Symbol[] symbols = rule.getSymbols();
     for (Symbol symbol : symbols) {
       Node node = new Node(symbol, line);
@@ -203,8 +203,9 @@ public class RowdyParseTree {
    * placed in the main symbol table.
    *
    * @param parent
+   * @param programParamValues
    */
-  private void declareGlobals(Node parent, List<Value> programParamValues) {
+  public void declareGlobals(Node parent, List<Value> programParamValues) {
     Node currentTreeNode;
     ArrayList<Node> children = parent.getChildren();
     int currentID;
@@ -448,7 +449,7 @@ public class RowdyParseTree {
    * @param cur The function being called
    * @return The function's return value
    */
-  private Value executeFunc(Node cur) {
+  public Value executeFunc(Node cur) {
     // 1. Collect parameters
     Value funcVal = null;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
@@ -520,7 +521,7 @@ public class RowdyParseTree {
    * @param idTerminal The variable to allocate or change
    * @param value The Value being allocated or changed
    */
-  private void allocate(Terminal idTerminal, Value value) {
+  public void allocate(Terminal idTerminal, Value value) {
     Value exists = globalSymbolTable.get(idTerminal.getName());
     if (exists != null) {
       setAsGlobal(idTerminal, value);
@@ -538,7 +539,7 @@ public class RowdyParseTree {
    * @param idName The variable being set
    * @param value The value of the variable
    */
-  private void setAsGlobal(String idName, Value value) {
+  public void setAsGlobal(String idName, Value value) {
     Value curValue;
     curValue = globalSymbolTable.get(idName);
     if (curValue == null) {
@@ -549,16 +550,16 @@ public class RowdyParseTree {
     }
   }
 
-  private void setAsGlobal(Terminal cur, Value value) {
+  public void setAsGlobal(Terminal cur, Value value) {
     setAsGlobal(cur.getName(), value);
   }
 
-  private boolean isset(Node cur) {
+  public boolean isset(Node cur) {
     Value o = (Value) executeExpr(cur, null);
     return isset(o);
   }
 
-  private boolean isset(Value value) {
+  public boolean isset(Value value) {
     if (value == null) {
       return false;
     }
@@ -578,12 +579,12 @@ public class RowdyParseTree {
    * @param cur The tree node
    * @return A value object with an atom stored in it.
    */
-  private Value getValue(Node cur) {
+  public Value getValue(Node cur) {
     Value value = (Value) executeExpr(cur, null);
     return fetch(value, cur);
   }
   
-  private Value fetch(Value value, Node curSeq) {
+  public Value fetch(Value value, Node curSeq) {
     if (value == null) {
       return null;
     }
@@ -613,7 +614,7 @@ public class RowdyParseTree {
    * @param leftValue The left value of an expression
    * @return The value of the expression
    */
-  private Value executeExpr(Node cur, Value leftValue) {
+  public Value executeExpr(Node cur, Value leftValue) {
     Node parent = cur;
     ArrayList<Node> children = cur.getChildren();
     double left, right;
@@ -946,7 +947,7 @@ public class RowdyParseTree {
   /**
    * Tree Node for the parse tree
    */
-  private class Node {
+  public class Node {
 
     private final ArrayList<Node> children;
     private final Symbol def;
