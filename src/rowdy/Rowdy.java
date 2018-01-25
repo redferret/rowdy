@@ -392,9 +392,9 @@ public class Rowdy {
     RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
     Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
     String programFileName = args[0];
-    parser.parse(programFileName);
     
     try {
+      parser.parse(programFileName);
       rowdyProgram.build(parser);
       List<Value> programParameters = new ArrayList<>();
 

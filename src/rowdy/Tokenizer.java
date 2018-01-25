@@ -74,7 +74,7 @@ public class Tokenizer {
    *
    * @param fileName The code file being parsed.
    */
-  public void parse(String fileName) {
+  public void parse(String fileName) throws IOException {
     fileStack = parseFile(fileName);
   }
 
@@ -85,107 +85,101 @@ public class Tokenizer {
    * @param fileName The file name for the datafile
    * @return The stack of grouped characters
    */
-  private List<String> parseFile(String fileName) {
+  private List<String> parseFile(String fileName) throws FileNotFoundException, 
+          IOException {
 
     List<String> symbols = new LinkedList<>();
     String line;
     File file = new File(fileName);
     BufferedReader reader = null;
     boolean eoln = false;
-    try {
-      reader = new BufferedReader(new FileReader(file));
-      char cur;
-      String word = "";
-      while ((line = reader.readLine()) != null) {
-        
-        for (int c = 0, prev = 0; c < line.length(); c++) {
-          cur = line.charAt(c);
 
-          if (cur == '/') {
-            if (line.charAt(c + 1) == '/') {
+    reader = new BufferedReader(new FileReader(file));
+    char cur;
+    String word = "";
+    while ((line = reader.readLine()) != null) {
+
+      for (int c = 0, prev = 0; c < line.length(); c++) {
+        cur = line.charAt(c);
+
+        if (cur == '/') {
+          if (line.charAt(c + 1) == '/') {
+            break;
+          }
+        }
+        if (id.matcher(Character.toString(cur)).matches()) {
+          word += cur;
+          do {
+            c++;
+            if (c >= line.length()) {
+              eoln = true;
               break;
             }
-          }
-          if (id.matcher(Character.toString(cur)).matches()) {
+            cur = line.charAt(c);
             word += cur;
-            do {
-              c++;
-              if (c >= line.length()) {
-                eoln = true;
-                break;
-              }
-              cur = line.charAt(c);
-              word += cur;
-            } while (id.matcher(word).matches());
-          } else if (cur == '\"') {
-            word += cur;
-            do {
-              c++;
-              if (c >= line.length()) {
-                break;
-              }
-              cur = line.charAt(c);
-              word += cur;
-            } while (cur != '\"');
-            eoln = true;
-          } else if (tokenNumber.matcher(Character.toString(cur)).matches()) {
-            word += cur;
-            do {
-              c++;
-              if (c >= line.length()) {
-                eoln = true;// Flag adjustments
-                break;
-              }
-              cur = line.charAt(c);
-              word += cur;
-            } while (number.matcher(word).matches());
-          } else if (SPECIALCHARGROUP.contains(Character.toString(cur))
-                  && cur != ' ') {
-            word += cur;
-            do {
-              c++;
-              if (c >= line.length()) {
-                eoln = true;// Flag adjustments
-                break;
-              }
-              cur = line.charAt(c);
-              word += cur;
-            } while (SPECIALCHARGROUP.contains(word) && cur != ' ');
-          }
-
-          if (!word.isEmpty()) {
-            symbols.add(
-                    (eoln)
-                            ? word
-                            :// Else
-                            word.substring(0, word.length() - 1));
-          }
-
-          if (!whiteSpace.matcher(Character.toString(cur)).matches()) {
-            if (c == prev) { // Stop parsing on unknown symbol
-              throw new RuntimeException("Parsing halted, unable"
-                      + " to resolve character '" + cur + "'");
+          } while (id.matcher(word).matches());
+        } else if (cur == '\"') {
+          word += cur;
+          do {
+            c++;
+            if (c >= line.length()) {
+              break;
             }
-            if (c < line.length() && !eoln) {
-              prev = c;
-              c--;
+            cur = line.charAt(c);
+            word += cur;
+          } while (cur != '\"');
+          eoln = true;
+        } else if (tokenNumber.matcher(Character.toString(cur)).matches()) {
+          word += cur;
+          do {
+            c++;
+            if (c >= line.length()) {
+              eoln = true;// Flag adjustments
+              break;
             }
-          }
-          eoln = false;
-          word = "";
+            cur = line.charAt(c);
+            word += cur;
+          } while (number.matcher(word).matches());
+        } else if (SPECIALCHARGROUP.contains(Character.toString(cur))
+                && cur != ' ') {
+          word += cur;
+          do {
+            c++;
+            if (c >= line.length()) {
+              eoln = true;// Flag adjustments
+              break;
+            }
+            cur = line.charAt(c);
+            word += cur;
+          } while (SPECIALCHARGROUP.contains(word) && cur != ' ');
         }
 
-        symbols.add("EOLN");
-      }
-    } catch (FileNotFoundException e) {
-    } catch (IOException e) {
-    } finally {
-      try {
-        if (reader != null) {
-          reader.close();
+        if (!word.isEmpty()) {
+          symbols.add(
+                  (eoln)
+                          ? word
+                          :// Else
+                          word.substring(0, word.length() - 1));
         }
-      } catch (IOException e) {
+
+        if (!whiteSpace.matcher(Character.toString(cur)).matches()) {
+          if (c == prev) { // Stop parsing on unknown symbol
+            throw new RuntimeException("Parsing halted, unable"
+                    + " to resolve character '" + cur + "'");
+          }
+          if (c < line.length() && !eoln) {
+            prev = c;
+            c--;
+          }
+        }
+        eoln = false;
+        word = "";
       }
+
+      symbols.add("EOLN");
+    }
+    if (reader != null) {
+      reader.close();
     }
     return symbols;
   }
