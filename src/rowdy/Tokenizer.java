@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
  */
 public class Tokenizer {
 
-  private static final String DIGIT = "0123456789";
-  private final String OPERATORS;
+  private final String SPECIALCHARGROUP;
 
-  private int identifierID, constantID;
+  private final int identifierID;
+  private final int constantID;
   /**
    * The table of all the reserved words/symbols for the language.
    */
@@ -57,7 +57,7 @@ public class Tokenizer {
   public Tokenizer(String[] reserved, String operators, int idID, int constID) {
 
     RESERVED_WORDS = new HashMap<>();
-    OPERATORS = operators;
+    SPECIALCHARGROUP = operators;
 
     for (int i = 0; i < reserved.length; i++) {
       if (!reserved[i].isEmpty()) {
@@ -128,7 +128,7 @@ public class Tokenizer {
               word += cur;
             } while (cur != '\"');
             eoln = true;
-          } else if (DIGIT.contains(Character.toString(cur))) {
+          } else if (tokenNumber.matcher(Character.toString(cur)).matches()) {
             word += cur;
             do {
               c++;
@@ -139,7 +139,7 @@ public class Tokenizer {
               cur = line.charAt(c);
               word += cur;
             } while (number.matcher(word).matches());
-          } else if (OPERATORS.contains(Character.toString(cur))
+          } else if (SPECIALCHARGROUP.contains(Character.toString(cur))
                   && cur != ' ') {
             word += cur;
             do {
@@ -150,7 +150,7 @@ public class Tokenizer {
               }
               cur = line.charAt(c);
               word += cur;
-            } while (OPERATORS.contains(word) && cur != ' ');
+            } while (SPECIALCHARGROUP.contains(word) && cur != ' ');
           }
 
           if (!word.isEmpty()) {
