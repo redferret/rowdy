@@ -34,7 +34,7 @@ public class Rowdy {
 	PRULE_ANONYMOUS_FUNC_BODY=77, PRULE_ARRAY_EXPR = 78, PRULE_ARRAY = 79,
     PRULE_ARRAY_LINEAR_BODY = 80, PRULE_ARRAY_LINEAR=81,
     PRULE_ARRAY_LINEAR_TAIL=82, PRULE_ARRAY_KEY_VALUE_BODY=83,
-    PRULE_ARRAY_KEY_VALUE_BODY_TAIL=84, PRULE_ARRAY_ACCESS=85;
+    PRULE_ARRAY_KEY_VALUE_BODY_TAIL=84, PRULE_ARRAY_ACCESS=85, EOLN = 200;
 
   public static final int PERIOD = 0, SEMICOLON = 1, IF = 2, THEN = 3,
           ELSE = 4, FI = 5, LOOP = 6, ID = 7,
@@ -190,7 +190,7 @@ public class Rowdy {
             new int[][]{{FUNC, PRULE_FUNCTION_DEF}, {ID, PRULE_ASSIGN_GLOBAL}, 
                         {LCURLY, END}}),
     
-    new NonTerminal("func", FUNCTION, 
+    new NonTerminal("function", FUNCTION, 
             new int[][]{{FUNC, PRULE_FUNCTION}}),
     new NonTerminal("func-tail", FUNC_TAIL, 
             new int[][]{{LCURLY, END}}),
@@ -396,6 +396,12 @@ public class Rowdy {
     try {
       parser.parse(programFileName);
       rowdyProgram.build(parser);
+    }catch (Exception e){
+      System.out.println("Build Exception: " + e.getMessage());
+      System.exit(100);
+    }
+    
+    try {
       List<Value> programParameters = new ArrayList<>();
 
       for (int p = 1; p < args.length; p++) {

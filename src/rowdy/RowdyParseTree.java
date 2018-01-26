@@ -38,6 +38,8 @@ public class RowdyParseTree {
    * Reference to the main function
   */
   private Node main;
+  
+  private List<Value> programParamValues;
 
   public RowdyParseTree(Language language) {
     this.language = language;
@@ -57,11 +59,13 @@ public class RowdyParseTree {
    * Only call this method if the program has stopped executing.
    */
   public void dumpCallStack() {
-    System.out.print("Call Stack:\n");
-    while(!callStack.isEmpty()){
-      Function function = callStack.pop();
-      System.out.println("->" + function.getName() + ": line " + 
-              function.getLineCalledOn());
+    if (!callStack.isEmpty()){
+      System.out.print("Call Stack:\n");
+      while(!callStack.isEmpty()){
+        Function function = callStack.pop();
+        System.out.println("->" + function.getName() + ": line " + 
+                function.getLineCalledOn());
+      }
     }
   }
   
@@ -77,8 +81,15 @@ public class RowdyParseTree {
     if (currentToken == null){
       return;
     }
-    while (currentToken.getID() == 200) {
-      if (currentToken.getID() == 200) {
+    consumeEOLN();
+    int id = currentToken.getID();
+    addToNode(root, produce(program, id));
+    build(root);
+  }
+
+  private void consumeEOLN() {
+    while (currentToken.getID() == EOLN) {
+      if (currentToken.getID() == EOLN) {
         line++;
       }
       currentToken = this.parser.getToken();
@@ -86,11 +97,8 @@ public class RowdyParseTree {
         return;
       }
     }
-    int id = currentToken.getID();
-    addToNode(root, produce(program, id));
-    build(root);
   }
-
+  
   public void print() {
     print(root);
   }
@@ -139,19 +147,13 @@ public class RowdyParseTree {
         Terminal terminal = new Terminal(symbol.getSymbol(), currentToken.getID(), currentToken.getSymbol());
         children.add(i, new Node(terminal, line));
         currentToken = parser.getToken();
-        while (currentToken != null && isCurTokenEOLN()) {
-          if (isCurTokenEOLN()) {
-            line++;
-          }
+        while (currentToken != null && currentToken.getID() == EOLN) {
+          line++;
           currentToken = parser.getToken();
         }
         if (currentToken == null) break;
       }
     }
-  }
-
-  private boolean isCurTokenEOLN() {
-    return currentToken.getID() == 200;
   }
 
   /**
@@ -189,7 +191,8 @@ public class RowdyParseTree {
    */
   public void execute(List<Value> programParams) {
     // Declare global variables
-    declareGlobals(root, programParams);
+    declareGlobals(root);
+    this.programParamValues = programParams;
     if (main == null) {
       throw new RuntimeException("main method not found");
     }
@@ -205,7 +208,7 @@ public class RowdyParseTree {
    * @param parent
    * @param programParamValues
    */
-  public void declareGlobals(Node parent, List<Value> programParamValues) {
+  public void declareGlobals(Node parent) {
     Node currentTreeNode;
     ArrayList<Node> children = parent.getAll();
     int currentID;
@@ -224,43 +227,18 @@ public class RowdyParseTree {
           break;
         case FUNCTION:
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          Node paramsNode = currentTreeNode.get(FUNCTION_BODY).get(PARAMETERS);
           if (!functionName.equals("main")) {
             setAsGlobal(functionName, new Value(currentTreeNode));
           } else {
             if (globalSymbolTable.get(functionName) != null) {
               throw new RuntimeException("main method already defined");
             }
-            List<String> paramsList = new ArrayList<>();
-            if (!programParamValues.isEmpty()) {
-              paramsList.add(((Terminal) executeExpr(paramsNode.get(ID), null).getValue()).getName());
-              Node paramTail = paramsNode.get(PARAMS_TAIL);
-              if (paramTail.hasChildren()) {
-                if (paramTail.get(PARAMS_TAIL).symbol().id() == PARAMS_TAIL) {
-                  Node tail = paramTail.get(PARAMS_TAIL);
-                  paramsList.add(((Terminal) executeExpr(paramTail.get(ID), null).getValue()).getName());
-                  while (tail.hasChildren()) {
-                    paramsList.add(((Terminal) executeExpr(tail.get(ID), null).getValue()).getName());
-                    tail = tail.get(PARAMS_TAIL);
-                  }
-                }
-              }
-            }
-            // 2. Copy actual parameters to formal parameters
-            HashMap<String, Value> params = new HashMap<>();
-            String paramName;
-            for (int p = 0; p < paramsList.size(); p++) {
-              paramName = paramsList.get(p);
-              params.put(paramName, programParamValues.get(p));
-            }
-            Function function = new Function(functionName, params, 
-                    currentTreeNode.getLine());
-            callStack.push(function);
+            setAsGlobal(functionName, new Value(currentTreeNode));
             main = parent;
           }
           break;
         default:
-          declareGlobals(currentTreeNode, programParamValues);
+          declareGlobals(currentTreeNode);
       }
     }
   }
@@ -285,12 +263,11 @@ public class RowdyParseTree {
       curID = currentTreeNode.symbol().id();
       switch (curID) {
         case FUNCTION:
-          // This should only execute the main function
-          Node funcStmtBlock = currentTreeNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-          Node funcStmtList = funcStmtBlock.get(STMT_LIST);
-          executeStmt(funcStmtList, null);
-          // After main has finished executing, the program is finished.
-          System.exit(0);
+          Value exitValue = executeFunc(currentTreeNode);
+          if (exitValue == null){
+            exitValue = new Value(0);
+          }
+          System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
@@ -465,13 +442,16 @@ public class RowdyParseTree {
       }
     }
     List<Value> parameterValues = new ArrayList<>();
-    if (cur.get(EXPRESSION).hasChildren()) {
+    Node expr = cur.get(EXPRESSION, false);// This might be 'main'
+    if (expr != null && expr.hasChildren()) {
       parameterValues.add(getValue(cur.get(EXPRESSION)));
       Node atomTailNode = cur.get(EXPR_LIST);
       while (atomTailNode.hasChildren()) {
         parameterValues.add(getValue(atomTailNode.get(EXPRESSION)));
         atomTailNode = atomTailNode.get(EXPR_LIST);
       }
+    } else if (funcName.equals("main")){
+      parameterValues = programParamValues;
     }
     
     Node functionNode = (Node) funcVal.getValue();
@@ -857,12 +837,20 @@ public class RowdyParseTree {
             reslt = left * right;
             break;
           case DIVIDE:
+            if (right == 0){
+              throw new ArithmeticException("Division by 0 on line "+
+                      cur.getLine());
+            }
             reslt = left / right;
             break;
           case POW:
             reslt = Math.pow(left, right);
             break;
           case MOD:
+            if (right == 0){
+              throw new ArithmeticException("Division by 0 on line "+
+                      cur.getLine());
+            }
             reslt = left % right;
             break;
         }
