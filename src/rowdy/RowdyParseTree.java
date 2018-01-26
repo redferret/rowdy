@@ -101,7 +101,7 @@ public class RowdyParseTree {
    * @param parent from
    */
   public void print(Node parent) {
-    List<Node> children = parent.getChildren();
+    List<Node> children = parent.getAll();
     for (int i = 0; i < children.size(); i++) {
       if (children.get(i).symbol() instanceof NonTerminal) {
         print(children.get(i));
@@ -120,7 +120,7 @@ public class RowdyParseTree {
   public void build(Node parent) {
     Symbol symbol;
     ProductionSymbols rule;
-    List<Node> children = parent.getChildren();
+    List<Node> children = parent.getAll();
     Node current;
     for (int i = 0; i < children.size(); i++) {
       current = children.get(i);
@@ -177,7 +177,7 @@ public class RowdyParseTree {
     Symbol[] symbols = rule.getSymbols();
     for (Symbol symbol : symbols) {
       Node node = new Node(symbol, line);
-      parent.addChild(node);
+      parent.add(node);
     }
   }
 
@@ -207,7 +207,7 @@ public class RowdyParseTree {
    */
   public void declareGlobals(Node parent, List<Value> programParamValues) {
     Node currentTreeNode;
-    ArrayList<Node> children = parent.getChildren();
+    ArrayList<Node> children = parent.getAll();
     int currentID;
     Value rightValue;
     
@@ -274,11 +274,11 @@ public class RowdyParseTree {
    * execute any remaining statements until sequence control is given back to
    * the original caller.
    */
-  private void executeStmt(Node parent, Node seqControl) {
+  public void executeStmt(Node parent, Node seqControl) {
     Node currentTreeNode;
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
-    ArrayList<Node> children = parent.getChildren();
+    ArrayList<Node> children = parent.getAll();
     Value rightValue;
     for (int i = 0, curID; i < children.size(); i++) {
       currentTreeNode = children.get(i);
@@ -616,7 +616,7 @@ public class RowdyParseTree {
    */
   public Value executeExpr(Node cur, Value leftValue) {
     Node parent = cur;
-    ArrayList<Node> children = cur.getChildren();
+    ArrayList<Node> children = cur.getAll();
     double left, right;
     boolean bLeft, bRight;
     Boolean bReslt;
@@ -656,13 +656,13 @@ public class RowdyParseTree {
             String slice;
             slice = getValue(cur.get(EXPRESSION)).valueToString();
             int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToDouble().intValue();
-            int rightBound = getValue(cur.getChild(ARITHM_EXPR, 1)).valueToDouble().intValue();
+            int rightBound = getValue(cur.get(ARITHM_EXPR, 1)).valueToDouble().intValue();
             return new Value(slice.substring(leftBound, rightBound));
           case STRCMP:
             String v1,
              v2;
             v1 = getValue(cur.get(EXPRESSION)).valueToString();
-            v2 = getValue(cur.getChild(EXPRESSION, 1)).valueToString();
+            v2 = getValue(cur.get(EXPRESSION, 1)).valueToString();
             return new Value(v1.compareTo(v2));
           case FUNC:
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
@@ -708,7 +708,7 @@ public class RowdyParseTree {
             Value array = getValue(cur.get(EXPRESSION));
             if (array.getValue() instanceof List){
               List<Value> list = (List<Value>)array.getValue();
-              Object arrayIndexValue = getValue(cur.getChild(EXPRESSION, 1)).getValue();
+              Object arrayIndexValue = getValue(cur.get(EXPRESSION, 1)).getValue();
               int index;
               if (arrayIndexValue instanceof Integer){
                 index = (Integer)arrayIndexValue;
@@ -721,7 +721,7 @@ public class RowdyParseTree {
               return new Value(list.get(index));
             } else {
               HashMap<String, Object> map = (HashMap)array.getValue();
-              Value key = getValue(cur.getChild(EXPRESSION, 1));
+              Value key = getValue(cur.get(EXPRESSION, 1));
               Value keyValue = new Value(map.get(key.getValue().toString()));
               return keyValue;
             }
@@ -734,7 +734,7 @@ public class RowdyParseTree {
         return resultBoolean;
       case BOOL_TERM_TAIL:
       case BOOL_FACTOR_TAIL:
-        ArrayList<Node> boolChildren = cur.getChildren();
+        ArrayList<Node> boolChildren = cur.getAll();
         if (boolChildren.isEmpty()) {
           return leftValue;
         }
@@ -756,13 +756,13 @@ public class RowdyParseTree {
         cur = boolChildren.get(2);
         return executeExpr(cur, new Value(bReslt));
       case RELATION_OPTION:
-        ArrayList<Node> relationChildren = cur.getChildren();
+        ArrayList<Node> relationChildren = cur.getAll();
         if (relationChildren.isEmpty()) {
           return leftValue;
         }
         cur = relationChildren.get(0);
         operator = cur.symbol();
-        
+      
         Object leftValueObject = fetch(leftValue, cur).getValue();
         cur = relationChildren.get(1);
         Object rightValueObject = getValue(cur).getValue();
@@ -812,7 +812,7 @@ public class RowdyParseTree {
         }
         return new Value(bReslt);
       case FACTOR:
-        ArrayList<Node> factorChildren = cur.getChildren();
+        ArrayList<Node> factorChildren = cur.getAll();
         if (factorChildren.size() > 0) {
           cur = factorChildren.get(0);
           if (cur.symbol() instanceof Terminal) {
@@ -835,7 +835,7 @@ public class RowdyParseTree {
           throw new RuntimeException("Factors not found");
         }
       case FACTOR_TAIL:
-        ArrayList<Node> factorTailChildren = cur.getChildren();
+        ArrayList<Node> factorTailChildren = cur.getAll();
         if (factorTailChildren.isEmpty()) {
           return leftValue;
         }
@@ -868,7 +868,7 @@ public class RowdyParseTree {
         }
         return executeExpr(children.get(2), new Value(reslt));
       case TERM_TAIL:
-        ArrayList<Node> termChildren = cur.getChildren();
+        ArrayList<Node> termChildren = cur.getAll();
         if (termChildren.size() < 1) {
           return leftValue;
         }
@@ -920,7 +920,7 @@ public class RowdyParseTree {
    * @param parent The root of the tree
    */
   private void collectTerminals(List<Terminal> program, Node parent) {
-    List<Node> children = parent.getChildren();
+    List<Node> children = parent.getAll();
     for (int i = 0; i < children.size(); i++) {
       if (children.get(i).symbol() instanceof NonTerminal) {
         collectTerminals(program, children.get(i));
@@ -937,7 +937,7 @@ public class RowdyParseTree {
    * @param parent The root of the tree
    */
   private void collectInOrder(List<Symbol> program, Node parent) {
-    List<Node> children = parent.getChildren();
+    List<Node> children = parent.getAll();
     for (int i = 0; i < children.size(); i++) {
       program.add(children.get(i).symbol());
       collectInOrder(program, children.get(i));
@@ -952,7 +952,7 @@ public class RowdyParseTree {
     private final ArrayList<Node> children;
     private final Symbol def;
     private Boolean seqActive;
-    private int line;
+    private final int line;
 
     public Node(Symbol def, int lineNumber) {
       children = new ArrayList<>();
@@ -965,7 +965,7 @@ public class RowdyParseTree {
       return line;
     }
 
-    public void addChild(Node child) {
+    public void add(Node child) {
       children.add(child);
     }
 
@@ -992,15 +992,15 @@ public class RowdyParseTree {
      * @return The found child, null if nothing was found
      */
     public Node get(int id) {
-      return getChild(id, 0);
+      return get(id, 0);
     }
     
     public Node get(int id, boolean throwException) {
       if (throwException){
-        return getChild(id, 0);
+        return get(id, 0);
       } else {
         try {
-          return getChild(id, 0);
+          return get(id, 0);
         }catch (RuntimeException re){
           return null;
         }
@@ -1017,7 +1017,7 @@ public class RowdyParseTree {
      * @param occur The number of times to skip a duplicate
      * @return The child node of this parent, null if it doesn't exist.
      */
-    public Node getChild(int id, int occur) {
+    public Node get(int id, int occur) {
       for (int c = 0; c < children.size(); c++) {
         if (children.get(c).symbol().id() == id
                 && occur == 0) {
@@ -1032,7 +1032,7 @@ public class RowdyParseTree {
               line);
     }
 
-    public ArrayList<Node> getChildren() {
+    public ArrayList<Node> getAll() {
       return children;
     }
 
