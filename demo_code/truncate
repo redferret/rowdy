@@ -2,6 +2,8 @@
 	func main(var1){
 		if (isset var1){
 			print ->truncate(var1), "\n";
+		} else {
+			return 1;
 		}
 	}
 
