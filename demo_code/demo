@@ -80,7 +80,3 @@
 		print (1 + 4) ^ (5 - 2), "\n"; // Evaluates to 5 ^ 3 => 125.0
 		print 5 % 10 + 1, "\n"; // Evaluates to 6
 	}
-	
-
-
-
