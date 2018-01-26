@@ -27,5 +27,9 @@ public class RowdyParseTreeTest {
   public void tearDown(){
     
   }
+  @Test
+  public void test(){
+    
+  }
 
 }
