@@ -1,14 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package rowdy;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -26,34 +18,22 @@ public class LanguageTest {
           new int[]{PROGRAM}),
       new ProductionRule(PRULE_STATEMENT,
           new int[]{STATEMENT})
-    };
-    String[] terms = {"add"};
-    NonTerminal[] nonterminals = {
+  };
+  
+  private static final String[] terms = {"add"};
+  private static final NonTerminal[] nonterminals = {
       new NonTerminal("prog", PROGRAM, 
         new int[][]{{0, PRULE_PROGRAM}}),
       new NonTerminal("statement", STATEMENT, 
             new int[][]{{0, PRULE_STATEMENT}}),
-    };
-    
-  private Language language;
-  
-  public LanguageTest() {
-    language = Language.build(grammarRules, terms, nonterminals);
-  }
-
-  /**
-   * Test of build method, of class Language.
-   */
-  @Test
-  public void testBuild() {
-    assertNotNull(language);
-  }
+  };
 
   /**
    * Test of getProductionSymbols method, of class Language.
    */
   @Test
   public void testGetProductionSymbols() {
+    Language language = getSimpleTestLanguage();
     Hint productionHint = new Hint(0, PRULE_STATEMENT);
     ProductionSymbols result = language.getProductionSymbols(productionHint);
     assertNotNull(result);
@@ -67,11 +47,18 @@ public class LanguageTest {
    */
   @Test
   public void testGetSymbol() {
+    Language language = getSimpleTestLanguage();
     int id = 0;
     String expResult = "add";
     Terminal symbol = (Terminal)language.getSymbol(id);
     String symbolName = symbol.getSymbol();
     assertEquals(expResult, symbolName);
+  }
+  
+  private Language getSimpleTestLanguage() {
+    Language language = Language.build(grammarRules, terms, nonterminals);
+    assertNotNull(language);
+    return language;
   }
   
 }
