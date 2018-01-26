@@ -334,18 +334,6 @@ public class RowdyParseTree {
             }
           }
           break;
-        case ROUND_STMT:
-          Value idToRound = getValue(currentTreeNode.get(ID));
-          double val = idToRound.valueToDouble();
-          int precision = getValue(currentTreeNode.get(ARITHM_EXPR)).valueToDouble().intValue();
-          double factor = 1;
-          while (precision > 0) {
-            factor *= 10;
-            precision--;
-          }
-          val = (double) Math.round(val * factor) / factor;
-          allocate((Terminal) currentTreeNode.get(ID).symbol(), new Value(val));
-          break;
         case READ_STMT:
           Scanner keys = new Scanner(System.in);
           String inValue;
@@ -647,6 +635,18 @@ public class RowdyParseTree {
           case FUNC:
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
             return new Value(anonymousFunc);
+          case ROUND_EXPR:
+            Node roundExpr = cur.get(ROUND_EXPR);
+            Value valueToRound = getValue(roundExpr.get(ID));
+            double roundedValue = valueToRound.valueToDouble();
+            int precision = getValue(roundExpr.get(ARITHM_EXPR)).valueToDouble().intValue();
+            double factor = 1;
+            while (precision > 0) {
+              factor *= 10;
+              precision--;
+            }
+            roundedValue = (double) Math.round(roundedValue * factor) / factor;
+            return new Value(roundedValue);
           case ARRAY_EXPR:
             Node arrayExpression = cur.getLeftMostChild();
             Value firstValue = getValue(arrayExpression.get(EXPRESSION));
