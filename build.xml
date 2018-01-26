@@ -8,7 +8,15 @@
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
 <project name="rowdy" default="test" basedir=".">
+  
+  
 
+  <path id="classpath.test">
+    <pathelement location="lib/junit-4.12.jar" />
+    <pathelement location="lib/hamcrest-core-1.3.jar" />
+    <pathelement location="${main.build.dir}"/>
+    <path refid="classpath.base" />
+  </path>
   <import file="nbproject/build-impl.xml"/>
   
 </project>
