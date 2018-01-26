@@ -9,7 +9,7 @@
 
 	func truncate(variable) {
 		originalValue = variable;
-		round variable, 0;
+		variable = round variable, 0;
 		if (variable < originalValue){
 			return variable;
 		} else {

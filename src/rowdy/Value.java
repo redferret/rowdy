@@ -7,15 +7,26 @@ package rowdy;
 public class Value {
 
   private Object value;
+  private boolean isConstant;
 
   public Value() {
     value = null;
+    isConstant = false;
   }
 
   public Value(Object value) {
     this.value = value;
+    isConstant = false;
   }
 
+  public void setAsConstant(boolean isConstant){
+    this.isConstant = isConstant;
+  }
+
+  public boolean isConstant() {
+    return isConstant;
+  }
+  
   public void setValue(Object value) {
     this.value = value;
   }

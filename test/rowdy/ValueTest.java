@@ -83,5 +83,14 @@ public class ValueTest {
     Object result = instance.getValue();
     assertNotNull(result);
   }
+
+  /**
+   * Test of setAsConstant method, of class Value.
+   */
+  public void testIsConstant() {
+    Value instance = new Value(0);
+    instance.setAsConstant(true);
+    assertTrue(instance.isConstant());
+  }
   
 }
