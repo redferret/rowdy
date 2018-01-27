@@ -8,7 +8,7 @@
 	func main (price, amt) {
 	
 		change = amt - price;
-		round change, 2;
+		change = round change, 2;
 		
 		chg = change;
 		
@@ -40,7 +40,7 @@
 	func getChange_recur (denom, qty) {
 		if (change >= denom) {
 			change = change - denom;
-			round change, 2;
+			change = round change, 2;
 			return ->getChange_recur(denom, qty + 1);
 		} else {
 			return qty;
@@ -53,7 +53,7 @@
 			if (change >= denom) {
 				change = change - denom;
 				qty = qty + 1;
-				round change, 2;
+				change = round change, 2;
 			} else {
 				return qty;
 			}
