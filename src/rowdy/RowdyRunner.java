@@ -491,6 +491,9 @@ public class RowdyRunner {
           return valueFromFunction;
         }
       }
+      while(!functions.isEmpty()) {
+        callStack.push(functions.pop());
+      }
       Value val = globalSymbolTable.get(fetchIdName);
       if (val == null) {
         throw new RuntimeException("The ID '" + value + "' doesn't exist "
