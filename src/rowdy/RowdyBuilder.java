@@ -45,7 +45,7 @@ public class RowdyBuilder {
   private void buildAs(RowdyLexer parser, int programType) {
     this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(programType);
-    root = new Node(program, 1);
+    root = new Node(program, 0);
     currentToken = this.parser.getToken();
     if (currentToken == null){
       return;
