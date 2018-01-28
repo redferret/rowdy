@@ -3,6 +3,7 @@ package rowdy;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -87,11 +88,12 @@ public class RowdyRunner {
    */
   public void execute(List<Value> programParams) throws Exception {
     // Declare global variables
-    declareGlobals(root);
     this.programParamValues = programParams;
-    if (!runAsSingleLine && main == null) {
-      throw new RuntimeException("main method not found");
-    } else if (!runAsSingleLine && main != null){
+    if (!runAsSingleLine) {
+      declareGlobals(root);
+      if (main == null){
+        throw new RuntimeException("main method not found");
+      }
       executeStmt(main, null);
     } else {
       executeStmt(root, null);
@@ -188,24 +190,32 @@ public class RowdyRunner {
           }
           break;
         case LOOP_STMT:
-          String idName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          Function curFunction = callStack.peek();
-          Value curValue = curFunction.getValue(idName);
-          if (curValue == null) {
-            curFunction.allocate(idName, new Value(0));
-            activeLoops.push(currentTreeNode);
-            currentTreeNode.setSeqActive(true);
+          Terminal loopIdTerminal = (Terminal) currentTreeNode.get(ID).symbol();
+          String idName = (loopIdTerminal).getName();
+          Function curFunction = null;
+          if (!callStack.isEmpty()){
+            curFunction = callStack.peek();
+            Value curValue = curFunction.getValue(idName);
+            if (curValue == null) {
+              curFunction.allocate(idName, new Value(0));
+            } else {
+              throw new RuntimeException("ID '" + idName + "' already in use "+
+                      "on line " + currentTreeNode.getLine());
+            }
           } else {
-            throw new RuntimeException("ID '" + idName + "' already in use "+
-                    "on line " + currentTreeNode.getLine());
+            allocate(loopIdTerminal, new Value(0));
           }
+          activeLoops.push(currentTreeNode);
+          currentTreeNode.setSeqActive(true);
           boolean done = false;
           Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
           while (!done) {
             executeStmt(loopStmtList, currentTreeNode);
             done = !currentTreeNode.isSeqActive();
           }
-          curFunction.unset(idName);
+          if (curFunction != null){
+            curFunction.unset(idName);
+          }
           break;
         case BREAK_STMT:
           if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
@@ -218,16 +228,21 @@ public class RowdyRunner {
           } else {
             idName = ((Terminal) currentTreeNode.get(ID_OPTION).get(ID).symbol()).getName();
           }
-          curFunction = callStack.peek();
-          if (curFunction.getValue(idName) == null) {
-            throw new RuntimeException("The ID '" + idName + "' doesn't exist."
-                    + " Line " + currentTreeNode.getLine());
+          curFunction = null;
+          if (!callStack.isEmpty()) {
+            curFunction = callStack.peek();
+            if (curFunction.getValue(idName) == null) {
+              throw new RuntimeException("The ID '" + idName + "' doesn't exist."
+                      + " Line " + currentTreeNode.getLine());
+            }
           }
           for (;;) {
             Node lp = activeLoops.pop();
             lp.setSeqActive(false);
             String tempBinding = ((Terminal) lp.get(ID).symbol()).getName();
-            curFunction.unset(tempBinding);
+            if (curFunction != null){
+              curFunction.unset(tempBinding);
+            }
             if (idName.equals(tempBinding)) {
               break;
             }
@@ -393,10 +408,15 @@ public class RowdyRunner {
     if (exists != null) {
       setAsGlobal(idTerminal, value);
     } else {
-      try {
-        Function currentFunction = callStack.peek();
-        currentFunction.allocate(idTerminal, value);
-      } catch (EmptyStackException e) {}
+      
+      if (callStack.isEmpty()) {
+        setAsGlobal(idTerminal, value);
+      } else {
+        try {
+          Function currentFunction = callStack.peek();
+          currentFunction.allocate(idTerminal, value);
+        } catch (EmptyStackException e) {}
+      }
     }
   }
 
@@ -456,16 +476,25 @@ public class RowdyRunner {
       return null;
     }
     if (value.getValue() instanceof Terminal) {
-      String v = ((Terminal) value.getValue()).getName();
-      Value val = globalSymbolTable.get(v);
-      if (val == null) {
-        Function currentFunction = callStack.peek();
-        Value valueFromFunction = currentFunction.getValue(value);
-        if (valueFromFunction == null) {
-          throw new RuntimeException("The ID '" + value + "' doesn't exist "
-                  + "on line " + curSeq.getLine());
+      // Look in the functions first
+      String fetchIdName = ((Terminal) value.getValue()).getName();
+      Value valueFromFunction;
+      Stack<Function> functions = new Stack<>();
+      while(!callStack.isEmpty()) {
+        Function currentFunction = callStack.pop();
+        functions.push(currentFunction);
+        valueFromFunction = currentFunction.getValue(value);
+        if (valueFromFunction != null) {
+          while(!functions.isEmpty()) {
+            callStack.push(functions.pop());
+          }
+          return valueFromFunction;
         }
-        return currentFunction.getValue(value);
+      }
+      Value val = globalSymbolTable.get(fetchIdName);
+      if (val == null) {
+        throw new RuntimeException("The ID '" + value + "' doesn't exist "
+                + "on line " + curSeq.getLine());
       }
       return val;
     } else {
