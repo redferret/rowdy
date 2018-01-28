@@ -436,7 +436,7 @@ public class Rowdy {
         try {
           parser.parseLine(line);
           builder.buildAsSingleLine(parser);
-          rowdyProgram.initialize(builder, false);
+          rowdyProgram.initialize(builder, true);
         } catch (Exception e) {
           System.out.println("Build Exception: " + e.getMessage());
           System.exit(500);

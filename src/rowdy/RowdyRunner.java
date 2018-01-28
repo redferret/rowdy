@@ -49,7 +49,7 @@ public class RowdyRunner {
   
   public void initialize(RowdyBuilder builder, boolean runAsSingleLine) {
     this.root = builder.getProgram();
-    if (runAsSingleLine) {
+    if (!runAsSingleLine) {
       callStack.clear();
       activeLoops.clear();
       globalSymbolTable.clear();
@@ -58,7 +58,7 @@ public class RowdyRunner {
   }
   
   public void initialize(RowdyBuilder builder) {
-    this.initialize(builder, true);
+    this.initialize(builder, false);
   }
   
   /**
@@ -89,9 +89,9 @@ public class RowdyRunner {
     // Declare global variables
     declareGlobals(root);
     this.programParamValues = programParams;
-    if (runAsSingleLine && main == null) {
+    if (!runAsSingleLine && main == null) {
       throw new RuntimeException("main method not found");
-    } else if (runAsSingleLine && main != null){
+    } else if (!runAsSingleLine && main != null){
       executeStmt(main, null);
     } else {
       executeStmt(root, null);
