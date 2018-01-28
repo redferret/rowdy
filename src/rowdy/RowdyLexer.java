@@ -78,7 +78,8 @@ public class RowdyLexer {
   }
 
   public void parseLine(String code) {
-    
+    String rowdyCode = "func main(){"+code+"}";
+    fileStack = parseCode(rowdyCode);
   }
   
   /**
