@@ -35,7 +35,7 @@ public class RowdyRunner {
   */
   private Node main;
   
-  private boolean exit;
+  private boolean runAsSingleLine;
   
   private List<Value> programParamValues;
 
@@ -47,14 +47,14 @@ public class RowdyRunner {
     globalSymbolTable = new HashMap<>();
   }
   
-  public void initialize(RowdyBuilder builder, boolean exit) {
+  public void initialize(RowdyBuilder builder, boolean runAsSingleLine) {
     this.root = builder.getProgram();
-    if (exit) {
+    if (runAsSingleLine) {
       callStack.clear();
       activeLoops.clear();
       globalSymbolTable.clear();
     }
-    this.exit = exit;
+    this.runAsSingleLine = runAsSingleLine;
   }
   
   public void initialize(RowdyBuilder builder) {
@@ -89,9 +89,9 @@ public class RowdyRunner {
     // Declare global variables
     declareGlobals(root);
     this.programParamValues = programParams;
-    if (exit && main == null) {
+    if (runAsSingleLine && main == null) {
       throw new RuntimeException("main method not found");
-    } else if (exit && main != null){
+    } else if (runAsSingleLine && main != null){
       executeStmt(main, null);
     } else {
       executeStmt(root, null);
@@ -163,14 +163,10 @@ public class RowdyRunner {
       switch (curID) {
         case FUNCTION:
           Value exitValue = executeFunc(currentTreeNode);
-          if (exit) {
-            if (exitValue == null){
-              exitValue = new Value(0);
-            }
-            System.exit(exitValue.valueToDouble().intValue());
-          } else {
-            return;
+          if (exitValue == null){
+            exitValue = new Value(0);
           }
+          System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
