@@ -63,17 +63,17 @@ public class Rowdy {
           ARRAY_KEY_VALUE_BODY_TAIL=759,ARRAY_ACCESS=760, ID_EXPR=761,
           ID_EXPR_TYPE=62,
           END = 10;
-  private static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
+  public static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
     "fi", "loop", "ID", ":", "repeat", "break", "=", "print",
     "read", ",", "or", "and", "<", "<=", "==", ">=",
     ">", "!=", "+", "-", "*", "/", "(", ")", "CONST", "^", "%",
     "concat", "slice", "strcmp", "func", "->", "return", "isset", "round",
     "{", "}", "array", "get"};
 
-  private static final String SPECIAL_SYMBOLS = ". ( ) ; + - * / != = >= "
+  public static final String SPECIAL_SYMBOLS = ". ( ) ; + - * / != = >= "
           + "<= < > : == , ^ % -> { }";
 
-  private static final NonTerminal[] NONTERMINALS = {
+  public static final NonTerminal[] NONTERMINALS = {
     new NonTerminal("prog", PROGRAM, 
             new int[][]{{FUNC, PRULE_START}, {ID, PRULE_START}}),
     new NonTerminal("stmt-block", STMT_BLOCK, 
@@ -234,7 +234,7 @@ public class Rowdy {
             new int[][]{}),
   };
   
-  private static final ProductionRule[] GRAMMAR = {
+  public static final ProductionRule[] GRAMMAR = {
     new ProductionRule(PRULE_START,
 		new int[]{DEFINITION}),
     new ProductionRule(PRULE_STMT_LIST, 
@@ -388,14 +388,15 @@ public class Rowdy {
   public static void main(String[] args) {
 
     Language rowdy = Language.build(GRAMMAR, TERMINALS, NONTERMINALS);
-
-    RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
+    RowdyBuilder builder = RowdyBuilder.getBuilder(rowdy);
+    RowdyRunner rowdyProgram = new RowdyRunner();
     RowdyLexer parser = new RowdyLexer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
     String programFileName = args[0];
     
     try {
       parser.parse(programFileName);
-      rowdyProgram.build(parser);
+      builder.build(parser);
+      rowdyProgram.initialize(builder);
     }catch (Exception e){
       System.out.println("Build Exception: " + e.getMessage());
       System.exit(100);

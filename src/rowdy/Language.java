@@ -28,7 +28,7 @@ public class Language {
           NonTerminal[] nonterminals) {
     return new Language(terms, grammarRules, nonterminals);
   }
-
+  
   private Language(String[] terms, ProductionRule[] grammarRules, NonTerminal[] nonterminals) {
     GRAMMAR = new HashMap<>();
     SYMBOLS = new HashMap<>();
