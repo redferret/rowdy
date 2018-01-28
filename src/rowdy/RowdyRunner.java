@@ -35,6 +35,8 @@ public class RowdyRunner {
   */
   private Node main;
   
+  private boolean runAsSingleLine;
+  
   private List<Value> programParamValues;
 
   public RowdyRunner() {
@@ -45,8 +47,18 @@ public class RowdyRunner {
     globalSymbolTable = new HashMap<>();
   }
   
-  public void initialize(RowdyBuilder builder) {
+  public void initialize(RowdyBuilder builder, boolean runAsSingleLine) {
     this.root = builder.getProgram();
+    if (!runAsSingleLine) {
+      callStack.clear();
+      activeLoops.clear();
+      globalSymbolTable.clear();
+    }
+    this.runAsSingleLine = runAsSingleLine;
+  }
+  
+  public void initialize(RowdyBuilder builder) {
+    this.initialize(builder, false);
   }
   
   /**
@@ -77,11 +89,14 @@ public class RowdyRunner {
     // Declare global variables
     declareGlobals(root);
     this.programParamValues = programParams;
-    if (main == null) {
+    if (!runAsSingleLine && main == null) {
       throw new RuntimeException("main method not found");
+    } else if (!runAsSingleLine && main != null){
+      executeStmt(main, null);
+    } else {
+      executeStmt(root, null);
     }
-    // Run the main method
-    executeStmt(main, null);
+    
   }
 
   /**
@@ -117,9 +132,9 @@ public class RowdyRunner {
             if (globalSymbolTable.get(functionName) != null) {
               throw new RuntimeException("main method already defined");
             }
-            setAsGlobal(functionName, new Value(currentTreeNode));
-            main = parent;
-          }
+              setAsGlobal(functionName, new Value(currentTreeNode));
+              main = parent;
+              }
           break;
         default:
           declareGlobals(currentTreeNode);

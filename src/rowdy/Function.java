@@ -44,6 +44,10 @@ public class Function {
   public void allocate(Terminal cur, Value value) {
     Function.this.allocate(cur.getName(), value);
   }
+  
+  public void allocate(HashMap<String, Value> table) {
+    this.symbolTable.putAll(table);
+  }
 
   /**
    * Frees up the memory used by this function. Deletes all the parameters and
@@ -95,5 +99,9 @@ public class Function {
   @Override
   public String toString() {
     return name;
+  }
+
+  public HashMap getSymbolTable() {
+    return this.symbolTable;
   }
 }
