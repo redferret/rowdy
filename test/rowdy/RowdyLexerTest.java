@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -71,6 +72,31 @@ public class RowdyLexerTest {
       assertEquals("Token id mismatch", expectedId, tokenId);
     }
 
+  }
+
+  /**
+   * Test of parse method, of class RowdyLexer.
+   * @throws java.lang.Exception
+   */
+  public void testParse() throws Exception {
+  }
+
+  /**
+   * Test of parseLine method, of class RowdyLexer.
+   */
+  public void testParseLine() {
+  }
+
+  /**
+   * Test of parseCode method, of class RowdyLexer.
+   */
+  public void testParseCode() {
+  }
+
+  /**
+   * Test of tokenCount method, of class RowdyLexer.
+   */
+  public void testTokenCount() {
   }
   
 }

@@ -63,7 +63,7 @@ public class RowdyRunner {
     }
   }
 
-  public void exectue() throws Exception {
+  public void execute() throws Exception {
     this.execute(new ArrayList<>());
   }
   
