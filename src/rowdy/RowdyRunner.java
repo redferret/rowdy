@@ -15,13 +15,9 @@ import static rowdy.Rowdy.*;
  *
  * @author Richard DeSilvey
  */
-public class RowdyParseTree {
+public class RowdyRunner {
 
-  private RowdyLexer parser;
-  private Language language;
   private Node root;
-  private Token currentToken;
-  private int line;
   /**
    * Stores the name of each identifier or function
    */
@@ -41,20 +37,18 @@ public class RowdyParseTree {
   
   private List<Value> programParamValues;
 
-  public RowdyParseTree(Language language) {
-    this.language = language;
+  public RowdyRunner() {
     this.root = null;
-    this.line = 1;
     main = null;
     callStack = new Stack<>();
     activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
   }
-
-  public void setLanguage(Language language) {
-    this.language = language;
+  
+  public void initialize(RowdyBuilder builder) {
+    this.root = builder.getProgram();
   }
-
+  
   /**
    * Only call this method if the program has stopped executing.
    */
@@ -68,128 +62,18 @@ public class RowdyParseTree {
       }
     }
   }
-  
-  /**
-   * Builds the parse tree with the given program file and language definitions.
-   * @param parser
-   */
-  public void build(RowdyLexer parser) {
-    this.parser = parser;
-    NonTerminal program = (NonTerminal) language.getSymbol(PROGRAM);
-    root = new Node(program, 0);
-    currentToken = this.parser.getToken();
-    if (currentToken == null){
-      return;
-    }
-    consumeEOLN();
-    int id = currentToken.getID();
-    addToNode(root, produce(program, id));
-    build(root);
-  }
 
-  private void consumeEOLN() {
-    while (currentToken.getID() == EOLN) {
-      if (currentToken.getID() == EOLN) {
-        line++;
-      }
-      currentToken = this.parser.getToken();
-      if (currentToken == null){
-        return;
-      }
-    }
+  public void execute() throws Exception {
+    this.execute(new ArrayList<>());
   }
   
-  public void print() {
-    print(root);
-  }
-
-  /**
-   * Prints the tree
-   *
-   * @param parent from
-   */
-  public void print(Node parent) {
-    List<Node> children = parent.getAll();
-    for (int i = 0; i < children.size(); i++) {
-      if (children.get(i).symbol() instanceof NonTerminal) {
-        print(children.get(i));
-      } else {
-        System.out.println(children.get(i).symbol());
-      }
-    }
-  }
-
-  /**
-   * Walks through the tree recursively building on non-terminals. If a syntax
-   * error is detected the line number is printed out.
-   *
-   * @param parent
-   */
-  public void build(Node parent) {
-    Symbol symbol;
-    ProductionSymbols rule;
-    List<Node> children = parent.getAll();
-    Node current;
-    for (int i = 0; i < children.size(); i++) {
-      current = children.get(i);
-      symbol = current.symbol();
-      if (symbol instanceof NonTerminal) {
-        if (currentToken == null) break;
-        rule = produce((NonTerminal) symbol, currentToken.getID());
-        addToNode(current, rule);
-        build(current);
-      } else {
-        if (symbol.id() != currentToken.getID()) {
-          throw new RuntimeException("Syntax error, unexpected token '"
-                  + currentToken.getSymbol() + "' on Line " + line);
-        }
-        children.remove(i);
-        Terminal terminal = new Terminal(symbol.getSymbol(), currentToken.getID(), currentToken.getSymbol());
-        children.add(i, new Node(terminal, line));
-        currentToken = parser.getToken();
-        while (currentToken != null && currentToken.getID() == EOLN) {
-          line++;
-          currentToken = parser.getToken();
-        }
-        if (currentToken == null) break;
-      }
-    }
-  }
-
-  /**
-   * Builds a rule from the given NonTerminal using the id to map onto a hint.
-   *
-   * @param symbol The NonTerminal for reference
-   * @param terminal The id from a token, usually a terminal
-   * @return Fetches a production rule from the language's grammar.
-   */
-  public ProductionSymbols produce(NonTerminal symbol, int terminal) {
-    Hint productionHint = symbol.getHint(terminal);
-    return language.getProductionSymbols(productionHint);
-  }
-
-  /**
-   * Adds to the parent node the production rules. Each child is from the
-   * production rule.
-   *
-   * @param parent The parent being added to
-   * @param rule The production rule.
-   */
-  public void addToNode(Node parent, ProductionSymbols rule) {
-    Symbol[] symbols = rule.getSymbols();
-    for (Symbol symbol : symbols) {
-      Node node = new Node(symbol, line);
-      parent.add(node);
-    }
-  }
-
   /**
    * Runs the program loaded into the parse tree.
    *
    * @param programParams The program parameters
    * @throws java.lang.Exception
    */
-  public void execute(List<Value> programParams) {
+  public void execute(List<Value> programParams) throws Exception {
     // Declare global variables
     declareGlobals(root);
     this.programParamValues = programParams;
@@ -295,7 +179,7 @@ public class RowdyParseTree {
           if (curValue == null) {
             curFunction.allocate(idName, new Value(0));
             activeLoops.push(currentTreeNode);
-            currentTreeNode.seqActive = true;
+            currentTreeNode.setSeqActive(true);
           } else {
             throw new RuntimeException("ID '" + idName + "' already in use "+
                     "on line " + currentTreeNode.getLine());
@@ -304,7 +188,7 @@ public class RowdyParseTree {
           Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
           while (!done) {
             executeStmt(loopStmtList, currentTreeNode);
-            done = !currentTreeNode.seqActive;
+            done = !currentTreeNode.isSeqActive();
           }
           curFunction.unset(idName);
           break;
@@ -326,7 +210,7 @@ public class RowdyParseTree {
           }
           for (;;) {
             Node lp = activeLoops.pop();
-            lp.seqActive = false;
+            lp.setSeqActive(false);
             String tempBinding = ((Terminal) lp.get(ID).symbol()).getName();
             curFunction.unset(tempBinding);
             if (idName.equals(tempBinding)) {
@@ -361,7 +245,7 @@ public class RowdyParseTree {
           break;
         case RETURN_STMT:
           Function functionReturning = callStack.peek();
-          seqControl.seqActive = false;
+          seqControl.setSeqActive(false);
           Value toSet = getValue(currentTreeNode.get(EXPRESSION));
           functionReturning.setReturnValue(toSet);
           break;
@@ -392,7 +276,7 @@ public class RowdyParseTree {
           break;
         default:
           if (seqControl != null) {
-            if (seqControl.seqActive) {
+            if (seqControl.isSeqActive()) {
               executeStmt(currentTreeNode, seqControl);
             }
           } else {
@@ -471,7 +355,7 @@ public class RowdyParseTree {
     // 4. Get and execute the stmt-list
     Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
     Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
-    seqControl.seqActive = true;
+    seqControl.setSeqActive(true);
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
     // call stack and free it's memory then return
@@ -932,102 +816,23 @@ public class RowdyParseTree {
     }
   }
   
+  public void print() {
+    print(root);
+  }
+
   /**
-   * Tree Node for the parse tree
+   * Prints the tree
+   *
+   * @param parent from
    */
-  public class Node {
-
-    private final ArrayList<Node> children;
-    private final Symbol def;
-    private Boolean seqActive;
-    private final int line;
-
-    public Node(Symbol def, int lineNumber) {
-      children = new ArrayList<>();
-      this.def = def;
-      seqActive = false;
-      this.line = lineNumber;
-    }
-
-    public int getLine() {
-      return line;
-    }
-
-    public void add(Node child) {
-      children.add(child);
-    }
-
-    public Symbol symbol() {
-      return def;
-    }
-
-    public boolean hasChildren() {
-      return !children.isEmpty();
-    }
-
-    public Node getLeftMostChild() {
-      if (children.isEmpty()) {
-        return null;
-      }
-      return children.get(0);
-    }
-
-    /**
-     * Gets the child node with the id, only returns the first occurance of the
-     * found child.
-     *
-     * @param id The child's ID to search for
-     * @return The found child, null if nothing was found
-     */
-    public Node get(int id) {
-      return get(id, 0);
-    }
-    
-    public Node get(int id, boolean throwException) {
-      if (throwException){
-        return get(id, 0);
+  public void print(Node parent) {
+    List<Node> children = parent.getAll();
+    for (int i = 0; i < children.size(); i++) {
+      if (children.get(i).symbol() instanceof NonTerminal) {
+        print(children.get(i));
       } else {
-        try {
-          return get(id, 0);
-        }catch (RuntimeException re){
-          return null;
-        }
+        System.out.println(children.get(i).symbol());
       }
-    }
-
-    /**
-     * Gets the child node with the id. Since there could be duplicates or
-     * multiple child nodes with the same ID, occur will tell the method to skip
-     * a certain number of occurrences of the given ID. If occur is 1 then it
-     * will skip the first occurrence of the search.
-     *
-     * @param id The id to search for
-     * @param occur The number of times to skip a duplicate
-     * @return The child node of this parent, null if it doesn't exist.
-     */
-    public Node get(int id, int occur) {
-      for (int c = 0; c < children.size(); c++) {
-        if (children.get(c).symbol().id() == id
-                && occur == 0) {
-          return children.get(c);
-        } else if (children.get(c).symbol().id() == id
-                && occur > 0) {
-          occur--;
-        }
-      }
-      throw new RuntimeException("The id '" + id + 
-              "' could not be found for the node '" + def + "' on line " +
-              line);
-    }
-
-    public ArrayList<Node> getAll() {
-      return children;
-    }
-
-    @Override
-    public String toString() {
-      return def.toString() + " " + 
-              ((children.isEmpty())?"":(children.toString()));
     }
   }
 }
