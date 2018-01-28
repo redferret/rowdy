@@ -47,6 +47,9 @@ public class RowdyRunner {
   
   public void initialize(RowdyBuilder builder) {
     this.root = builder.getProgram();
+    callStack.clear();
+    activeLoops.clear();
+    globalSymbolTable.clear();
   }
   
   /**
