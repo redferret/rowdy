@@ -18,13 +18,13 @@ import org.junit.Before;
  *
  * @author Richard
  */
-public class TokenizerTest {
+public class RowdyLexerTest {
    
-  private Tokenizer tokenizer;
+  private RowdyLexer lexer;
   private final String[] reserved = {"add", "+", "-"};
   private final String operators = "+ -";
   
-  public TokenizerTest() {
+  public RowdyLexerTest() {
   }
   
   @Before
@@ -33,8 +33,8 @@ public class TokenizerTest {
     BufferedWriter bf = new BufferedWriter(new FileWriter(file));
     bf.write("add a + 25 - 1");
     bf.close();
-    tokenizer = new Tokenizer(reserved, operators, 3, 4);
-    tokenizer.parse("tokenizerTestFile1");
+    lexer = new RowdyLexer(reserved, operators, 3, 4);
+    lexer.parse("tokenizerTestFile1");
     file.delete();
   }
 
@@ -44,29 +44,29 @@ public class TokenizerTest {
 
   @Test
   public void tokenCountTest() {
-    Integer numberOfTokens = tokenizer.tokenCount();
+    Integer numberOfTokens = lexer.tokenCount();
     Integer expectedCount = 7;
     assertEquals("The number of Tokens is incorrect", expectedCount, numberOfTokens);
   }
 
   /**
-   * Test of hasToken method, of class Tokenizer.
+   * Test of hasToken method, of class RowdyLexer.
    */
   @Test
   public void testHasToken() {
-    Boolean hasToken = tokenizer.hasToken();
+    Boolean hasToken = lexer.hasToken();
     assertTrue("The number of Tokens is incorrect", hasToken);
   }
 
   /**
-   * Test of getToken method, of class Tokenizer.
+   * Test of getToken method, of class RowdyLexer.
    */
   @Test
   public void testGetToken() {
     Token token;
     Integer[] expectedIds = {0, 3, 1, 4, 2, 4, 200};
     for (Integer expectedId : expectedIds){
-      token = tokenizer.getToken();
+      token = lexer.getToken();
       Integer tokenId = token.getID();
       assertEquals("Token id mismatch", expectedId, tokenId);
     }

@@ -17,7 +17,7 @@ import static rowdy.Rowdy.*;
  */
 public class RowdyParseTree {
 
-  private Tokenizer parser;
+  private RowdyLexer parser;
   private Language language;
   private Node root;
   private Token currentToken;
@@ -73,7 +73,7 @@ public class RowdyParseTree {
    * Builds the parse tree with the given program file and language definitions.
    * @param parser
    */
-  public void build(Tokenizer parser) {
+  public void build(RowdyLexer parser) {
     this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(PROGRAM);
     root = new Node(program, 0);

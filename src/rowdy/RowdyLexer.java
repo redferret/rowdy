@@ -5,21 +5,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Tokenizer parses code files and allows a fetch for each individual token when
- * getID() is called. Once the token is called for it is removed from the file
+ * RowdyLexer parses code files and allows a fetch for each individual token when
+ getID() is called. Once the token is called for it is removed from the file
  * stack. The file stack contains groupings of characters which are later
  * interpreted when getID is called.
  *
  * @author Richard DeSilvey
  */
-public class Tokenizer {
+public class RowdyLexer {
 
   private final String SPECIALCHARGROUP;
 
@@ -47,14 +46,14 @@ public class Tokenizer {
   }
 
   /**
-   * Creates a new Tokenizer
+   * Creates a new RowdyLexer
    *
    * @param reserved The reserved words in the language
    * @param operators The string containing all the operators
    * @param idID The id of an identifier
    * @param constID The id of a constant
    */
-  public Tokenizer(String[] reserved, String operators, int idID, int constID) {
+  public RowdyLexer(String[] reserved, String operators, int idID, int constID) {
 
     RESERVED_WORDS = new HashMap<>();
     SPECIALCHARGROUP = operators;
@@ -79,7 +78,7 @@ public class Tokenizer {
   }
 
   /**
-   * Gets the contents of a file and addes all relevant groupings of characters
+   * Gets the contents of a file and adds all relevant groupings of characters
    * to a stack.
    *
    * @param fileName The file name for the datafile

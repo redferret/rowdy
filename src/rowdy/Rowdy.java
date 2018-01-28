@@ -27,7 +27,7 @@ public class Rowdy {
 	PRULE_FACTOR_POW=50, PRULE_FACTOR_MOD=51, PRULE_CONCAT=52, PRULE_SLICE=53,
 	PRULE_STRCMP=54, PRULE_FUNCTION_DEF=55, PRULE_ASSIGN_GLOBAL=56,
 	PRULE_FUNCTION=58, PRULE_ID_PARAM=59, PRULE_ID_PARAM_TAIL=61,
-	PRULE_FUNCTION_CALL=63, PRULE_FUNC_CALL_STMT=64, PRULE_RETURN_STMT=65,
+	PRULE_FUNCTION_CALL=63, PRULE_FUNC_CALL=64, PRULE_RETURN_STMT=65,
 	PRULE_RETURN=66, PRULE_FUNC_ASSIGN_GLOBAL=67, PRULE_EXPR_LIST=68,
 	PRULE_ISSET=70, PRULE_ROUND_EXPR=71, PRULE_ROUND=72, PRULE_ISSET_EXPR=73,
 	PRULE_STMT_BLOCK=74, PRULE_FUNCTION_BODY=75, PRULE_ANONYMOUS_FUNC=76,
@@ -94,7 +94,7 @@ public class Rowdy {
                         {ID, PRULE_ASSIGN_STMT}, {REPEAT, END},
                         {BREAK,PRULE_BREAK_STMT}, 
                         {PRINT, PRULE_PRINT_STMT}, {READ, PRULE_READ_STMT}, 
-                        {CALL,PRULE_FUNC_CALL_STMT},{RETURN,PRULE_RETURN_STMT}, 
+                        {CALL,PRULE_FUNC_CALL},{RETURN,PRULE_RETURN_STMT}, 
                         {ISSET, PRULE_ISSET_EXPR}, {LCURLY, END}}),
     new NonTerminal("stmt-tail", STMT_TAIL, 
             new int[][]{{SEMICOLON, PRULE_STMT_TAIL}, {ELSE, END}, {FI, END}, 
@@ -120,7 +120,7 @@ public class Rowdy {
             new int[][]{{ID,PRULE_BOOL_TERM}, {MINUS,PRULE_BOOL_TERM}, 
                         {OPENPAREN,PRULE_BOOL_TERM}, {CONST,PRULE_BOOL_TERM}, 
                         {CONCAT, PRULE_CONCAT}, {SLICE, PRULE_SLICE}, 
-                        {STRCMP, PRULE_STRCMP}, {CALL, PRULE_FUNC_CALL_STMT}, 
+                        {STRCMP, PRULE_STRCMP}, {CALL, PRULE_FUNC_CALL}, 
                         {ISSET,PRULE_ISSET_EXPR},{FUNC,PRULE_ANONYMOUS_FUNC},
                         {ARRAY, PRULE_ARRAY_EXPR}, {GET, PRULE_ARRAY_ACCESS},
                         {ROUND, PRULE_ROUND_EXPR}}),
@@ -335,7 +335,7 @@ public class Rowdy {
 		new int[]{COMMA, ID, PARAMS_TAIL}),
     new ProductionRule(PRULE_FUNCTION_CALL, 
 		new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN}),
-    new ProductionRule(PRULE_FUNC_CALL_STMT, 
+    new ProductionRule(PRULE_FUNC_CALL, 
 		new int[]{FUNC_CALL}),
     new ProductionRule(PRULE_RETURN_STMT, 
 		new int[]{RETURN_STMT}),
@@ -390,7 +390,7 @@ public class Rowdy {
     Language rowdy = Language.build(GRAMMAR, TERMINALS, NONTERMINALS);
 
     RowdyParseTree rowdyProgram = new RowdyParseTree(rowdy);
-    Tokenizer parser = new Tokenizer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
+    RowdyLexer parser = new RowdyLexer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
     String programFileName = args[0];
     
     try {
@@ -421,6 +421,8 @@ public class Rowdy {
     }catch (Exception e) {
       System.out.println("Runtime Exception: " + e.getMessage());
       rowdyProgram.dumpCallStack();
+      System.out.println("\nRowdy Stack");
+      e.printStackTrace();
     }
 
   }
