@@ -2,6 +2,7 @@ package rowdy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Main driver class. The grammar, terminals/non-terminals and the hint table
@@ -391,41 +392,70 @@ public class Rowdy {
     RowdyBuilder builder = RowdyBuilder.getBuilder(rowdy);
     RowdyRunner rowdyProgram = new RowdyRunner();
     RowdyLexer parser = new RowdyLexer(TERMINALS, SPECIAL_SYMBOLS, ID, CONST);
-    String programFileName = args[0];
     
-    try {
-      parser.parse(programFileName);
-      builder.build(parser);
-      rowdyProgram.initialize(builder);
-    }catch (Exception e){
-      System.out.println("Build Exception: " + e.getMessage());
-      System.exit(100);
-    }
-    
-    try {
-      List<Value> programParameters = new ArrayList<>();
+    if (args.length > 0) {
+      String programFileName = args[0];
 
-      for (int p = 1; p < args.length; p++) {
-        String in = args[p];
-        if (Character.isDigit(in.charAt(0))) {
-          programParameters.add(new Value(Float.parseFloat(args[p])));
-        } else {
-          String argStr = args[p];
-          if (argStr.equals("true") || argStr.equals("false")){
-            programParameters.add(new Value(Boolean.valueOf(argStr)));
+      try {
+        parser.parse(programFileName);
+        builder.build(parser);
+        rowdyProgram.initialize(builder);
+      } catch (Exception e) {
+        System.out.println("Build Exception: " + e.getMessage());
+        System.exit(500);
+      }
+
+      try {
+        List<Value> programParameters = new ArrayList<>();
+
+        for (int p = 1; p < args.length; p++) {
+          String in = args[p];
+          if (Character.isDigit(in.charAt(0))) {
+            programParameters.add(new Value(Float.parseFloat(args[p])));
           } else {
-            programParameters.add(new Value(args[p]));
+            String argStr = args[p];
+            if (argStr.equals("true") || argStr.equals("false")) {
+              programParameters.add(new Value(Boolean.valueOf(argStr)));
+            } else {
+              programParameters.add(new Value(args[p]));
+            }
           }
         }
+        rowdyProgram.execute(programParameters);
+      } catch (Exception e) {
+        handleException(rowdyProgram, e);
       }
-      rowdyProgram.execute(programParameters);
-    }catch (Exception e) {
-      System.out.println("Runtime Exception: " + e.getMessage());
-      rowdyProgram.dumpCallStack();
-      System.out.println("\nRowdy Stack");
-      e.printStackTrace();
+    } else {
+      Scanner keys = new Scanner(System.in);
+      String line;
+      do {
+        line = keys.nextLine();
+        if (line.isEmpty()) {
+          continue;
+        }
+        try {
+          parser.parseLine(line);
+          builder.buildAsSingleLine(parser);
+          rowdyProgram.initialize(builder, false);
+        } catch (Exception e) {
+          System.out.println("Build Exception: " + e.getMessage());
+          System.exit(500);
+        }
+
+        try {
+          rowdyProgram.execute();
+        } catch (Exception e) {
+          handleException(rowdyProgram, e);
+        }
+      }while(!line.equalsIgnoreCase("exit"));
     }
 
   }
 
+  private static void handleException(RowdyRunner rowdyProgram, Exception e) {
+    System.out.println("Runtime Exception: " + e.getMessage());
+    rowdyProgram.dumpCallStack();
+//    System.out.println("\nRowdy Stack");
+//    e.printStackTrace();
+  }
 }

@@ -1,13 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package rowdy;
 
 import java.util.List;
-import static rowdy.Rowdy.EOLN;
-import static rowdy.Rowdy.PROGRAM;
+import static rowdy.Rowdy.*;
 
 /**
  *
@@ -40,9 +35,17 @@ public class RowdyBuilder {
    * @param parser
    */
   public void build(RowdyLexer parser) {
+    this.buildAs(parser, PROGRAM);
+  }
+
+  public void buildAsSingleLine(RowdyLexer parser) {
+    this.buildAs(parser, STMT_LIST);
+  }
+  
+  private void buildAs(RowdyLexer parser, int programType) {
     this.parser = parser;
-    NonTerminal program = (NonTerminal) language.getSymbol(PROGRAM);
-    root = new Node(program, 0);
+    NonTerminal program = (NonTerminal) language.getSymbol(programType);
+    root = new Node(program, 1);
     currentToken = this.parser.getToken();
     if (currentToken == null){
       return;
@@ -52,7 +55,7 @@ public class RowdyBuilder {
     addToNode(root, produce(program, id));
     build(root);
   }
-
+  
   private void consumeEOLN() {
     while (currentToken.getID() == EOLN) {
       if (currentToken.getID() == EOLN) {

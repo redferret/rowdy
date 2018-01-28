@@ -35,6 +35,8 @@ public class RowdyRunner {
   */
   private Node main;
   
+  private boolean exit;
+  
   private List<Value> programParamValues;
 
   public RowdyRunner() {
@@ -45,11 +47,18 @@ public class RowdyRunner {
     globalSymbolTable = new HashMap<>();
   }
   
-  public void initialize(RowdyBuilder builder) {
+  public void initialize(RowdyBuilder builder, boolean exit) {
     this.root = builder.getProgram();
-    callStack.clear();
-    activeLoops.clear();
-    globalSymbolTable.clear();
+    if (exit) {
+      callStack.clear();
+      activeLoops.clear();
+      globalSymbolTable.clear();
+    }
+    this.exit = exit;
+  }
+  
+  public void initialize(RowdyBuilder builder) {
+    this.initialize(builder, true);
   }
   
   /**
@@ -80,11 +89,14 @@ public class RowdyRunner {
     // Declare global variables
     declareGlobals(root);
     this.programParamValues = programParams;
-    if (main == null) {
+    if (exit && main == null) {
       throw new RuntimeException("main method not found");
+    } else if (exit && main != null){
+      executeStmt(main, null);
+    } else {
+      executeStmt(root, null);
     }
-    // Run the main method
-    executeStmt(main, null);
+    
   }
 
   /**
@@ -120,9 +132,9 @@ public class RowdyRunner {
             if (globalSymbolTable.get(functionName) != null) {
               throw new RuntimeException("main method already defined");
             }
-            setAsGlobal(functionName, new Value(currentTreeNode));
-            main = parent;
-          }
+              setAsGlobal(functionName, new Value(currentTreeNode));
+              main = parent;
+              }
           break;
         default:
           declareGlobals(currentTreeNode);
@@ -151,10 +163,14 @@ public class RowdyRunner {
       switch (curID) {
         case FUNCTION:
           Value exitValue = executeFunc(currentTreeNode);
-          if (exitValue == null){
-            exitValue = new Value(0);
+          if (exit) {
+            if (exitValue == null){
+              exitValue = new Value(0);
+            }
+            System.exit(exitValue.valueToDouble().intValue());
+          } else {
+            return;
           }
-          System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
