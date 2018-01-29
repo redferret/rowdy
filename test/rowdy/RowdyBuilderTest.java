@@ -52,22 +52,22 @@ public class RowdyBuilderTest {
     assertNotNull(root);
     String actual = root.symbol().getSymbol();
     String expected = "prog";
-    assertEquals(expected, actual);
+    assertEquals("No program found", expected, actual);
     
     Node definition = root.get(DEFINITION);
     actual = definition.symbol().getSymbol();
     expected = "def";
-    assertEquals(expected, actual);
+    assertEquals("No definition found", expected, actual);
     
     Node function = definition.get(FUNCTION);
     actual = function.symbol().getSymbol();
     expected = "function";
-    assertEquals(expected, actual);
+    assertEquals("No function found", expected, actual);
     
     Node mainFunc = function.get(ID);
     actual = ((Terminal)mainFunc.symbol()).getName();
     expected = "main";
-    assertEquals(expected, actual);
+    assertEquals("No main found",expected, actual);
   }
   
   
