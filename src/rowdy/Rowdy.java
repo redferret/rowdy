@@ -334,8 +334,10 @@ public class Rowdy {
 		new int[]{ID, PARAMS_TAIL}),
     new ProductionRule(PRULE_ID_PARAM_TAIL, 
 		new int[]{COMMA, ID, PARAMS_TAIL}),
+    
     new ProductionRule(PRULE_FUNCTION_CALL, 
 		new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN}),
+    
     new ProductionRule(PRULE_FUNC_CALL, 
 		new int[]{FUNC_CALL}),
     new ProductionRule(PRULE_RETURN_STMT, 

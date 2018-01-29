@@ -81,7 +81,9 @@ public class RowdyRunner {
   }
   
   /**
-   * Runs the program loaded into the parse tree.
+   * Runs the program loaded into the parse tree. You need to first 
+   * initialize the runner with a builder and flag if it's
+   * a single line execution or a program file.
    *
    * @param programParams The program parameters
    * @throws java.lang.Exception
@@ -92,7 +94,7 @@ public class RowdyRunner {
     if (!runAsSingleLine) {
       declareGlobals(root);
       if (main == null){
-        throw new RuntimeException("main method not found");
+        throw new MainNotFoundException("main method not found");
       }
       executeStmt(main, null);
     } else {
@@ -107,7 +109,6 @@ public class RowdyRunner {
    * placed in the main symbol table.
    *
    * @param parent
-   * @param programParamValues
    */
   public void declareGlobals(Node parent) {
     Node currentTreeNode;
@@ -266,11 +267,6 @@ public class RowdyRunner {
           }
           break;
         case FUNC_CALL:
-          String funcName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          if (funcName.equals("main")) {
-            throw new RuntimeException("Can't recurse on main. Line " 
-                    + currentTreeNode.getLine());
-          }
           executeFunc(currentTreeNode);
           break;
         case RETURN_STMT:
