@@ -2,19 +2,35 @@
 	func main(var1){
 		if (isset var1){
 			print ->truncate(var1), "\n";
+			print ->ceil(var1), "\n";
+			print ->floor(var1), "\n";
 		} else {
 			return 1;
 		}
 	}
 
+	func ceil(variable) {
+		if (variable > 0) {
+			return (->truncate(variable)) + 1;
+		} else {
+			return (->truncate(variable)) - 1;
+		}
+	}
+	
+	func floor(variable) {
+		if (variable > 0) {
+			return (->truncate(variable)) - 1;
+		} else {
+			return (->truncate(variable)) + 1;
+		}
+	}
+	
 	func truncate(variable) {
 		originalValue = variable;
 		variable = round variable, 0;
 		if (variable < originalValue){
 			return variable;
 		} else {
-			difference = variable - originalValue;
-			deciPart = 1 - difference;
-			return originalValue - deciPart;
+			return variable - 1;
 		}
 	}

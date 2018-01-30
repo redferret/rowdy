@@ -3,34 +3,52 @@
 	// This file is used for planning and working out new features
 
 	func main() {
-		loop x in range 0, 10, 1 { // x is between -1 and 11 incremented by 1
-			// Loop goes for 10 iterations
-			break x; // break out of this loop
-			break; // Same as line above
+
+		Person = func (name, customerType) {
+			getCustomerType = func() {
+				return customerType;
+			}
+			getName = func(){
+				return name;
+			}
+			toString = func() {
+				return concat "Customer Type: ", customerType, "; Name: ", name;
+			}
 		}
-		// LOOP_STMT => LOOP ID STMT_BLOCK
-		// LOOP_STMT => LOOP ID IN RANGE_EXPR STMT_BLOCK
-		// RANGE_EXPR => RANGE ARITHM_EXPR , ARITHM_EXPR , ARITHM_EXPR
 		
-		array1 = array(9, 1, 2, 3, 4);
-		array1 = array(9, array(), 2, 3, 4);
-		// EXPRESSION => ARRAY ( ARRAY_BODY )
-		// ARRAY_BODY => ARRAY_LINEAR
-		// ARRAY_LINEAR => ARRAY_VALUE
+		myObj = new Person("Name", "Patient");// Value(RowdyObject)
+		print @myObj.toString();
 		
-		array2 = array(5:7, "hello":1);
-		// EXPRESSION => ARRAY ( ARRAY_BODY )
-		// ARRAY_BODY => ARRAY_KEY_VALUE
-		// ARRAY_KEY_VALUE => ARRAY_PAIR ARRAY_PAIR_TAIL;
-		// ARRAY_PAIR => ARRAY_KEY : ARRAY_VALUE
-		// ARRAY_PAIR_TAIL => , ARRAY_PAIR ARRAY_PAIR_TAIL
-		// ARRAY_VALUE => EXPRESSION
 		
-		var1 = get(array2, "hello") // assigns 1
-		// EXPRESSION => ID ARRAY_ACCESS  
-		// ARRAY_ACCESS => LBRACKET ARRAY_KEY RBRACKET
-		// ARRAY_KEY => EXPRESSION
+		Tree = func (data, leftChild, rightChild) {
+			setData = func(data) {
+				this.data = data;
+			}
+			setTree = func(left, right) {
+				leftChild = left;
+				rightChild = right;
+			}
+			isLeaf = func() {
+				return data != null;
+			}
+			getLeft = func() {
+				return leftChild;
+			}
+			getRight = func() {
+				return rightChild;
+			}
+		}
 		
-		array3 = range 0, 20, 5; // array(0, 5, 10, 15, 20)
+		root = new Tree();// By default, passing no values to certain members initializes them to null
+		
+		leftC = new Tree("C");
+		leftA = new Tree("A", leftC, new Tree("D"));
+		rightB = new Tree("B");
+		
+		@root.setTree(null, leftA, rightB);
+		
+		rightD = @root.getLeft().getRight();
+		
 		
 	}
+	
