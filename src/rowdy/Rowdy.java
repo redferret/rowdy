@@ -203,8 +203,8 @@ public class Rowdy {
     new NonTerminal("params", PARAMETERS, 
             new int[][]{{ID, PRULE_ID_PARAM}, {CLOSEDPAREN, END}}),
     new NonTerminal("params-tail", PARAMS_TAIL, 
-            
             new int[][]{{COMMA, PRULE_ID_PARAM_TAIL}, {CLOSEDPAREN, END}}),
+    
     new NonTerminal("func-call", FUNC_CALL, 
             new int[][]{{CALL, PRULE_FUNCTION_CALL}}),
     new NonTerminal("stmt-id", STMT_ID, 

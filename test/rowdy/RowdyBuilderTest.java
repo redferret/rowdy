@@ -58,7 +58,7 @@ public class RowdyBuilderTest {
     
     getAndTestSymbol(assignStmt, ID, "ID");
     getAndTestSymbol(assignStmt, BECOMES, "=");
-    getAndTestSymbol(assignStmt, EXPRESSION, "expr");
+    getFromAndTestNotNull(assignStmt, EXPRESSION);
   }
   
   @Test
@@ -67,9 +67,9 @@ public class RowdyBuilderTest {
     Node loopStmt = getTestStatement(testCode, LOOP_STMT);
     
     getAndTestSymbol(loopStmt, LOOP, "loop");
-    getAndTestSymbol(loopStmt, ID, "ID");
+    getFromAndTestNotNull(loopStmt, ID);
     getAndTestSymbol(loopStmt, COLON, ":");
-    getAndTestSymbol(loopStmt, STMT_BLOCK, "stmt-block");
+    getFromAndTestNotNull(loopStmt, STMT_BLOCK);
   }
   
   @Test
@@ -78,9 +78,19 @@ public class RowdyBuilderTest {
     Node ifStmt = getTestStatement(testCode, IF_STMT);
     
     getAndTestSymbol(ifStmt, IF, "if");
-    getAndTestSymbol(ifStmt, EXPRESSION, "expr");
-    getAndTestSymbol(ifStmt, STMT_BLOCK, "stmt-block");
+    getFromAndTestNotNull(ifStmt, EXPRESSION);
+    getFromAndTestNotNull(ifStmt, STMT_BLOCK);
     getAndTestSymbol(ifStmt, ELSE_PART, "else-part");
+    
+    testCode = "if (some == yes) {}";
+    ifStmt = getTestStatement(testCode, IF_STMT);
+    
+    getFromAndTestNotNull(ifStmt, IF);
+    getFromAndTestNotNull(ifStmt, EXPRESSION);
+    getFromAndTestNotNull(ifStmt, STMT_BLOCK);
+    Node elsePart = getFromAndTestNotNull(ifStmt, ELSE_PART);
+    
+    assertTrue(elsePart.getAll().isEmpty());
   }
   
   @Test
@@ -90,8 +100,14 @@ public class RowdyBuilderTest {
     
     getAndTestSymbol(breakStmt, BREAK, "break");
     Node idOpt = getAndTestSymbol(breakStmt, ID_OPTION, "id-option");
-    Node id = getAndTestSymbol(idOpt, ID, "ID");
+    Node id = getFromAndTestNotNull(idOpt, ID);
     testForTerminal(id, "x");
+    
+    testCode = "break";
+    breakStmt = getTestStatement(testCode, BREAK_STMT);
+    getFromAndTestNotNull(breakStmt, BREAK);
+    idOpt = getFromAndTestNotNull(breakStmt, ID_OPTION);
+    assertTrue(idOpt.getAll().isEmpty());
   }
   
   @Test
@@ -100,7 +116,7 @@ public class RowdyBuilderTest {
     Node returnStmt = getTestStatement(testCode, RETURN_STMT);
     
     getAndTestSymbol(returnStmt, RETURN, "return");
-    getAndTestSymbol(returnStmt, EXPRESSION, "expr");
+    getFromAndTestNotNull(returnStmt, EXPRESSION);
   }
   
   @Test
@@ -109,12 +125,16 @@ public class RowdyBuilderTest {
     Node functionCall = getTestStatement(testCode, FUNC_CALL);
     
     getAndTestSymbol(functionCall, CALL, "->");
-    Node id = getAndTestSymbol(functionCall, ID, "ID");
+    Node id = getFromAndTestNotNull(functionCall, ID);
     testForTerminal(id, "function");
     getAndTestSymbol(functionCall, OPENPAREN, "(");
-    getAndTestSymbol(functionCall, EXPRESSION, "expr");
-    getAndTestSymbol(functionCall, EXPR_LIST, "expr-list");
+    getFromAndTestNotNull(functionCall, EXPRESSION);
+    getFromAndTestNotNull(functionCall, EXPR_LIST);
     getAndTestSymbol(functionCall, CLOSEDPAREN, ")");
+    
+    testCode = "->function(0, \"Hello\", apples)";
+    functionCall = getTestStatement(testCode, FUNC_CALL);
+    testExpressionList(functionCall);
   }
   
   @Test
@@ -123,9 +143,19 @@ public class RowdyBuilderTest {
     Node readStmt = getTestStatement(testCode, READ_STMT);
     
     getAndTestSymbol(readStmt, READ, "read");
-    Node id = getAndTestSymbol(readStmt, ID, "ID");
+    Node id = getFromAndTestNotNull(readStmt, ID);
     testForTerminal(id, "testID");
-    getAndTestSymbol(readStmt, PARAMS_TAIL, "params-tail");
+    getFromAndTestNotNull(readStmt, PARAMS_TAIL);
+    
+    testCode = "read a1, a2, a3, a4, a5";
+    readStmt = getTestStatement(testCode, READ_STMT);
+    
+    Node paramsTail = getFromAndTestNotNull(readStmt, PARAMS_TAIL);
+    while(paramsTail.hasChildren()) {
+      getFromAndTestNotNull(paramsTail, COMMA);
+      getFromAndTestNotNull(paramsTail, ID);
+      paramsTail = getFromAndTestNotNull(paramsTail, PARAMS_TAIL);
+    }
   }
   
   @Test
@@ -134,8 +164,14 @@ public class RowdyBuilderTest {
     Node printStmt = getTestStatement(testCode, PRINT_STMT);
     
     getAndTestSymbol(printStmt, PRINT, "print");
-    getAndTestSymbol(printStmt, EXPRESSION, "expr");
-    getAndTestSymbol(printStmt, EXPR_LIST, "expr-list");
+    getFromAndTestNotNull(printStmt, EXPRESSION);
+    getFromAndTestNotNull(printStmt, EXPR_LIST);
+    
+    testCode = "print a1, a2, a3, a4, a5, 100, \"Hello World!\"";
+    printStmt = getTestStatement(testCode, PRINT_STMT);
+    
+    testExpressionList(printStmt);
+    
   }
   
 }

@@ -10,15 +10,8 @@ import rowdy.RowdyLexer;
 import rowdy.Terminal;
 import rowdy.Language;
 import rowdy.Node;
-import static rowdy.Rowdy.CONST;
-import static rowdy.Rowdy.GRAMMAR;
-import static rowdy.Rowdy.ID;
-import static rowdy.Rowdy.NONTERMINALS;
-import static rowdy.Rowdy.SPECIAL_SYMBOLS;
-import static rowdy.Rowdy.STATEMENT;
-import static rowdy.Rowdy.TERMINALS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static rowdy.Rowdy.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -69,5 +62,23 @@ public class TestUtils {
     String actual = toFetch.symbol().getSymbolAsString();
     assertEquals("The expected Symbol did not match ID: " + nodeId, expected, actual);
     return toFetch;
+  }
+  
+  public static void testExpressionList(Node root) {
+    Node exprList = getFromAndTestNotNull(root, EXPR_LIST);
+    while(exprList.hasChildren()) {
+      getFromAndTestNotNull(exprList, COMMA);
+      getFromAndTestNotNull(exprList, EXPRESSION);
+      exprList = getFromAndTestNotNull(exprList, EXPR_LIST);
+    }
+  }
+  
+  public static Node getAtomicFromExpression(Node expr, int nodeId) {
+    return expr .get(BOOL_TERM)
+                .get(BOOL_FACTOR)
+                .get(ARITHM_EXPR)
+                .get(TERM)
+                .get(FACTOR)
+                .get(nodeId);
   }
 }
