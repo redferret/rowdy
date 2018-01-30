@@ -74,11 +74,16 @@ public class TestUtils {
   }
   
   public static Node getAtomicFromExpression(Node expr, int nodeId) {
-    return expr .get(BOOL_TERM)
-                .get(BOOL_FACTOR)
-                .get(ARITHM_EXPR)
-                .get(TERM)
-                .get(FACTOR)
-                .get(nodeId);
+    try {
+      return expr .get(BOOL_TERM)
+                  .get(BOOL_FACTOR)
+                  .get(ARITHM_EXPR)
+                  .get(TERM)
+                  .get(FACTOR)
+                  .get(nodeId);
+    }catch(Throwable t) {
+      fail("Expression Tree is invalid");
+    }
+    return null;
   }
 }
