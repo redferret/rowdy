@@ -121,7 +121,7 @@ public class Rowdy {
             new int[][]{{ID,PRULE_BOOL_TERM}, {MINUS,PRULE_BOOL_TERM}, 
                         {OPENPAREN,PRULE_BOOL_TERM}, {CONST,PRULE_BOOL_TERM}, 
                         {CONCAT, PRULE_CONCAT}, {SLICE, PRULE_SLICE}, 
-                        {STRCMP, PRULE_STRCMP}, {CALL, PRULE_FUNC_CALL}, 
+                        {STRCMP, PRULE_STRCMP}, {CALL, PRULE_BOOL_TERM}, 
                         {ISSET,PRULE_ISSET_EXPR},{FUNC,PRULE_ANONYMOUS_FUNC},
                         {ARRAY, PRULE_ARRAY_EXPR}, {GET, PRULE_ARRAY_ACCESS},
                         {ROUND, PRULE_ROUND_EXPR}}),
@@ -138,21 +138,23 @@ public class Rowdy {
     new NonTerminal("bool-term", BOOL_TERM, 
             new int[][]{{ID,PRULE_BOOL_FACTOR}, {MINUS,PRULE_BOOL_FACTOR}, 
                         {OPENPAREN,PRULE_BOOL_FACTOR}, 
-                        {CONST,PRULE_BOOL_FACTOR}}),
+                        {CONST,PRULE_BOOL_FACTOR},{CALL, PRULE_BOOL_FACTOR}}),
     new NonTerminal("bool-term-tail", BOOL_TERM_TAIL, 
             new int[][]{{SEMICOLON, END}, {ELSE, END},{LCURLY, END}, 
                         {OR, PRULE_BOOL_TERM_OR},{CLOSEDPAREN, END}}),
     
     new NonTerminal("bool-factor", BOOL_FACTOR, 
             new int[][]{{ID,PRULE_ARITHM_EXPR}, {MINUS,PRULE_ARITHM_EXPR}, 
-              {OPENPAREN,PRULE_ARITHM_EXPR}, {CONST,PRULE_ARITHM_EXPR}}),
+                        {OPENPAREN,PRULE_ARITHM_EXPR},{CONST,PRULE_ARITHM_EXPR},
+                        {CALL, PRULE_ARITHM_EXPR}}),
     new NonTerminal("bool-factor-tail", BOOL_FACTOR_TAIL, 
             new int[][]{{SEMICOLON, END}, {ELSE, END},{LCURLY, END}, {OR, END}, 
                         {AND, PRULE_BOOL_FACTOR_AND},{CLOSEDPAREN, END}}),
     
     new NonTerminal("arith-expr", ARITHM_EXPR, 
             new int[][]{{ID,PRULE_TERM}, {MINUS,PRULE_TERM}, 
-                        {OPENPAREN,PRULE_TERM}, {CONST,PRULE_TERM}}),
+                        {OPENPAREN,PRULE_TERM}, {CONST,PRULE_TERM},
+                        {CALL, PRULE_TERM}}),
     new NonTerminal("relation-option", RELATION_OPTION, 
             new int[][]{{SEMICOLON, END}, {ELSE, END}, 
                         {LCURLY, END}, {OR, END}, {AND, END}, 
@@ -165,7 +167,8 @@ public class Rowdy {
     
     new NonTerminal("term", TERM, 
             new int[][]{{ID,PRULE_FACTOR}, {MINUS,PRULE_FACTOR}, 
-                        {OPENPAREN,PRULE_FACTOR}, {CONST,PRULE_FACTOR}}),
+                        {OPENPAREN,PRULE_FACTOR}, {CONST,PRULE_FACTOR},
+                        {CALL, PRULE_FACTOR}}),
     new NonTerminal("term-tail", TERM_TAIL, 
             new int[][]{{SEMICOLON, END}, {THEN, END},{ELSE,END},{REPEAT, END},
                         {OR, END}, {AND, END}, {LESS, END}, {LESSEQUAL, END}, 
@@ -176,7 +179,8 @@ public class Rowdy {
     
     new NonTerminal("factor", FACTOR, 
             new int[][]{{ID, PRULE_ATOMIC}, {MINUS, PRULE_MINUS}, 
-                        {OPENPAREN, PRULE_PAREN_EXPR}, {CONST, PRULE_ATOMIC}}),
+                        {OPENPAREN, PRULE_PAREN_EXPR}, {CONST, PRULE_ATOMIC},
+                        {CALL, PRULE_ATOMIC}}),
     new NonTerminal("factor-tail", FACTOR_TAIL, 
             new int[][]{{SEMICOLON, END}, {THEN, END}, {ELSE, END}, 
                         {REPEAT, END}, {OR, END}, {AND, END}, {LESS, END}, 
@@ -185,8 +189,9 @@ public class Rowdy {
                         {MULTIPLY, PRULE_MUL}, {DIVIDE, PRULE_DIV}, 
                         {POW, PRULE_FACTOR_POW}, {MOD, PRULE_FACTOR_MOD}, 
                         {CLOSEDPAREN, END}, {LCURLY, END}}),
-    new NonTerminal("atom", ATOMIC, 
-            new int[][]{{ID, PRULE_ID}, {CONST, PRULE_CONST}}),
+    new NonTerminal("atomic", ATOMIC, 
+            new int[][]{{ID, PRULE_ID}, {CONST, PRULE_CONST}, 
+                        {CALL, PRULE_FUNC_CALL}}),
     new NonTerminal("def", DEFINITION, 
             new int[][]{{FUNC, PRULE_FUNCTION_DEF}, {ID, PRULE_ASSIGN_GLOBAL}, 
                         {LCURLY, END}}),
@@ -203,8 +208,8 @@ public class Rowdy {
     new NonTerminal("params", PARAMETERS, 
             new int[][]{{ID, PRULE_ID_PARAM}, {CLOSEDPAREN, END}}),
     new NonTerminal("params-tail", PARAMS_TAIL, 
-            
             new int[][]{{COMMA, PRULE_ID_PARAM_TAIL}, {CLOSEDPAREN, END}}),
+    
     new NonTerminal("func-call", FUNC_CALL, 
             new int[][]{{CALL, PRULE_FUNCTION_CALL}}),
     new NonTerminal("stmt-id", STMT_ID, 
@@ -236,58 +241,152 @@ public class Rowdy {
   };
   
   public static final ProductionRule[] GRAMMAR = {
+    /**
+     **********************************************   Program
+     */
     new ProductionRule(PRULE_START,
 		new int[]{DEFINITION}),
+    
+    new ProductionRule(PRULE_FUNC_ASSIGN_GLOBAL, 
+		new int[]{FUNC_CALL, SEMICOLON, DEFINITION}),
+    new ProductionRule(PRULE_FUNCTION_DEF, 
+		new int[]{FUNCTION, DEFINITION}),
+    new ProductionRule(PRULE_ASSIGN_GLOBAL, 
+		new int[]{ASSIGN_STMT, SEMICOLON, DEFINITION}),
+    
+    /**
+     **********************************************   Statement
+     */
+    new ProductionRule(PRULE_STMT_BLOCK, 
+		new int[]{RCURLY, STMT_LIST, LCURLY}),
     new ProductionRule(PRULE_STMT_LIST, 
 		new int[]{STATEMENT, STMT_TAIL}),
     new ProductionRule(PRULE_STMT_TAIL, 
 		new int[]{SEMICOLON, STATEMENT, STMT_TAIL}),
+    
     new ProductionRule(PRULE_IF_STMT, 
 		new int[]{IF_STMT}),
-    new ProductionRule(PRULE_LOOP_STMT, 
-		new int[]{LOOP_STMT}),
-    new ProductionRule(PRULE_BREAK_STMT, 
-		new int[]{BREAK_STMT}),
-    new ProductionRule(PRULE_ASSIGN_STMT, 
-		new int[]{ASSIGN_STMT}),
-    new ProductionRule(PRULE_READ_STMT, 
-		new int[]{READ_STMT}),
-    new ProductionRule(PRULE_PRINT_STMT, 
-		new int[]{PRINT_STMT}),
-    new ProductionRule(PRULE_RETURN_STMT, 
-		new int[]{RETURN_STMT}),
-    new ProductionRule(PRULE_RETURN, 
-		new int[]{RETURN, EXPRESSION}),
     new ProductionRule(PRULE_IF, 
 		new int[]{IF, EXPRESSION, STMT_BLOCK, ELSE_PART}),
     new ProductionRule(PRULE_ELSE, 
 		new int[]{ELSE, STMT_BLOCK}),
+    
+    new ProductionRule(PRULE_LOOP_STMT, 
+		new int[]{LOOP_STMT}),
     new ProductionRule(PRULE_LOOP, 
 		new int[]{LOOP, ID, COLON, STMT_BLOCK}),
+    
+    new ProductionRule(PRULE_BREAK_STMT, 
+		new int[]{BREAK_STMT}),
     new ProductionRule(PRULE_BREAK, 
 		new int[]{BREAK, ID_OPTION}),
-    new ProductionRule(PRULE_ID, 
-		new int[]{ID}),
+    
+    new ProductionRule(PRULE_ASSIGN_STMT, 
+		new int[]{ASSIGN_STMT}),
     new ProductionRule(PRULE_ASSIGN, 
 		new int[]{ID, BECOMES, EXPRESSION}),
-    new ProductionRule(PRULE_PRINT, 
-		new int[]{PRINT, EXPRESSION, EXPR_LIST}),
+    
+    new ProductionRule(PRULE_READ_STMT, 
+		new int[]{READ_STMT}),
     new ProductionRule(PRULE_READ, 
 		new int[]{READ, ID, PARAMS_TAIL}),
     
+    new ProductionRule(PRULE_PRINT_STMT, 
+		new int[]{PRINT_STMT}),
+    new ProductionRule(PRULE_PRINT, 
+		new int[]{PRINT, EXPRESSION, EXPR_LIST}),
+    
+    new ProductionRule(PRULE_RETURN_STMT, 
+		new int[]{RETURN_STMT}),
+    new ProductionRule(PRULE_RETURN, 
+		new int[]{RETURN, EXPRESSION}),
+    
+    
+    /**
+     **********************************************   Expression
+     */
+    new ProductionRule(PRULE_PAREN_EXPR, 
+		new int[]{OPENPAREN, EXPRESSION, CLOSEDPAREN}),
+   
+    new ProductionRule(PRULE_ARRAY_EXPR,
+        new int[]{ARRAY_EXPR}),
+    new ProductionRule(PRULE_ARRAY,
+        new int[]{ARRAY, OPENPAREN, EXPRESSION, ARRAY_BODY, CLOSEDPAREN}),
+    
+    new ProductionRule(PRULE_EXPR_LIST, 
+		new int[]{COMMA, EXPRESSION, EXPR_LIST}),
+    
+    new ProductionRule(PRULE_ISSET_EXPR, 
+		new int[]{ISSET_EXPR}),
+    new ProductionRule(PRULE_ISSET, 
+		new int[]{ISSET, ID}),
+    
+    new ProductionRule(PRULE_ROUND_EXPR, 
+		new int[]{ROUND_EXPR}),
+    new ProductionRule(PRULE_ROUND, 
+		new int[]{ROUND, ID, COMMA, ARITHM_EXPR}),
+    
+    new ProductionRule(PRULE_CONCAT, 
+		new int[]{CONCAT, EXPRESSION, EXPR_LIST}),
+    new ProductionRule(PRULE_SLICE, 
+		new int[]{SLICE, EXPRESSION, COMMA, ARITHM_EXPR, COMMA, ARITHM_EXPR}),
+    new ProductionRule(PRULE_STRCMP, 
+		new int[]{STRCMP, EXPRESSION, COMMA, EXPRESSION}),
+    
+    /**
+     **********************************************   Atomic
+     */
+    new ProductionRule(PRULE_ATOMIC, 
+		new int[]{ATOMIC}),
+    new ProductionRule(PRULE_ID, 
+		new int[]{ID}),
+    new ProductionRule(PRULE_ID_PARAM, 
+		new int[]{ID, PARAMS_TAIL}),
+    new ProductionRule(PRULE_ID_PARAM_TAIL, 
+		new int[]{COMMA, ID, PARAMS_TAIL}),
+    
+    new ProductionRule(PRULE_CONST, 
+		new int[]{CONST}),
     
     new ProductionRule(PRULE_ATOM_LIST_TAIL, 
 		new int[]{COMMA, ATOMIC, ATOM_LIST_TAIL}),
+    
+    /**
+     **********************************************   Arrays
+     */
+    new ProductionRule(PRULE_ARRAY_LINEAR_BODY,
+        new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY}),
+    
+    new ProductionRule(PRULE_ARRAY_KEY_VALUE_BODY,
+        new int[]{COLON, EXPRESSION, ARRAY_KEY_VALUE_BODY_TAIL}),
+    new ProductionRule(PRULE_ARRAY_KEY_VALUE_BODY_TAIL,
+        new int[]{COMMA, EXPRESSION, ARRAY_KEY_VALUE_BODY}),
+    
+    new ProductionRule(PRULE_ARRAY_ACCESS,
+        new int[]{GET, OPENPAREN, EXPRESSION, COMMA, EXPRESSION, CLOSEDPAREN}),
+    
+    /**
+     **********************************************   Boolean Term
+     */
     new ProductionRule(PRULE_BOOL_TERM, 
 		new int[]{BOOL_TERM, BOOL_TERM_TAIL}),
     new ProductionRule(PRULE_BOOL_TERM_OR, 
 		new int[]{OR, BOOL_TERM, BOOL_TERM_TAIL}),
+    
+    /**
+     **********************************************   Boolean Factor
+     */
     new ProductionRule(PRULE_BOOL_FACTOR, 
 		new int[]{BOOL_FACTOR, BOOL_FACTOR_TAIL}),
     new ProductionRule(PRULE_BOOL_FACTOR_AND, 
 		new int[]{AND, BOOL_FACTOR, BOOL_FACTOR_TAIL}),
+    
+    /**
+     **********************************************   Arithmetic
+     */
     new ProductionRule(PRULE_ARITHM_EXPR, 
 		new int[]{ARITHM_EXPR, RELATION_OPTION}),
+    
     new ProductionRule(PRULE_ARITHM_LESS, 
 		new int[]{LESS, ARITHM_EXPR}),
     new ProductionRule(PRULE_ARITHM_LESSEQUAL, 
@@ -300,12 +399,20 @@ public class Rowdy {
 		new int[]{GREATER, ARITHM_EXPR}),
     new ProductionRule(PRULE_ARITHM_NOTEQUAL, 
 		new int[]{NOTEQUAL, ARITHM_EXPR}),
+    
+    /**
+     **********************************************   Term
+     */
     new ProductionRule(PRULE_TERM, 
 		new int[]{TERM, TERM_TAIL}),
     new ProductionRule(PRULE_TERM_PLUS, 
 		new int[]{PLUS, TERM, TERM_TAIL}),
     new ProductionRule(PRULE_TERM_MINUS, 
 		new int[]{MINUS, TERM, TERM_TAIL}),
+    
+    /**
+     **********************************************   Factor
+     */
     new ProductionRule(PRULE_FACTOR, 
 		new int[]{FACTOR, FACTOR_TAIL}),
     new ProductionRule(PRULE_MUL, 
@@ -314,57 +421,21 @@ public class Rowdy {
 		new int[]{DIVIDE, FACTOR, FACTOR_TAIL}),
     new ProductionRule(PRULE_MINUS, 
 		new int[]{MINUS, FACTOR}),
-    new ProductionRule(PRULE_ATOMIC, 
-		new int[]{ATOMIC}),
-    new ProductionRule(PRULE_PAREN_EXPR, 
-		new int[]{OPENPAREN, EXPRESSION, CLOSEDPAREN}),
-    new ProductionRule(PRULE_CONST, 
-		new int[]{CONST}),
     new ProductionRule(PRULE_FACTOR_POW, 
 		new int[]{POW, FACTOR, FACTOR_TAIL}),
     new ProductionRule(PRULE_FACTOR_MOD, 
 		new int[]{MOD, FACTOR, FACTOR_TAIL}),
     
-    new ProductionRule(PRULE_CONCAT, 
-		new int[]{CONCAT, EXPRESSION, EXPR_LIST}),
-    new ProductionRule(PRULE_SLICE, 
-		new int[]{SLICE, EXPRESSION, COMMA, ARITHM_EXPR, COMMA, ARITHM_EXPR}),
-    new ProductionRule(PRULE_STRCMP, 
-		new int[]{STRCMP, EXPRESSION, COMMA, EXPRESSION}),
-    new ProductionRule(PRULE_FUNCTION_DEF, 
-		new int[]{FUNCTION, DEFINITION}),
-    new ProductionRule(PRULE_ISSET, 
-		new int[]{ISSET, ID}),
-    new ProductionRule(PRULE_ROUND_EXPR, 
-		new int[]{ROUND_EXPR}),
-    new ProductionRule(PRULE_ROUND, 
-		new int[]{ROUND, ID, COMMA, ARITHM_EXPR}),
-    new ProductionRule(PRULE_ISSET_EXPR, 
-		new int[]{ISSET_EXPR}),
-    
-    new ProductionRule(PRULE_ASSIGN_GLOBAL, 
-		new int[]{ASSIGN_STMT, SEMICOLON, DEFINITION}),
+    /**
+     **********************************************   Function
+     */
+    new ProductionRule(PRULE_FUNC_CALL, 
+		new int[]{FUNC_CALL}),
+    new ProductionRule(PRULE_FUNCTION_CALL, 
+		new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN}),
     
     new ProductionRule(PRULE_FUNCTION, 
 		new int[]{FUNC, ID, FUNCTION_BODY}),
-    
-    new ProductionRule(PRULE_ID_PARAM, 
-		new int[]{ID, PARAMS_TAIL}),
-    new ProductionRule(PRULE_ID_PARAM_TAIL, 
-		new int[]{COMMA, ID, PARAMS_TAIL}),
-    
-    new ProductionRule(PRULE_FUNCTION_CALL, 
-		new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN}),
-    new ProductionRule(PRULE_FUNC_CALL, 
-		new int[]{FUNC_CALL}),
-    
-    new ProductionRule(PRULE_FUNC_ASSIGN_GLOBAL, 
-		new int[]{FUNC_CALL, SEMICOLON, DEFINITION}),
-    new ProductionRule(PRULE_EXPR_LIST, 
-		new int[]{COMMA, EXPRESSION, EXPR_LIST}),
-    
-    new ProductionRule(PRULE_STMT_BLOCK, 
-		new int[]{RCURLY, STMT_LIST, LCURLY}),
     new ProductionRule(PRULE_FUNCTION_BODY, 
 		new int[]{OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK}),
     new ProductionRule(PRULE_ANONYMOUS_FUNC, 
@@ -372,22 +443,13 @@ public class Rowdy {
     new ProductionRule(PRULE_ANONYMOUS_FUNC_BODY, 
 		new int[]{FUNCTION_BODY}),
     
-    new ProductionRule(PRULE_ARRAY_EXPR,
-        new int[]{ARRAY_EXPR}),
-    new ProductionRule(PRULE_ARRAY,
-        new int[]{ARRAY, OPENPAREN, EXPRESSION, ARRAY_BODY, CLOSEDPAREN}),
     
-    new ProductionRule(PRULE_ARRAY_LINEAR_BODY,
-        new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY}),
     
-    new ProductionRule(PRULE_ARRAY_KEY_VALUE_BODY,
-        new int[]{COLON, EXPRESSION, ARRAY_KEY_VALUE_BODY_TAIL}),
-    new ProductionRule(PRULE_ARRAY_KEY_VALUE_BODY_TAIL,
-        new int[]{COMMA, EXPRESSION, ARRAY_KEY_VALUE_BODY}),
     
-    new ProductionRule(PRULE_ARRAY_ACCESS,
-        new int[]{GET, OPENPAREN, EXPRESSION, COMMA, EXPRESSION, CLOSEDPAREN}),
     
+    /**
+     **********************************************   END
+     */
     new ProductionRule(END, 
 		new int[]{}),
   };
