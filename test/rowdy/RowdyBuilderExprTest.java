@@ -32,19 +32,19 @@ public class RowdyBuilderExprTest {
     Node expr = getAndTestSymbol(stmt, EXPRESSION, "expr");
     
     Node boolTerm = getAndTestSymbol(expr, BOOL_TERM, "bool-term");
-    getAndTestSymbol(expr, BOOL_TERM_TAIL, "bool-term-tail");
+    Node boolTermTail = getAndTestSymbol(expr, BOOL_TERM_TAIL, "bool-term-tail");
     
     Node boolFactor = getAndTestSymbol(boolTerm, BOOL_FACTOR, "bool-factor");
-    getAndTestSymbol(boolTerm, BOOL_FACTOR_TAIL, "bool-factor-tail");
+    Node boolFactorTail = getAndTestSymbol(boolTerm, BOOL_FACTOR_TAIL, "bool-factor-tail");
     
     Node arithmExpr = getAndTestSymbol(boolFactor, ARITHM_EXPR, "arith-expr");
-    getAndTestSymbol(boolFactor, RELATION_OPTION, "relation-option");
+    Node relationOpt = getAndTestSymbol(boolFactor, RELATION_OPTION, "relation-option");
     
     Node term = getAndTestSymbol(arithmExpr, TERM, "term");
-    getAndTestSymbol(arithmExpr, TERM_TAIL, "term-tail");
+    Node termTail = getAndTestSymbol(arithmExpr, TERM_TAIL, "term-tail");
     
-    getAndTestSymbol(term, FACTOR, "factor");
-    getAndTestSymbol(term, FACTOR_TAIL, "factor-tail");
+    Node factor = getAndTestSymbol(term, FACTOR, "factor");
+    Node factorTail = getAndTestSymbol(term, FACTOR_TAIL, "factor-tail");
   }
   
   // Provide data
@@ -52,7 +52,7 @@ public class RowdyBuilderExprTest {
   public static List<Object[]> data() {
     List<Object[]> list = new ArrayList<>();
     list.add(new Object[]{"e= a + b"});
-    list.add(new Object[]{"e= 5 * "});
+    list.add(new Object[]{"e= 5 "});
     list.add(new Object[]{"e= a ->a() + ->b()"});
     list.add(new Object[]{"e= a or b"});
     list.add(new Object[]{"e= ->a() or b"});

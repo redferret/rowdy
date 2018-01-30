@@ -35,7 +35,7 @@ public class TestUtils {
   
   public static Node getRoot(String testProgram) {
     parser.parseLine(testProgram);
-    builder.buildAsSingleLine(parser);
+    builder.buildLine(parser);
     Node root = builder.getProgram();
     assertNotNull("Root Program is Null", root);
     return root;

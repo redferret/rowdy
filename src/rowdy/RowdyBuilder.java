@@ -38,7 +38,7 @@ public class RowdyBuilder {
     this.buildAs(parser, PROGRAM);
   }
 
-  public void buildAsSingleLine(RowdyLexer parser) {
+  public void buildLine(RowdyLexer parser) {
     this.buildAs(parser, STMT_LIST);
   }
   

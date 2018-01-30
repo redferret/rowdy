@@ -506,15 +506,15 @@ public class Rowdy {
         }
         try {
           parser.parseLine(line);
-          builder.buildAsSingleLine(parser);
-          rowdyProgram.initialize(builder, true);
+          builder.buildLine(parser);
+          rowdyProgram.initializeLine(builder);
         } catch (Exception e) {
           System.out.println("Build Exception: " + e.getMessage());
-          System.exit(500);
+          continue;
         }
 
         try {
-          rowdyProgram.execute();
+          rowdyProgram.executeLine();
         } catch (Exception e) {
           handleException(rowdyProgram, e);
         }
