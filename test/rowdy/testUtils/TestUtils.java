@@ -60,7 +60,7 @@ public class TestUtils {
   public static Node getAndTestSymbol(Node from, int nodeId, String expected){
     Node toFetch = getFromAndTestNotNull(from, nodeId);
     String actual = toFetch.symbol().getSymbolAsString();
-    assertEquals("The expected Symbol did not match ID: " + nodeId, expected, actual);
+    assertEquals("The expected Symbol is incorrect " + nodeId, expected, actual);
     return toFetch;
   }
   
@@ -71,19 +71,5 @@ public class TestUtils {
       getFromAndTestNotNull(exprList, EXPRESSION);
       exprList = getFromAndTestNotNull(exprList, EXPR_LIST);
     }
-  }
-  
-  public static Node getAtomicFromExpression(Node expr, int nodeId) {
-    try {
-      return expr .get(BOOL_TERM)
-                  .get(BOOL_FACTOR)
-                  .get(ARITHM_EXPR)
-                  .get(TERM)
-                  .get(FACTOR)
-                  .get(nodeId);
-    }catch(Throwable t) {
-      fail("Expression Tree is invalid");
-    }
-    return null;
   }
 }
