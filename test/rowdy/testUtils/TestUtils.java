@@ -5,8 +5,9 @@
  */
 package rowdy.testUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import rowdy.RowdyBuilder;
+import rowdy.RowdyLexer;
+import rowdy.Terminal;
 import rowdy.Language;
 import rowdy.Node;
 import static rowdy.Rowdy.CONST;
@@ -16,9 +17,8 @@ import static rowdy.Rowdy.NONTERMINALS;
 import static rowdy.Rowdy.SPECIAL_SYMBOLS;
 import static rowdy.Rowdy.STATEMENT;
 import static rowdy.Rowdy.TERMINALS;
-import rowdy.RowdyBuilder;
-import rowdy.RowdyLexer;
-import rowdy.Terminal;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -49,7 +49,11 @@ public class TestUtils {
   }
   
   public static Node getFromAndTestNotNull(Node from, int id) {
-    Node toFetch = from.get(id, false);
+    return getFromAndTestNotNull(from, id, 0);
+  }
+  
+  public static Node getFromAndTestNotNull(Node from, int id, int occur) {
+    Node toFetch = from.get(id, occur, false);
     assertNotNull("Node doesn't contain the given id: " + id, toFetch);
     return toFetch;
   }

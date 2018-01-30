@@ -61,7 +61,7 @@ public class Node {
     return get(id, 0);
   }
 
-  public Node get(int id, boolean throwException) {
+  public Node get(int id, int occur, boolean throwException){
     if (throwException) {
       return get(id, 0);
     } else {
@@ -71,6 +71,10 @@ public class Node {
         return null;
       }
     }
+  }
+  
+  public Node get(int id, boolean throwException) {
+    return get(id, 0, throwException);
   }
 
   /**
@@ -83,7 +87,7 @@ public class Node {
    * @param occur The number of times to skip a duplicate
    * @return The child node of this parent, null if it doesn't exist.
    */
-  public Node get(int id, int occur) {
+  public Node get(int id, int occur) throws RuntimeException {
     for (int c = 0; c < children.size(); c++) {
       if (children.get(c).symbol().id() == id
               && occur == 0) {
