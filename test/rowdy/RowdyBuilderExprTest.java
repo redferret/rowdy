@@ -52,13 +52,11 @@ public class RowdyBuilderExprTest {
   public static List<Object[]> data() {
     List<Object[]> list = new ArrayList<>();
     list.add(new Object[]{"e= a + b"});
-    list.add(new Object[]{"e= a -+ b"});
-    list.add(new Object[]{"e= a +- b"});
+    list.add(new Object[]{"e= 5 * "});
+    list.add(new Object[]{"e= a ->a() + ->b()"});
     list.add(new Object[]{"e= a or b"});
-    list.add(new Object[]{"e= a and b"});
-    list.add(new Object[]{"e= a +-+* b"});
-    list.add(new Object[]{"e= a +-+* b"});
-    list.add(new Object[]{"e= a +-+* b"});
+    list.add(new Object[]{"e= ->a() or b"});
+    list.add(new Object[]{"e= (a/ b) and b or/*-/+or or a"});
     return list;
   }
 }

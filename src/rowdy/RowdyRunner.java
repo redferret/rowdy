@@ -520,8 +520,6 @@ public class RowdyRunner {
     Symbol operator;
     int curID = cur.symbol().id();
     switch (curID) {
-      case FUNC_CALL:
-        return executeFunc(cur);
       case EXPRESSION:
         Node leftChild = cur.getLeftMostChild();
         if (leftChild == null) {
@@ -531,8 +529,6 @@ public class RowdyRunner {
           case BOOL_TERM:
             leftValue = executeExpr(leftChild, leftValue);
             return executeExpr(cur.get(BOOL_TERM_TAIL), leftValue);
-          case FUNC_CALL:
-            return executeExpr(leftChild, leftValue);
           case ISSET_EXPR:
             return executeExpr(leftChild, leftValue);
         }
@@ -815,6 +811,8 @@ public class RowdyRunner {
         return new Value(cur.symbol());
       case CONST:
         return new Value(((Terminal) cur.symbol()).getName());
+      case FUNC_CALL:
+        return executeFunc(cur);
       default:
         return leftValue;
     }
