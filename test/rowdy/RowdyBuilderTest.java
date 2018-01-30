@@ -32,12 +32,12 @@ public class RowdyBuilderTest {
     builder.buildAsSingleLine(parser);
     Node root = builder.getProgram();
     assertNotNull(root);
-    String actual = root.symbol().getSymbol();
+    String actual = root.symbol().getSymbolAsString();
     String expected = "stmt-list";
     assertEquals(expected, actual);
     
     Node assignStmt = root.get(STATEMENT).get(ASSIGN_STMT);
-    actual = assignStmt.symbol().getSymbol();
+    actual = assignStmt.symbol().getSymbolAsString();
     expected = "assign-stmt";
     assertEquals(expected, actual);
   }
@@ -50,26 +50,51 @@ public class RowdyBuilderTest {
     builder.build(parser);
     Node root = builder.getProgram();
     assertNotNull(root);
-    String actual = root.symbol().getSymbol();
+    String actual = root.symbol().getSymbolAsString();
     String expected = "prog";
     assertEquals("No program found", expected, actual);
     
-    Node definition = root.get(DEFINITION);
-    actual = definition.symbol().getSymbol();
-    expected = "def";
-    assertEquals("No definition found", expected, actual);
+    Node definition = getAndTestSymbol(root, DEFINITION, "def");
+    Node function = getAndTestSymbol(definition, FUNCTION, "function");
     
-    Node function = definition.get(FUNCTION);
-    actual = function.symbol().getSymbol();
-    expected = "function";
-    assertEquals("No function found", expected, actual);
+    Node mainFunc = getFromAndTestNotNull(function, ID);
+    testForTerminal(mainFunc, "main");
+  }
+  
+  @Test
+  public void testAssignmentStatement() {
+    String testProgram = "a = 100";
     
-    Node mainFunc = function.get(ID);
-    actual = ((Terminal)mainFunc.symbol()).getName();
-    expected = "main";
+    parser.parseLine(testProgram);
+    builder.buildAsSingleLine(parser);
+    Node root = builder.getProgram();
+    assertNotNull(root);
+    
+    Node statement = getFromAndTestNotNull(root, STATEMENT);
+    Node assignStmt = getFromAndTestNotNull(statement, ASSIGN_STMT);
+    
+    getAndTestSymbol(assignStmt, ID, "ID");
+    getAndTestSymbol(assignStmt, BECOMES, "=");
+    getAndTestSymbol(assignStmt, EXPRESSION, "expr");
+  }
+  
+  private Node getFromAndTestNotNull(Node from, int id) {
+    Node toFetch = from.get(id, false);
+    assertNotNull(toFetch);
+    return toFetch;
+  }
+  
+  private void testForTerminal(Node terminal, String expected) {
+    assertNotNull(terminal);
+    String actual = ((Terminal)terminal.symbol()).getName();
     assertEquals("No main found",expected, actual);
   }
   
-  
+  private Node getAndTestSymbol(Node from, int nodeId, String expected){
+    Node toFetch = getFromAndTestNotNull(from, nodeId);
+    String actual = toFetch.symbol().getSymbolAsString();
+    assertEquals(expected, actual);
+    return toFetch;
+  }
   
 }

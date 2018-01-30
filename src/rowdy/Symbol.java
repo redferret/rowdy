@@ -29,7 +29,7 @@ public abstract class Symbol {
     return id;
   }
 
-  public String getSymbol() {
+  public String getSymbolAsString() {
     return symbol;
   }
 

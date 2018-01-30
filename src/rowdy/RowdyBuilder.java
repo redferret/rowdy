@@ -93,7 +93,7 @@ public class RowdyBuilder {
                   + currentToken.getSymbol() + "' on Line " + line);
         }
         children.remove(i);
-        Terminal terminal = new Terminal(symbol.getSymbol(), currentToken.getID(), currentToken.getSymbol());
+        Terminal terminal = new Terminal(symbol.getSymbolAsString(), currentToken.getID(), currentToken.getSymbol());
         children.add(i, new Node(terminal, line));
         currentToken = parser.getToken();
         while (currentToken != null && currentToken.getID() == EOLN) {

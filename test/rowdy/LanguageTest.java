@@ -38,12 +38,12 @@ public class LanguageTest {
     ProductionSymbols result = language.getProductionSymbols(productionHint);
     assertNotNull(result);
     String nonTerminalName = "statement";
-    String actualName = ((NonTerminal)result.getSymbols()[0]).getSymbol();
+    String actualName = ((NonTerminal)result.getSymbols()[0]).getSymbolAsString();
     assertEquals(nonTerminalName, actualName);
   }
 
   /**
-   * Test of getSymbol method, of class Language.
+   * Test of getSymbolAsString method, of class Language.
    */
   @Test
   public void testGetSymbol() {
@@ -51,7 +51,7 @@ public class LanguageTest {
     int id = 0;
     String expResult = "add";
     Terminal symbol = (Terminal)language.getSymbol(id);
-    String symbolName = symbol.getSymbol();
+    String symbolName = symbol.getSymbolAsString();
     assertEquals(expResult, symbolName);
   }
   
