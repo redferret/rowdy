@@ -1,7 +1,8 @@
 package rowdy;
 
 /**
- *
+ * The wrapper for a value in Rowdy. This value can be anything, even a 
+ * Node, or a Function, or even another Rowdy program.
  * @author Richard DeSilvey
  */
 public class Value {

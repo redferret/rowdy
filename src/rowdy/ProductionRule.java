@@ -4,8 +4,9 @@ package rowdy;
 import java.util.Arrays;
 
 /**
- *
- * @author Richard
+ * A piece to a grammar that contains ids for a builder to consume and use to
+ * build a parse tree.
+ * @author Richard DeSilvey
  */
 public class ProductionRule {
   private final int id;

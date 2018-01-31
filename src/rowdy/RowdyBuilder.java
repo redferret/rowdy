@@ -5,8 +5,10 @@ import java.util.List;
 import static rowdy.Rowdy.*;
 
 /**
- *
- * @author Richard
+ * The builder takes a RowdyLexer instance and pulls tokens to build a parse
+ * tree with recursive decent parsing. If no build exceptions occur the 
+ * program can be retrieved.
+ * @author Richard DeSilvey
  */
 public class RowdyBuilder {
   

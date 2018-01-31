@@ -2,6 +2,12 @@ package rowdy;
 
 import java.util.HashMap;
 
+/**
+ * A function in Rowdy always returns a value, has it's own symbol table, id
+ * and the line it was called on. Functions are also used to initialize 
+ * RowdyObjects.
+ * @author Richard DeSilvey
+ */
 public class Function {
 
   private Value funcReturnValue;
@@ -64,7 +70,6 @@ public class Function {
    *
    * @param value The Value object that holds an atomic symbol. May contain an
    * ID or it may be a Constant.
-   * @param error throw any RuntimeExceptions or not
    * @return A value object with an atomic symbol stored in it.
    */
   public Value getValue(Value value) {
@@ -101,7 +106,10 @@ public class Function {
     return name;
   }
 
+  /**
+   * @return A shallow copy of this function's symbol table
+   */
   public HashMap getSymbolTable() {
-    return this.symbolTable;
+    return (HashMap) this.symbolTable.clone();
   }
 }
