@@ -63,10 +63,10 @@ public class Node {
 
   public Node get(int id, int occur, boolean throwException){
     if (throwException) {
-      return get(id, 0);
+      return get(id, occur);
     } else {
       try {
-        return get(id, 0);
+        return get(id, occur);
       } catch (RuntimeException re) {
         return null;
       }

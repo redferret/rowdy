@@ -565,7 +565,10 @@ public class RowdyRunner {
             
             Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
             if (bodyType == null) {
-              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL);
+              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+              if (bodyType == null) {
+                return new Value(new ArrayList<>());
+              }
               HashMap<String, Object> keypairArray = new HashMap<>();
               Value key = firstValue;
               Value keyValue = getValue(arrayBody.get(EXPRESSION));
