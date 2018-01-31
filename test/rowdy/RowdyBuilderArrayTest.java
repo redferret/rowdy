@@ -18,6 +18,7 @@ public class RowdyBuilderArrayTest {
     
     Node assignStmt = getTestStatement(testCode, ASSIGN_STMT);
     Node expr = getFromAndTestNotNull(assignStmt, EXPRESSION);
+    getAndTestSymbol(expr, GET, "get");
     testContainsSymbols(expr, 
             new int[]{GET,OPENPAREN,EXPRESSION,COMMA,EXPRESSION,CLOSEDPAREN});
     boolean e1 = getFromAndTestNotNull(expr, EXPRESSION, 0).getAll().isEmpty();
