@@ -305,11 +305,6 @@ public class Rowdy {
      */
     new ProductionRule(PRULE_PAREN_EXPR, 
 		new int[]{OPENPAREN, EXPRESSION, CLOSEDPAREN}),
-   
-    new ProductionRule(PRULE_ARRAY_EXPR,
-        new int[]{ARRAY_EXPR}),
-    new ProductionRule(PRULE_ARRAY,
-        new int[]{ARRAY, OPENPAREN, EXPRESSION, ARRAY_BODY, CLOSEDPAREN}),
     
     new ProductionRule(PRULE_EXPR_LIST, 
 		new int[]{COMMA, EXPRESSION, EXPR_LIST}),
@@ -352,6 +347,11 @@ public class Rowdy {
     /**
      **********************************************   Arrays
      */
+    new ProductionRule(PRULE_ARRAY_EXPR,
+        new int[]{ARRAY_EXPR}),
+    new ProductionRule(PRULE_ARRAY,
+        new int[]{ARRAY, OPENPAREN, EXPRESSION, ARRAY_BODY, CLOSEDPAREN}),
+    
     new ProductionRule(PRULE_ARRAY_LINEAR_BODY,
         new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY}),
     
@@ -436,6 +436,7 @@ public class Rowdy {
 		new int[]{FUNC, ID, FUNCTION_BODY}),
     new ProductionRule(PRULE_FUNCTION_BODY, 
 		new int[]{OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK}),
+    
     new ProductionRule(PRULE_ANONYMOUS_FUNC, 
 		new int[]{FUNC, ANONYMOUS_FUNC}),
     new ProductionRule(PRULE_ANONYMOUS_FUNC_BODY, 

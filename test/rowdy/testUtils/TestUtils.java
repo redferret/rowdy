@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package rowdy.testUtils;
 
 import rowdy.RowdyBuilder;
@@ -26,16 +22,34 @@ public class TestUtils {
   public static final RowdyBuilder builder = 
           RowdyBuilder.getBuilder(rowdy);
   
+  public static Node getTestProgram(String testProgram, int stmtId) {
+    parser.parseLine(testProgram);
+    try {
+      builder.build(parser);
+    } catch (Exception e) {
+      fail("Builder failed to compile: " + e.getLocalizedMessage());
+    }
+    Node root = builder.getProgram();
+    assertNotNull("Root Program is Null", root);
+    
+    Node definition = getFromAndTestNotNull(root, DEFINITION);
+    return getFromAndTestNotNull(definition, stmtId);
+  }
+  
   public static Node getTestStatement(String testProgram, int stmtId) {
-    Node root = getRoot(testProgram);
+    Node root = getRootSingleLine(testProgram);
     
     Node statement = getFromAndTestNotNull(root, STATEMENT);
     return getFromAndTestNotNull(statement, stmtId);
   }
   
-  public static Node getRoot(String testProgram) {
+  public static Node getRootSingleLine(String testProgram) {
     parser.parseLine(testProgram);
-    builder.buildLine(parser);
+    try {
+      builder.buildLine(parser);
+    } catch (Exception e) {
+      fail("Builder failed to compile: " + e.getLocalizedMessage());
+    }
     Node root = builder.getProgram();
     assertNotNull("Root Program is Null", root);
     return root;
@@ -49,6 +63,12 @@ public class TestUtils {
     Node toFetch = from.get(id, occur, false);
     assertNotNull("Node doesn't contain the given id: " + id, toFetch);
     return toFetch;
+  }
+  
+  public static void testContainsSymbols(Node parent, int[] prules){
+    for (int prule : prules) {
+      getFromAndTestNotNull(parent, prule);
+    }
   }
   
   public static void testForTerminal(Node terminal, String expected) {

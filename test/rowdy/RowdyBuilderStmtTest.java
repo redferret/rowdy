@@ -1,19 +1,27 @@
 
 package rowdy;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 import static rowdy.Rowdy.*;
 import static rowdy.testUtils.TestUtils.*;
 import static org.junit.Assert.*;
-import org.junit.runners.Parameterized.Parameters;
 
 /**
  *
  * @author Richard
  */
-public class RowdyBuilderTest {
+public class RowdyBuilderStmtTest {
+  
+  @Test
+  public void testStmtBlock() {
+    String testCode = "func main(){}";
+    
+    Node function = getTestProgram(testCode, FUNCTION);
+    Node functionBody = getAndTestSymbol(function, FUNCTION_BODY, "func-body");
+    Node stmtBlock = getFromAndTestNotNull(functionBody, STMT_BLOCK);
+    testContainsSymbols(stmtBlock, new int[]{LCURLY, STMT_LIST, RCURLY});
+    
+  }
   
   /**
    * Test of getProgram method, of class RowdyBuilder.
@@ -23,7 +31,7 @@ public class RowdyBuilderTest {
     
     String testCode = "main = func(){}";
     
-    Node root = getRoot(testCode);
+    Node root = getRootSingleLine(testCode);
     assertNotNull(root);
     String actual = root.symbol().getSymbolAsString();
     String expected = "stmt-list";
