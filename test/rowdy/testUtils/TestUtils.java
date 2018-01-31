@@ -66,6 +66,10 @@ public class TestUtils {
   }
   
   public static void testContainsSymbols(Node parent, int[] prules){
+    Integer actualLength = parent.getAll().size();
+    Integer expectedLength = prules.length;
+    assertEquals("The expected number of symbols is incorrect", 
+            expectedLength, actualLength);
     for (int prule : prules) {
       getFromAndTestNotNull(parent, prule);
     }
