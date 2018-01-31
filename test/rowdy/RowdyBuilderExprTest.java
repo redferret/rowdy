@@ -72,7 +72,7 @@ public class RowdyBuilderExprTest {
                         {DIVIDE, FACTOR, FACTOR_TAIL}, 
                         {MOD, FACTOR, FACTOR_TAIL}, 
                         {POW, FACTOR, FACTOR_TAIL}});
-  }
+    }
   
   
   public void testNodeLeftChild(Node testNode, final int cases[][]) {
