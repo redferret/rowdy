@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * The symbol for directing the builder to build out terminal leaf nodes and to
+ * give context to the children nodes.
  * @author Richard DeSilvey
  */
 public class NonTerminal extends Symbol {

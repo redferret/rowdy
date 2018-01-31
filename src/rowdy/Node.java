@@ -3,7 +3,7 @@ package rowdy;
 import java.util.ArrayList;
 
 /**
- * Tree Node for the parse tree
+ * Tree Node for a parse tree
  */
 public class Node {
 

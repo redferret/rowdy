@@ -3,8 +3,7 @@ package rowdy;
 import java.util.Arrays;
 
 /**
- * A production rule holds all the terminals and non-terminals for building a
- * parse tree.
+ * The translation from IDs to Symbols are held for the builder
  *
  * @author Richard DeSilvey
  */

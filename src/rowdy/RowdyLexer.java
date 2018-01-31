@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 /**
  * RowdyLexer parses code files and allows a fetch for each individual token when
- getID() is called. Once the token is called for it is removed from the file
+ * getID() is called. Once the token is called for it is removed from the file
  * stack. The file stack contains groupings of characters which are later
  * interpreted when getID is called.
  *

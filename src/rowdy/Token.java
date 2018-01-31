@@ -1,14 +1,15 @@
 package rowdy;
 
 /**
- * Wrapper class that holds a symbol and an id.
+ * A Token is an incomplete symbol but has an ID matched with a string that
+ * is the source code pulled in by a lexer.
  *
  * @author Richard DeSilvey
  */
 public class Token {
 
-  private int token;
-  private String symbol;
+  private final int token;
+  private final String symbol;
 
   public Token(int token, String symbol) {
     this.token = token;

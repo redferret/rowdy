@@ -3,7 +3,6 @@ package rowdy;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -11,8 +10,7 @@ import java.util.Stack;
 import static rowdy.Rowdy.*;
 
 /**
- * Constructs a parse tree with the given language and then allows you to
- * execute the parse tree.
+ * Executes a parse tree given by a builder.
  *
  * @author Richard DeSilvey
  */
