@@ -7,6 +7,11 @@
 	
 	func main (price, amt) {
 	
+		if ((isset price) and (isset amt)) == false {
+			print "Illegal or Missing Arguments\n";
+			return 1;
+		}
+	
 		change = amt - price;
 		change = round change, 2;
 		
