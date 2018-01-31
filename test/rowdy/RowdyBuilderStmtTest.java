@@ -69,7 +69,7 @@ public class RowdyBuilderStmtTest {
     
     getAndTestSymbol(assignStmt, ID, "ID");
     getAndTestSymbol(assignStmt, BECOMES, "=");
-    getFromAndTestNotNull(assignStmt, EXPRESSION);
+    testContainsSymbols(assignStmt, new int[]{ID, BECOMES, EXPRESSION});
   }
   
   @Test
@@ -78,9 +78,8 @@ public class RowdyBuilderStmtTest {
     Node loopStmt = getTestStatement(testCode, LOOP_STMT);
     
     getAndTestSymbol(loopStmt, LOOP, "loop");
-    getFromAndTestNotNull(loopStmt, ID);
     getAndTestSymbol(loopStmt, COLON, ":");
-    getFromAndTestNotNull(loopStmt, STMT_BLOCK);
+    testContainsSymbols(loopStmt, new int[]{LOOP, ID, COLON, STMT_BLOCK});
   }
   
   @Test
@@ -89,9 +88,11 @@ public class RowdyBuilderStmtTest {
     Node ifStmt = getTestStatement(testCode, IF_STMT);
     
     getAndTestSymbol(ifStmt, IF, "if");
-    getFromAndTestNotNull(ifStmt, EXPRESSION);
-    getFromAndTestNotNull(ifStmt, STMT_BLOCK);
     getAndTestSymbol(ifStmt, ELSE_PART, "else-part");
+    
+    testContainsSymbols(ifStmt, new int[]{IF, EXPRESSION, STMT_BLOCK, ELSE_PART});
+    Node elsePart = getFromAndTestNotNull(ifStmt, ELSE_PART);
+    testContainsSymbols(elsePart, new int[]{ELSE, STMT_BLOCK});
     
     testCode = "if (some == yes) {}";
     ifStmt = getTestStatement(testCode, IF_STMT);
@@ -99,9 +100,10 @@ public class RowdyBuilderStmtTest {
     getFromAndTestNotNull(ifStmt, IF);
     getFromAndTestNotNull(ifStmt, EXPRESSION);
     getFromAndTestNotNull(ifStmt, STMT_BLOCK);
-    Node elsePart = getFromAndTestNotNull(ifStmt, ELSE_PART);
+    elsePart = getFromAndTestNotNull(ifStmt, ELSE_PART);
     
     assertTrue(elsePart.getAll().isEmpty());
+    
   }
   
   @Test
@@ -109,6 +111,7 @@ public class RowdyBuilderStmtTest {
     String testCode = "break x";
     Node breakStmt = getTestStatement(testCode, BREAK_STMT);
     
+    testContainsSymbols(breakStmt, new int[]{BREAK, ID_OPTION});
     getAndTestSymbol(breakStmt, BREAK, "break");
     Node idOpt = getAndTestSymbol(breakStmt, ID_OPTION, "id-option");
     Node id = getFromAndTestNotNull(idOpt, ID);
@@ -116,7 +119,6 @@ public class RowdyBuilderStmtTest {
     
     testCode = "break";
     breakStmt = getTestStatement(testCode, BREAK_STMT);
-    getFromAndTestNotNull(breakStmt, BREAK);
     idOpt = getFromAndTestNotNull(breakStmt, ID_OPTION);
     assertTrue(idOpt.getAll().isEmpty());
   }
@@ -126,8 +128,8 @@ public class RowdyBuilderStmtTest {
     String testCode = "return 100";
     Node returnStmt = getTestStatement(testCode, RETURN_STMT);
     
+    testContainsSymbols(returnStmt, new int[]{RETURN, EXPRESSION});
     getAndTestSymbol(returnStmt, RETURN, "return");
-    getFromAndTestNotNull(returnStmt, EXPRESSION);
   }
   
   @Test
@@ -139,9 +141,10 @@ public class RowdyBuilderStmtTest {
     Node id = getFromAndTestNotNull(functionCall, ID);
     testForTerminal(id, "function");
     getAndTestSymbol(functionCall, OPENPAREN, "(");
-    getFromAndTestNotNull(functionCall, EXPRESSION);
-    getFromAndTestNotNull(functionCall, EXPR_LIST);
     getAndTestSymbol(functionCall, CLOSEDPAREN, ")");
+    
+    testContainsSymbols(functionCall, 
+            new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
     
     testCode = "->function(0, \"Hello\", apples)";
     functionCall = getTestStatement(testCode, FUNC_CALL);
@@ -156,7 +159,8 @@ public class RowdyBuilderStmtTest {
     getAndTestSymbol(readStmt, READ, "read");
     Node id = getFromAndTestNotNull(readStmt, ID);
     testForTerminal(id, "testID");
-    getFromAndTestNotNull(readStmt, PARAMS_TAIL);
+    
+    testContainsSymbols(readStmt, new int[]{READ, ID, PARAMS_TAIL});
     
     testCode = "read a1, a2, a3, a4, a5";
     readStmt = getTestStatement(testCode, READ_STMT);
@@ -175,8 +179,7 @@ public class RowdyBuilderStmtTest {
     Node printStmt = getTestStatement(testCode, PRINT_STMT);
     
     getAndTestSymbol(printStmt, PRINT, "print");
-    getFromAndTestNotNull(printStmt, EXPRESSION);
-    getFromAndTestNotNull(printStmt, EXPR_LIST);
+    testContainsSymbols(printStmt, new int[]{PRINT, EXPRESSION, EXPR_LIST});
     
     testCode = "print a1, a2, a3, a4, a5, 100, \"Hello World!\"";
     printStmt = getTestStatement(testCode, PRINT_STMT);
