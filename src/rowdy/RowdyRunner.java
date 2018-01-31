@@ -36,8 +36,6 @@ public class RowdyRunner {
   */
   private Node main;
   
-  private boolean runAsSingleLine;
-  
   private List<Value> programParamValues;
 
   public RowdyRunner() {
@@ -48,18 +46,15 @@ public class RowdyRunner {
     globalSymbolTable = new HashMap<>();
   }
   
-  public void initialize(RowdyBuilder builder, boolean runAsSingleLine) {
+  public void initialize(RowdyBuilder builder) {
     this.root = builder.getProgram();
-    if (!runAsSingleLine) {
-      callStack.clear();
-      activeLoops.clear();
-      globalSymbolTable.clear();
-    }
-    this.runAsSingleLine = runAsSingleLine;
+    callStack.clear();
+    activeLoops.clear();
+    globalSymbolTable.clear();
   }
   
-  public void initialize(RowdyBuilder builder) {
-    this.initialize(builder, false);
+  public void initializeLine(RowdyBuilder builder) {
+    this.root = builder.getProgram();
   }
   
   /**
@@ -76,8 +71,8 @@ public class RowdyRunner {
     }
   }
 
-  public void execute() throws Exception {
-    this.execute(new ArrayList<>());
+  public void executeLine() throws Exception {
+    executeStmt(root, null);
   }
   
   /**
@@ -89,18 +84,13 @@ public class RowdyRunner {
    * @throws java.lang.Exception
    */
   public void execute(List<Value> programParams) throws Exception {
-    // Declare global variables
     this.programParamValues = programParams;
-    if (!runAsSingleLine) {
-      declareGlobals(root);
-      if (main == null){
-        throw new MainNotFoundException("main method not found");
-      }
-      executeStmt(main, null);
-    } else {
-      executeStmt(root, null);
+    declareGlobals(root);
+    if (main == null){
+      throw new MainNotFoundException("main method not found");
     }
-    
+    executeStmt(main, null);
+    executeStmt(root, null);
   }
 
   /**
