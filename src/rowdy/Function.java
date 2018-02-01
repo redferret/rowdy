@@ -47,7 +47,7 @@ public class Function {
         symbolTable.remove(idName);
         symbolTable.put(idName, value);
       } else {
-        throw new ConstantReassignmentException("Variable "+idName+" is a constant");
+        throw new ConstantReassignmentException(idName, this.lineCalledOn);
       }
     }
   }

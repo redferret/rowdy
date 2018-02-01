@@ -174,11 +174,6 @@ public class RowdyRunner {
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
-          String idNameToAssign = idTerminal.getName();
-          if (idNameToAssign.equals("true") || idNameToAssign.equals("false")) {
-            throw new RuntimeException("Can't assign new value to constant '" + 
-                    idNameToAssign + "' on line " + currentTreeNode.getLine());
-          }
           allocate(idTerminal, rightValue);
           break;
         case IF_STMT:
@@ -433,7 +428,7 @@ public class RowdyRunner {
         globalSymbolTable.remove(idName);
         globalSymbolTable.put(idName, value);
       } else {
-        throw new ConstantReassignmentException("Variable "+idName+" is a constant");
+        throw new ConstantReassignmentException(idName);
       }
     }
   }
