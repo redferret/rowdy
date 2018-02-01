@@ -38,8 +38,7 @@ public class RowdyBuilderFuncTest {
     testContainsSymbols(funcCall, 
             new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
     getAndTestSymbol(funcCall, CALL, "->");
-    Node exprList = getFromAndTestNotNull(funcCall, EXPR_LIST);
-    testContainsSymbols(exprList, new int[]{COMMA, EXPRESSION, EXPR_LIST});
+    testExpressionList(funcCall);
   }
   
   @Test

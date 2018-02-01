@@ -90,6 +90,7 @@ public class TestUtils {
   
   public static void testExpressionList(Node root) {
     Node exprList = getFromAndTestNotNull(root, EXPR_LIST);
+    testContainsSymbols(exprList, new int[]{COMMA, EXPRESSION, EXPR_LIST});
     while(exprList.hasChildren()) {
       getFromAndTestNotNull(exprList, COMMA);
       getFromAndTestNotNull(exprList, EXPRESSION);
