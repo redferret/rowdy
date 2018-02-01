@@ -539,6 +539,6 @@ public class Rowdy {
   private static void handleException(RowdyRunner rowdyProgram, Exception e) {
     System.out.println("Runtime Exception: " + e.getMessage());
     rowdyProgram.dumpCallStack();
-    e.printStackTrace();
+//    e.printStackTrace();
   }
 }

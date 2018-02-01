@@ -1,5 +1,6 @@
 package rowdy;
 
+import rowdy.exceptions.ConstantReassignmentException;
 import java.util.HashMap;
 
 /**
@@ -30,20 +31,24 @@ public class Function {
     funcReturnValue = value;
   }
 
-  public void allocate(String idName, Value value) {
+  public void allocate(String idName, Value value) throws ConstantReassignmentException {
     if (idName.equals("true") || idName.equals("false")) {
       return;
     }
     Value curValue;
     if (value == null) {
-      value = new Value("null");
+      value = new Value(null);
     }
     curValue = symbolTable.get(idName);
     if (curValue == null) {
       symbolTable.put(idName, value);
     } else {
-      symbolTable.remove(idName);
-      symbolTable.put(idName, value);
+      if (!curValue.isConstant()){
+        symbolTable.remove(idName);
+        symbolTable.put(idName, value);
+      } else {
+        throw new ConstantReassignmentException("Variable "+idName+" is a constant");
+      }
     }
   }
 

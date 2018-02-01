@@ -1,5 +1,7 @@
 package rowdy;
 
+import rowdy.exceptions.MainNotFoundException;
+import rowdy.exceptions.ConstantReassignmentException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
@@ -35,6 +37,8 @@ public class RowdyRunner {
   private Node main;
   
   private List<Value> programParamValues;
+  
+  private boolean firstTimeInitialization;
 
   public RowdyRunner() {
     this.root = null;
@@ -42,6 +46,7 @@ public class RowdyRunner {
     callStack = new Stack<>();
     activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
+    firstTimeInitialization = true;
   }
   
   public void initialize(RowdyBuilder builder) {
@@ -92,8 +97,12 @@ public class RowdyRunner {
   }
   
   public void declareSystemConstants() {
-    setAsGlobal("true", new Value(true));
-    setAsGlobal("false", new Value(false));
+    if (firstTimeInitialization) {
+      setAsGlobal("true", new Value(true, true));
+      setAsGlobal("false", new Value(false, true));
+      setAsGlobal("null", new Value(null, true));
+      firstTimeInitialization = false;
+    }
   }
 
   /**
@@ -420,8 +429,12 @@ public class RowdyRunner {
     if (curValue == null) {
       globalSymbolTable.put(idName, value);
     } else {
-      globalSymbolTable.remove(idName);
-      globalSymbolTable.put(idName, value);
+      if (!curValue.isConstant()) {
+        globalSymbolTable.remove(idName);
+        globalSymbolTable.put(idName, value);
+      } else {
+        throw new ConstantReassignmentException("Variable "+idName+" is a constant");
+      }
     }
   }
 

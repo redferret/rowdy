@@ -11,13 +11,16 @@ public class Value {
   private boolean isConstant;
 
   public Value() {
-    value = null;
-    isConstant = false;
+    this(null, false);
   }
 
-  public Value(Object value) {
+  public Value(Object value, boolean isConstant) {
     this.value = value;
-    isConstant = false;
+    this.isConstant = isConstant;
+  }
+  
+  public Value(Object value) {
+    this(value, false);
   }
 
   public void setAsConstant(boolean isConstant){
@@ -29,19 +32,21 @@ public class Value {
   }
   
   public void setValue(Object value) {
-    this.value = value;
+    if (!isConstant) {
+      this.value = value;
+    }
   }
 
   public String valueToString() {
     if (value == null) {
-      return null;
+      return "null";
     }
     return value.toString().replaceAll("\"", "");
   }
 
   public Double valueToDouble() {
     if (value == null) {
-      return null;
+      return 0d;
     }
     if (value instanceof String) {
       return Double.parseDouble((String) value);
@@ -62,7 +67,7 @@ public class Value {
 
   public Boolean valueToBoolean() {
     if (value == null) {
-      return null;
+      return false;
     }
     if (value instanceof Terminal) {
       return Boolean.parseBoolean(((Terminal) value).getName());
@@ -80,7 +85,7 @@ public class Value {
 
   public String toString() {
     if (value == null) {
-      return "NULL";
+      return "null";
     }
     return value.toString();
   }

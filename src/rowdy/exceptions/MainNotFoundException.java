@@ -1,5 +1,5 @@
 
-package rowdy;
+package rowdy.exceptions;
 
 /**
  *
