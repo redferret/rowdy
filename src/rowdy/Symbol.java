@@ -41,7 +41,8 @@ public abstract class Symbol {
     this.symbol = symbol;
   }
 
+  @Override
   public String toString() {
-    return "'"+symbol+": " + id+"' ";
+    return symbol;
   }
 }
