@@ -499,12 +499,26 @@ public class Rowdy {
       Scanner keys = new Scanner(System.in);
       String line;
       do {
-        line = keys.nextLine();
-        if (line.isEmpty()) {
+        StringBuilder program = new StringBuilder();
+        for(;;){
+          line = keys.nextLine();
+          if (line.isEmpty()) {
+            break;
+          }
+          if (line.contains("\\\\")){
+            line = line.replace("\\\\", " ");
+            program.append(line);
+            line = "";
+          } else {
+            program.append(line);
+            break;
+          }
+        }
+        if (program.toString().isEmpty()){
           continue;
         }
         try {
-          parser.parseLine(line);
+          parser.parseLine(program.toString());
           builder.buildLine(parser);
           rowdyProgram.initializeLine(builder);
         } catch (Exception e) {
