@@ -70,6 +70,7 @@ public class RowdyRunner {
   }
 
   public void executeLine() throws Exception {
+    declareSystemConstants();
     executeStmt(root, null);
   }
   
@@ -88,7 +89,11 @@ public class RowdyRunner {
       throw new MainNotFoundException("main method not found");
     }
     executeStmt(main, null);
-    executeStmt(root, null);
+  }
+  
+  public void declareSystemConstants() {
+    setAsGlobal("true", new Value(true));
+    setAsGlobal("false", new Value(false));
   }
 
   /**
@@ -104,8 +109,7 @@ public class RowdyRunner {
     int currentID;
     Value rightValue;
     
-    setAsGlobal("true", new Value(true));
-    setAsGlobal("false", new Value(false));
+    declareSystemConstants();
     
     for (int i = 0; i < children.size(); i++) {
       currentTreeNode = children.get(i);

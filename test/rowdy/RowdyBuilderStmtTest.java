@@ -167,7 +167,7 @@ public class RowdyBuilderStmtTest {
     
     Node paramsTail = getFromAndTestNotNull(readStmt, PARAMS_TAIL);
     while(paramsTail.hasChildren()) {
-      getFromAndTestNotNull(paramsTail, COMMA);
+      getAndTestSymbol(paramsTail, COMMA, ",");
       getFromAndTestNotNull(paramsTail, ID);
       paramsTail = getFromAndTestNotNull(paramsTail, PARAMS_TAIL);
     }
