@@ -80,7 +80,8 @@ public class Rowdy {
 
   public static final NonTerminal[] NONTERMINALS = {
     new NonTerminal("prog", PROGRAM, 
-            new int[][]{{FUNC, PRULE_START}, {ID, PRULE_START}}),
+            new int[][]{{FUNC, PRULE_START}, {ID, PRULE_START}, 
+                        {CONST_DEF, PRULE_START}}),
     new NonTerminal("stmt-block", STMT_BLOCK, 
             new int[][]{{LCURLY, PRULE_STMT_BLOCK}, {RCURLY, END}}),
     new NonTerminal("stmt-list", STMT_LIST, 
