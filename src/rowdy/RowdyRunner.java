@@ -135,12 +135,9 @@ public class RowdyRunner {
           if (!functionName.equals("main")) {
             setAsGlobal(functionName, new Value(currentTreeNode));
           } else {
-            if (globalSymbolTable.get(functionName) != null) {
-              throw new RuntimeException("main method already defined");
-            }
-              setAsGlobal(functionName, new Value(currentTreeNode));
-              main = parent;
-              }
+            setAsGlobal(functionName, new Value(currentTreeNode, true));
+            main = parent;
+          }
           break;
         default:
           declareGlobals(currentTreeNode);
