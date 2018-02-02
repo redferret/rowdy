@@ -90,6 +90,19 @@ public class FunctionTest {
     Double actualValue = instance.getValue("A").valueToDouble();
     assertEquals(expectedValue, actualValue);
   }
+  
+  /**
+   * Test of allocate method, of class Function.
+   * @throws rowdy.exceptions.ConstantReassignmentException
+   */
+  @Test(expected = ConstantReassignmentException.class)
+  public void testAllocateValueConstant() throws ConstantReassignmentException {
+    Terminal cur = new Terminal("ID", 0, "A");
+    Value value = new Value(10, true);
+    Function instance = new Function("Function", new HashMap<>(), 100);
+    instance.allocate(cur, value);
+    instance.allocate(cur, value);
+  }
 
   /**
    * Test of unset method, of class Function.
