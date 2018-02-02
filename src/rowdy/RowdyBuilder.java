@@ -3,6 +3,7 @@ package rowdy;
 
 import java.util.List;
 import static rowdy.Rowdy.*;
+import rowdy.exceptions.SyntaxException;
 
 /**
  * The builder takes a RowdyLexer instance and pulls tokens to build a parse
@@ -35,16 +36,17 @@ public class RowdyBuilder {
   /**
    * Builds the parse tree with the given program file and language definitions.
    * @param parser
+   * @throws rowdy.exceptions.SyntaxException
    */
-  public void build(RowdyLexer parser) {
+  public void build(RowdyLexer parser) throws SyntaxException {
     this.buildAs(parser, PROGRAM);
   }
 
-  public void buildLine(RowdyLexer parser) {
+  public void buildLine(RowdyLexer parser) throws SyntaxException {
     this.buildAs(parser, STMT_LIST);
   }
   
-  private void buildAs(RowdyLexer parser, int programType) {
+  private void buildAs(RowdyLexer parser, int programType) throws SyntaxException {
     this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(programType);
     root = new Node(program, 0);
@@ -75,8 +77,9 @@ public class RowdyBuilder {
    * error is detected the line number is printed out.
    *
    * @param parent
+   * @throws rowdy.exceptions.SyntaxException
    */
-  public void build(Node parent) {
+  public void build(Node parent) throws SyntaxException {
     Symbol symbol;
     ProductionSymbols rule;
     List<Node> children = parent.getAll();
@@ -91,7 +94,7 @@ public class RowdyBuilder {
         build(current);
       } else {
         if (symbol.id() != currentToken.getID()) {
-          throw new RuntimeException("Syntax error, unexpected token '"
+          throw new SyntaxException("Syntax error, unexpected token '"
                   + currentToken.getSymbol() + "' on Line " + line);
         }
         children.remove(i);

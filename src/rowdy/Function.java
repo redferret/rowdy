@@ -53,7 +53,7 @@ public class Function {
     }
   }
 
-  public void allocate(Terminal cur, Value value) {
+  public void allocate(Terminal cur, Value value) throws ConstantReassignmentException {
     Function.this.allocate(cur.getName(), value);
   }
   

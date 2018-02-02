@@ -1,9 +1,13 @@
 package rowdy;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.exceptions.MainNotFoundException;
+import rowdy.exceptions.ParseException;
+import rowdy.exceptions.SyntaxException;
 
 /**
  * Main driver class. The grammar, terminals/non-terminals and the hint table
@@ -476,8 +480,8 @@ public class Rowdy {
         parser.parse(programFileName);
         builder.build(parser);
         rowdyProgram.initialize(builder);
-      } catch (Exception e) {
-        System.out.println("Build Exception: " + e.getMessage());
+      } catch (IOException | SyntaxException | ParseException e) {
+        handleException(rowdyProgram, e);
         System.exit(500);
       }
 
@@ -498,7 +502,8 @@ public class Rowdy {
           }
         }
         rowdyProgram.execute(programParameters);
-      } catch (Exception e) {
+      } catch (NumberFormatException | MainNotFoundException | 
+              ConstantReassignmentException e) {
         handleException(rowdyProgram, e);
       }
     } else {
@@ -527,14 +532,14 @@ public class Rowdy {
           parser.parseLine(program.toString());
           builder.buildLine(parser);
           rowdyProgram.initializeLine(builder);
-        } catch (Exception e) {
-          System.out.println("Build Exception: " + e.getMessage());
+        } catch (ParseException | SyntaxException e) {
+          handleException(rowdyProgram, e);
           continue;
         }
 
         try {
           rowdyProgram.executeLine();
-        } catch (Exception e) {
+        } catch (Exception | ConstantReassignmentException e) {
           handleException(rowdyProgram, e);
         }
       }while(!line.equalsIgnoreCase("exit"));
@@ -542,8 +547,8 @@ public class Rowdy {
 
   }
 
-  private static void handleException(RowdyRunner rowdyProgram, Exception e) {
-    System.out.println("Runtime Exception: " + e.getMessage());
+  private static void handleException(RowdyRunner rowdyProgram, Throwable e) {
+    System.out.println(e.getClass().getCanonicalName() + ": " + e.getLocalizedMessage());
     rowdyProgram.dumpCallStack();
 //    e.printStackTrace();
   }

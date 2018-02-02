@@ -5,7 +5,7 @@ package rowdy.exceptions;
  *
  * @author Richard
  */
-public class ConstantReassignmentException extends RuntimeException {
+public class ConstantReassignmentException extends Throwable {
 
   public ConstantReassignmentException(String idName) {
     super(idName + " is a constant");
