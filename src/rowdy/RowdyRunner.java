@@ -174,6 +174,9 @@ public class RowdyRunner {
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
+          if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
+            rightValue.setAsConstant(true);
+          }
           allocate(idTerminal, rightValue);
           break;
         case IF_STMT:
