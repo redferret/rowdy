@@ -1,9 +1,10 @@
 
 package rowdy;
 
-import java.util.List;
 import org.junit.*;
 import static org.junit.Assert.*;
+import rowdy.exceptions.ParseException;
+import rowdy.exceptions.SyntaxException;
 
 
 /**
@@ -23,9 +24,8 @@ public class RowdyRunnerTest {
   private void buildAndParse(String code) {
     try {
       testParser.parseLine(code);
-      testBuilder.build(testParser);
-    }catch (Exception e){
-      System.out.println("Build Exception: " + e.getMessage());
+      testBuilder.buildLine(testParser);
+    }catch (SyntaxException | ParseException e){
       fail("Build Exception");
     }
   }

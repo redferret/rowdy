@@ -11,8 +11,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import rowdy.exceptions.ConstantReassignmentException;
 import static org.junit.Assert.*;
-
 /**
  *
  * @author Richard
@@ -63,9 +63,10 @@ public class FunctionTest {
 
   /**
    * Test of allocate method, of class Function.
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
   @Test
-  public void testAllocateString() {
+  public void testAllocateString() throws ConstantReassignmentException {
     String idName = "someId";
     Value value = new Value(0);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
@@ -77,9 +78,10 @@ public class FunctionTest {
 
   /**
    * Test of allocate method, of class Function.
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
   @Test
-  public void testAllocateValue() {
+  public void testAllocateValue() throws ConstantReassignmentException {
     Terminal cur = new Terminal("ID", 0, "A");
     Value value = new Value(10);
     Function instance = new Function("Function", new HashMap<>(), 100);
@@ -91,9 +93,10 @@ public class FunctionTest {
 
   /**
    * Test of unset method, of class Function.
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
   @Test
-  public void testUnset() {
+  public void testUnset() throws ConstantReassignmentException {
     String idName = "someId";
     Value value = new Value(0);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
