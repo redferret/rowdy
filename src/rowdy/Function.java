@@ -2,6 +2,7 @@ package rowdy;
 
 import rowdy.exceptions.ConstantReassignmentException;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * A function in Rowdy always returns a value, has it's own symbol table, id
@@ -106,6 +107,27 @@ public class Function {
     return funcReturnValue;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Function){
+      Function other = (Function)obj;
+      if (other.name.equals(this.name)){
+        return true;
+      } else if (other == this){
+        return true;
+      }
+    } 
+    
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 89 * hash + Objects.hashCode(this.name);
+    return hash;
+  }
+  
   @Override
   public String toString() {
     return name;

@@ -51,7 +51,13 @@ public class Value {
     if (value instanceof String) {
       return Double.parseDouble((String) value);
     } else {
-      return Double.parseDouble(value.toString());
+      Double v;
+      try {
+        v = Double.parseDouble(value.toString());
+      } catch (Exception e){
+        v = 0d;
+      }
+      return v;
     }
   }
 

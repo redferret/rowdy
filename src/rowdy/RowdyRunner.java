@@ -679,16 +679,20 @@ public class RowdyRunner {
         cur = relationChildren.get(1);
         Object rightValueObject = getValue(cur).getValue();
         
-        Boolean leftAsBool = null, rightAsBool = null;
+        Object leftAsBool = null, rightAsBool = null;
+        left = 0;
         if (leftValueObject instanceof Boolean){
-          leftAsBool = (Boolean)leftValueObject;
-          left = 0;
+          leftAsBool = leftValueObject;
+        } else if (leftValueObject instanceof Node) {
+          leftAsBool = leftValueObject;
         } else {
           left = fetch(leftValue, cur).valueToDouble();
         }
+        right = 0;
         if (rightValueObject instanceof Boolean){
-          rightAsBool = (Boolean)rightValueObject;
-          right = 0;
+          rightAsBool = rightValueObject;
+        } else if (leftValueObject instanceof Node) {
+          rightAsBool = rightValueObject;
         } else {
           right = getValue(cur).valueToDouble();
         }
