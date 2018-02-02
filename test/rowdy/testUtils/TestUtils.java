@@ -6,9 +6,10 @@ import rowdy.RowdyLexer;
 import rowdy.Terminal;
 import rowdy.Language;
 import rowdy.Node;
+import rowdy.exceptions.ParseException;
+import rowdy.exceptions.SyntaxException;
 import static rowdy.Rowdy.*;
 import static org.junit.Assert.*;
-
 /**
  *
  * @author Richard
@@ -23,17 +24,22 @@ public class TestUtils {
           RowdyBuilder.getBuilder(rowdy);
   
   public static Node getTestProgram(String testProgram, int stmtId) {
-    parser.parseLine(testProgram);
     try {
-      builder.build(parser);
-    } catch (Exception e) {
-      fail("Builder failed to compile: " + e.getLocalizedMessage());
+      parser.parseLine(testProgram);
+      try {
+        builder.build(parser);
+      } catch (SyntaxException e) {
+        fail("Builder failed to compile: " + e.getLocalizedMessage());
+      }
+      Node root = builder.getProgram();
+      assertNotNull("Root Program is Null", root);
+      
+      Node definition = getFromAndTestNotNull(root, DEFINITION);
+      return getFromAndTestNotNull(definition, stmtId);
+    } catch (ParseException ex) {
+      fail("Builder failed to compile: " + ex.getLocalizedMessage());
+      return null;
     }
-    Node root = builder.getProgram();
-    assertNotNull("Root Program is Null", root);
-    
-    Node definition = getFromAndTestNotNull(root, DEFINITION);
-    return getFromAndTestNotNull(definition, stmtId);
   }
   
   public static Node getTestStatement(String testProgram, int stmtId) {
@@ -44,15 +50,20 @@ public class TestUtils {
   }
   
   public static Node getRootSingleLine(String testProgram) {
-    parser.parseLine(testProgram);
     try {
-      builder.buildLine(parser);
-    } catch (Exception e) {
-      fail("Builder failed to compile: " + e.getLocalizedMessage());
+      parser.parseLine(testProgram);
+      try {
+        builder.buildLine(parser);
+      } catch (SyntaxException e) {
+        fail("Builder failed to compile: " + e.getLocalizedMessage());
+      }
+      Node root = builder.getProgram();
+      assertNotNull("Root Program is Null", root);
+      return root;
+    } catch (ParseException ex) {
+      fail("Builder failed to compile: " + ex.getLocalizedMessage());
     }
-    Node root = builder.getProgram();
-    assertNotNull("Root Program is Null", root);
-    return root;
+    return null;
   }
   
   public static Node getFromAndTestNotNull(Node from, int id) {
@@ -61,7 +72,7 @@ public class TestUtils {
   
   public static Node getFromAndTestNotNull(Node from, int id, int occur) {
     Node toFetch = from.get(id, occur, false);
-    assertNotNull("Node doesn't contain the given id: " + id, toFetch);
+    assertNotNull("Node "+from.symbol().toString()+" doesn't contain the given id: " + id, toFetch);
     return toFetch;
   }
   

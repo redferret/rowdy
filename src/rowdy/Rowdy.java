@@ -1,8 +1,13 @@
 package rowdy;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.exceptions.MainNotFoundException;
+import rowdy.exceptions.ParseException;
+import rowdy.exceptions.SyntaxException;
 
 /**
  * Main driver class. The grammar, terminals/non-terminals and the hint table
@@ -33,7 +38,8 @@ public class Rowdy {
 	PRULE_ANONYMOUS_FUNC_BODY=77, PRULE_ARRAY_EXPR = 78, PRULE_ARRAY = 79,
     PRULE_ARRAY_LINEAR_BODY = 80, PRULE_ARRAY_LINEAR=81,
     PRULE_ARRAY_LINEAR_TAIL=82, PRULE_ARRAY_KEY_VALUE_BODY=83,
-    PRULE_ARRAY_KEY_VALUE_BODY_TAIL=84, PRULE_ARRAY_ACCESS=85, EOLN = 200;
+    PRULE_ARRAY_KEY_VALUE_BODY_TAIL=84, PRULE_ARRAY_ACCESS=85, 
+    PRULE_CONST_OPT = 86, EOLN = 200;
 
   public static final int PERIOD = 0, SEMICOLON = 1, IF = 2, THEN = 3,
           ELSE = 4, FI = 5, LOOP = 6, ID = 7,
@@ -45,7 +51,7 @@ public class Rowdy {
           CLOSEDPAREN = 28, CONST = 29, POW = 30, MOD = 31, CONCAT = 32,
           SLICE = 33, STRCMP = 34, FUNC = 35, CALL = 36, RETURN = 37,
           ISSET = 38, ROUND = 39, LCURLY = 40, RCURLY = 41, ARRAY = 42,
-          GET = 43;
+          GET = 43, DEL = 44, PUT = 45, CONST_DEF = 46;
 
   public static final int PROGRAM = 400, STMT_LIST = 410, STATEMENT = 420,
           STMT_TAIL = 430, IF_STMT = 440, LOOP_STMT = 450, BREAK_STMT = 460,
@@ -60,14 +66,14 @@ public class Rowdy {
           ARRAY_BODY = 754, ARRAY_LINEAR = 755, ARRAY_EXPR = 756, 
           ARRAY_LINEAR_BODY=757,ARRAY_KEY_VALUE_BODY=758, 
           ARRAY_KEY_VALUE_BODY_TAIL=759,ARRAY_ACCESS=760, ID_EXPR=761,
-          ID_EXPR_TYPE=62,
+          CONST_OPT = 762,
           END = 10;
   public static final String[] TERMINALS = {"PERIOD", ";", "if", "then","else",
     "fi", "loop", "ID", ":", "repeat", "break", "=", "print",
     "read", ",", "or", "and", "<", "<=", "==", ">=",
     ">", "!=", "+", "-", "*", "/", "(", ")", "CONST", "^", "%",
     "concat", "slice", "strcmp", "func", "->", "return", "isset", "round",
-    "{", "}", "array", "get"};
+    "{", "}", "array", "get", "del", "put", "const"};
 
   public static final String SPECIAL_SYMBOLS = ". ( ) ; + - * / != = >= "
           + "<= < > : == , ^ % -> { }";
@@ -82,7 +88,7 @@ public class Rowdy {
                         {ELSE,PRULE_STMT_LIST},{FI,PRULE_STMT_LIST}, 
                         {LOOP,PRULE_STMT_LIST}, {ID,PRULE_STMT_LIST}, 
                         {REPEAT,PRULE_STMT_LIST}, {BREAK,PRULE_STMT_LIST},
-                        {PRINT,PRULE_STMT_LIST}, 
+                        {PRINT,PRULE_STMT_LIST}, {CONST_DEF, PRULE_STMT_LIST},
                         {READ,PRULE_STMT_LIST}, {CONCAT,PRULE_STMT_LIST}, 
                         {SLICE,PRULE_STMT_LIST},{STRCMP,PRULE_STMT_LIST}, 
                         {CALL,PRULE_STMT_LIST}, {RETURN,PRULE_STMT_LIST}, 
@@ -91,7 +97,7 @@ public class Rowdy {
             new int[][]{{SEMICOLON, END}, {IF, PRULE_IF_STMT}, {ELSE, END}, 
                         {FI, END}, {LOOP, PRULE_LOOP_STMT}, 
                         {ID, PRULE_ASSIGN_STMT}, {REPEAT, END},
-                        {BREAK,PRULE_BREAK_STMT}, 
+                        {BREAK,PRULE_BREAK_STMT},{CONST_DEF,PRULE_ASSIGN_STMT},
                         {PRINT, PRULE_PRINT_STMT}, {READ, PRULE_READ_STMT}, 
                         {CALL,PRULE_FUNC_CALL},{RETURN,PRULE_RETURN_STMT}, 
                         {ISSET, PRULE_ISSET_EXPR}, {RCURLY, END}}),
@@ -110,7 +116,9 @@ public class Rowdy {
     new NonTerminal("break-stmt", BREAK_STMT, 
             new int[][]{{BREAK, PRULE_BREAK}}),
     new NonTerminal("assign-stmt", ASSIGN_STMT, 
-            new int[][]{{ID, PRULE_ASSIGN}}),
+            new int[][]{{ID, PRULE_ASSIGN}, {CONST_DEF, PRULE_ASSIGN}}),
+    new NonTerminal("const-opt", CONST_OPT,
+            new int[][]{{CONST_DEF, PRULE_CONST_OPT}, {ID, END}}),
     new NonTerminal("read-stmt", READ_STMT, 
             new int[][]{{READ, PRULE_READ}}),
     new NonTerminal("print-stmt", PRINT_STMT, 
@@ -282,7 +290,9 @@ public class Rowdy {
     new ProductionRule(PRULE_ASSIGN_STMT, 
 		new int[]{ASSIGN_STMT}),
     new ProductionRule(PRULE_ASSIGN, 
-		new int[]{ID, BECOMES, EXPRESSION}),
+		new int[]{CONST_OPT, ID, BECOMES, EXPRESSION}),
+    new ProductionRule(PRULE_CONST_OPT, 
+        new int[]{CONST_DEF}),
     
     new ProductionRule(PRULE_READ_STMT, 
 		new int[]{READ_STMT}),
@@ -470,8 +480,8 @@ public class Rowdy {
         parser.parse(programFileName);
         builder.build(parser);
         rowdyProgram.initialize(builder);
-      } catch (Exception e) {
-        System.out.println("Build Exception: " + e.getMessage());
+      } catch (IOException | SyntaxException | ParseException e) {
+        handleException(rowdyProgram, e);
         System.exit(500);
       }
 
@@ -492,7 +502,8 @@ public class Rowdy {
           }
         }
         rowdyProgram.execute(programParameters);
-      } catch (Exception e) {
+      } catch (NumberFormatException | MainNotFoundException | 
+              ConstantReassignmentException e) {
         handleException(rowdyProgram, e);
       }
     } else {
@@ -521,14 +532,14 @@ public class Rowdy {
           parser.parseLine(program.toString());
           builder.buildLine(parser);
           rowdyProgram.initializeLine(builder);
-        } catch (Exception e) {
-          System.out.println("Build Exception: " + e.getMessage());
+        } catch (ParseException | SyntaxException e) {
+          handleException(rowdyProgram, e);
           continue;
         }
 
         try {
           rowdyProgram.executeLine();
-        } catch (Exception e) {
+        } catch (Exception | ConstantReassignmentException e) {
           handleException(rowdyProgram, e);
         }
       }while(!line.equalsIgnoreCase("exit"));
@@ -536,9 +547,9 @@ public class Rowdy {
 
   }
 
-  private static void handleException(RowdyRunner rowdyProgram, Exception e) {
-    System.out.println("Runtime Exception: " + e.getMessage());
+  private static void handleException(RowdyRunner rowdyProgram, Throwable e) {
+    System.out.println(e.getClass().getCanonicalName() + ": " + e.getLocalizedMessage());
     rowdyProgram.dumpCallStack();
-    e.printStackTrace();
+//    e.printStackTrace();
   }
 }

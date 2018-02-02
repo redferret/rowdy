@@ -2,10 +2,11 @@
 package rowdy;
 
 import org.junit.Test;
+import rowdy.exceptions.ParseException;
+import rowdy.exceptions.SyntaxException;
 import static rowdy.Rowdy.*;
 import static rowdy.testUtils.TestUtils.*;
 import static org.junit.Assert.*;
-
 /**
  *
  * @author Richard
@@ -47,8 +48,12 @@ public class RowdyBuilderStmtTest {
   public void testGetProgramAsProgram() {
     String testCode = "func main(){}";
     
-    parser.parseLine(testCode);
-    builder.build(parser);
+    try {
+      parser.parseLine(testCode);
+      builder.build(parser);
+    } catch (ParseException | SyntaxException ex) {
+      fail("Couldn't get program");
+    }
     Node root = builder.getProgram();
     assertNotNull(root);
     String actual = root.symbol().getSymbolAsString();
@@ -69,7 +74,14 @@ public class RowdyBuilderStmtTest {
     
     getAndTestSymbol(assignStmt, ID, "ID");
     getAndTestSymbol(assignStmt, BECOMES, "=");
-    testContainsSymbols(assignStmt, new int[]{ID, BECOMES, EXPRESSION});
+    testContainsSymbols(assignStmt, new int[]{CONST_OPT, ID, BECOMES, EXPRESSION});
+    
+    testCode = "const a = 100";
+    assignStmt = getTestStatement(testCode, ASSIGN_STMT);
+    Node constOpt = getFromAndTestNotNull(assignStmt, CONST_OPT);
+    assertFalse(constOpt.getAll().isEmpty());
+    getAndTestSymbol(constOpt, CONST_DEF, "const");
+    
   }
   
   @Test

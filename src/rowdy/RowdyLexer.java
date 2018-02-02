@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+import rowdy.exceptions.ParseException;
 
 /**
  * RowdyLexer parses code files and allows a fetch for each individual token when
@@ -72,12 +73,15 @@ public class RowdyLexer {
    * called on a given file.
    *
    * @param fileName The code file being parsed.
+   * @throws java.io.IOException
+   * @throws java.io.FileNotFoundException
+   * @throws rowdy.exceptions.SyntaxException
    */
-  public void parse(String fileName) throws IOException {
+  public void parse(String fileName) throws IOException, FileNotFoundException, ParseException {
     fileStack = parseFile(fileName);
   }
 
-  public void parseLine(String code) {
+  public void parseLine(String code) throws ParseException {
     fileStack = parseCode(code);
   }
   
@@ -89,7 +93,8 @@ public class RowdyLexer {
    * @return The stack of grouped characters
    */
   private List<String> parseFile(String fileName) throws FileNotFoundException, 
-          IOException {
+          IOException,
+          ParseException {
 
     List<String> symbols = new LinkedList<>();
     String line;
@@ -102,7 +107,7 @@ public class RowdyLexer {
     return symbols;
   }
   
-  public List<String> parseCode(String line) {
+  public List<String> parseCode(String line) throws ParseException {
     List<String> symbols = new LinkedList<>();
     boolean eoln = false;
     char cur;
@@ -172,7 +177,7 @@ public class RowdyLexer {
 
       if (!whiteSpace.matcher(Character.toString(cur)).matches()) {
         if (c == prev) { // Stop parsing on unknown symbol
-          throw new RuntimeException("Parsing halted, unable"
+          throw new ParseException("Parsing halted, unable"
                   + " to resolve character '" + cur + "'");
         }
         if (c < line.length() && !eoln) {

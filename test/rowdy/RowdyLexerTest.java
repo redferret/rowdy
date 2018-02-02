@@ -3,13 +3,14 @@ package rowdy;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
-
+import rowdy.exceptions.ParseException;
+import static org.junit.Assert.*;
 /**
  *
  * @author Richard
@@ -30,7 +31,11 @@ public class RowdyLexerTest {
     bf.write("add a + 25 - 1");
     bf.close();
     lexer = new RowdyLexer(reserved, operators, 3, 4);
-    lexer.parse("tokenizerTestFile1");
+    try {
+      lexer.parse("tokenizerTestFile1");
+    } catch (FileNotFoundException | ParseException ex) {
+      fail("Lexer failed to lex");
+    }
     file.delete();
   }
 

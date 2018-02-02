@@ -1,6 +1,8 @@
 package rowdy;
 
+import rowdy.exceptions.ConstantReassignmentException;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * A function in Rowdy always returns a value, has it's own symbol table, id
@@ -30,24 +32,28 @@ public class Function {
     funcReturnValue = value;
   }
 
-  public void allocate(String idName, Value value) {
+  public void allocate(String idName, Value value) throws ConstantReassignmentException {
     if (idName.equals("true") || idName.equals("false")) {
       return;
     }
     Value curValue;
     if (value == null) {
-      value = new Value("null");
+      value = new Value(null);
     }
     curValue = symbolTable.get(idName);
     if (curValue == null) {
       symbolTable.put(idName, value);
     } else {
-      symbolTable.remove(idName);
-      symbolTable.put(idName, value);
+      if (!curValue.isConstant()){
+        symbolTable.remove(idName);
+        symbolTable.put(idName, value);
+      } else {
+        throw new ConstantReassignmentException(idName, this.lineCalledOn);
+      }
     }
   }
 
-  public void allocate(Terminal cur, Value value) {
+  public void allocate(Terminal cur, Value value) throws ConstantReassignmentException {
     Function.this.allocate(cur.getName(), value);
   }
   
@@ -101,6 +107,27 @@ public class Function {
     return funcReturnValue;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Function){
+      Function other = (Function)obj;
+      if (other.name.equals(this.name)){
+        return true;
+      } else if (other == this){
+        return true;
+      }
+    } 
+    
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 89 * hash + Objects.hashCode(this.name);
+    return hash;
+  }
+  
   @Override
   public String toString() {
     return name;

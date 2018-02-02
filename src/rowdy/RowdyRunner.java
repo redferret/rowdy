@@ -1,5 +1,7 @@
 package rowdy;
 
+import rowdy.exceptions.MainNotFoundException;
+import rowdy.exceptions.ConstantReassignmentException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
@@ -35,6 +37,8 @@ public class RowdyRunner {
   private Node main;
   
   private List<Value> programParamValues;
+  
+  private boolean firstTimeInitialization;
 
   public RowdyRunner() {
     this.root = null;
@@ -42,6 +46,7 @@ public class RowdyRunner {
     callStack = new Stack<>();
     activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
+    firstTimeInitialization = true;
   }
   
   public void initialize(RowdyBuilder builder) {
@@ -69,7 +74,7 @@ public class RowdyRunner {
     }
   }
 
-  public void executeLine() throws Exception {
+  public void executeLine() throws ConstantReassignmentException {
     declareSystemConstants();
     executeStmt(root, null);
   }
@@ -80,9 +85,10 @@ public class RowdyRunner {
    * a single line execution or a program file.
    *
    * @param programParams The program parameters
-   * @throws java.lang.Exception
+   * @throws MainNotFoundException
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void execute(List<Value> programParams) throws Exception {
+  public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareGlobals(root);
     if (main == null){
@@ -91,9 +97,13 @@ public class RowdyRunner {
     executeStmt(main, null);
   }
   
-  public void declareSystemConstants() {
-    setAsGlobal("true", new Value(true));
-    setAsGlobal("false", new Value(false));
+  public void declareSystemConstants() throws ConstantReassignmentException {
+    if (firstTimeInitialization) {
+      setAsGlobal("true", new Value(true, true));
+      setAsGlobal("false", new Value(false, true));
+      setAsGlobal("null", new Value(null, true));
+      firstTimeInitialization = false;
+    }
   }
 
   /**
@@ -102,8 +112,9 @@ public class RowdyRunner {
    * placed in the main symbol table.
    *
    * @param parent
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void declareGlobals(Node parent) {
+  public void declareGlobals(Node parent) throws ConstantReassignmentException {
     Node currentTreeNode;
     ArrayList<Node> children = parent.getAll();
     int currentID;
@@ -145,8 +156,9 @@ public class RowdyRunner {
    * the parent. This lets break and return statements drop the sequence and not
    * execute any remaining statements until sequence control is given back to
    * the original caller.
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void executeStmt(Node parent, Node seqControl) {
+  public void executeStmt(Node parent, Node seqControl) throws ConstantReassignmentException {
     Node currentTreeNode;
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
@@ -165,10 +177,8 @@ public class RowdyRunner {
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
-          String idNameToAssign = idTerminal.getName();
-          if (idNameToAssign.equals("true") || idNameToAssign.equals("false")) {
-            throw new RuntimeException("Can't assign new value to constant '" + 
-                    idNameToAssign + "' on line " + currentTreeNode.getLine());
+          if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
+            rightValue.setAsConstant(true);
           }
           allocate(idTerminal, rightValue);
           break;
@@ -315,8 +325,9 @@ public class RowdyRunner {
    *
    * @param cur The function being called
    * @return The function's return value
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public Value executeFunc(Node cur) {
+  public Value executeFunc(Node cur) throws ConstantReassignmentException {
     // 1. Collect parameters
     Value funcVal = null;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
@@ -390,8 +401,9 @@ public class RowdyRunner {
    *
    * @param idTerminal The variable to allocate or change
    * @param value The Value being allocated or changed
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void allocate(Terminal idTerminal, Value value) {
+  public void allocate(Terminal idTerminal, Value value) throws ConstantReassignmentException {
     Value exists = globalSymbolTable.get(idTerminal.getName());
     if (exists != null) {
       setAsGlobal(idTerminal, value);
@@ -413,23 +425,34 @@ public class RowdyRunner {
    *
    * @param idName The variable being set
    * @param value The value of the variable
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void setAsGlobal(String idName, Value value) {
+  public void setAsGlobal(String idName, Value value) throws ConstantReassignmentException {
     Value curValue;
     curValue = globalSymbolTable.get(idName);
     if (curValue == null) {
       globalSymbolTable.put(idName, value);
     } else {
-      globalSymbolTable.remove(idName);
-      globalSymbolTable.put(idName, value);
+      if (!curValue.isConstant()) {
+        globalSymbolTable.remove(idName);
+        globalSymbolTable.put(idName, value);
+      } else {
+        throw new ConstantReassignmentException(idName);
+      }
     }
   }
 
-  public void setAsGlobal(Terminal cur, Value value) {
+  public void setAsGlobal(Terminal cur, Value value) throws ConstantReassignmentException {
     setAsGlobal(cur.getName(), value);
   }
 
-  public boolean isset(Node cur) {
+  /**
+   *
+   * @param cur
+   * @return
+   * @throws ConstantReassignmentException
+   */
+  public boolean isset(Node cur) throws ConstantReassignmentException {
     Value o = (Value) executeExpr(cur, null);
     return isset(o);
   }
@@ -453,8 +476,9 @@ public class RowdyRunner {
    *
    * @param cur The tree node
    * @return A value object with an atom stored in it.
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public Value getValue(Node cur) {
+  public Value getValue(Node cur) throws ConstantReassignmentException {
     Value value = (Value) executeExpr(cur, null);
     return fetch(value, cur);
   }
@@ -500,8 +524,9 @@ public class RowdyRunner {
    * @param cur The current tree node being searched
    * @param leftValue The left value of an expression
    * @return The value of the expression
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public Value executeExpr(Node cur, Value leftValue) {
+  public Value executeExpr(Node cur, Value leftValue) throws ConstantReassignmentException {
     Node parent = cur;
     ArrayList<Node> children = cur.getAll();
     double left, right;
@@ -671,16 +696,20 @@ public class RowdyRunner {
         cur = relationChildren.get(1);
         Object rightValueObject = getValue(cur).getValue();
         
-        Boolean leftAsBool = null, rightAsBool = null;
+        Object leftAsBool = null, rightAsBool = null;
+        left = 0;
         if (leftValueObject instanceof Boolean){
-          leftAsBool = (Boolean)leftValueObject;
-          left = 0;
+          leftAsBool = leftValueObject;
+        } else if (leftValueObject instanceof Node) {
+          leftAsBool = leftValueObject;
         } else {
           left = fetch(leftValue, cur).valueToDouble();
         }
+        right = 0;
         if (rightValueObject instanceof Boolean){
-          rightAsBool = (Boolean)rightValueObject;
-          right = 0;
+          rightAsBool = rightValueObject;
+        } else if (leftValueObject instanceof Node) {
+          rightAsBool = rightValueObject;
         } else {
           right = getValue(cur).valueToDouble();
         }
@@ -694,7 +723,7 @@ public class RowdyRunner {
             bReslt = left <= right;
             break;
           case EQUAL:
-            if (leftAsBool != null && rightAsBool != null) {
+            if (leftAsBool != null || rightAsBool != null) {
               bReslt = Objects.equals(leftAsBool, rightAsBool);
             } else {
               bReslt = left == right;
