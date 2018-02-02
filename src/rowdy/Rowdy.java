@@ -200,7 +200,7 @@ public class Rowdy {
                         {CALL, PRULE_FUNC_CALL}}),
     new NonTerminal("def", DEFINITION, 
             new int[][]{{FUNC, PRULE_FUNCTION_DEF}, {ID, PRULE_ASSIGN_GLOBAL}, 
-                        {RCURLY, END}}),
+                        {CONST_DEF, PRULE_ASSIGN_GLOBAL}, {RCURLY, END}}),
     
     new NonTerminal("function", FUNCTION, 
             new int[][]{{FUNC, PRULE_FUNCTION}}),
