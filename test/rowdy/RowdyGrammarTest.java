@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
  */
 public class RowdyGrammarTest {
   
-  private static final Integer EXPECTED_PRODUCTION_COUNT = 70;
+  private static final Integer EXPECTED_PRODUCTION_COUNT = 71;
   
   @Test
   public void testGrammarSize() {

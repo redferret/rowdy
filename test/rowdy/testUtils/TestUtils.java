@@ -61,7 +61,7 @@ public class TestUtils {
   
   public static Node getFromAndTestNotNull(Node from, int id, int occur) {
     Node toFetch = from.get(id, occur, false);
-    assertNotNull("Node doesn't contain the given id: " + id, toFetch);
+    assertNotNull("Node "+from.symbol().toString()+" doesn't contain the given id: " + id, toFetch);
     return toFetch;
   }
   

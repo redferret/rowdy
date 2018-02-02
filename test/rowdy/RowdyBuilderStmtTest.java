@@ -69,7 +69,14 @@ public class RowdyBuilderStmtTest {
     
     getAndTestSymbol(assignStmt, ID, "ID");
     getAndTestSymbol(assignStmt, BECOMES, "=");
-    testContainsSymbols(assignStmt, new int[]{ID, BECOMES, EXPRESSION});
+    testContainsSymbols(assignStmt, new int[]{CONST_OPT, ID, BECOMES, EXPRESSION});
+    
+    testCode = "const a = 100";
+    assignStmt = getTestStatement(testCode, ASSIGN_STMT);
+    Node constOpt = getFromAndTestNotNull(assignStmt, CONST_OPT);
+    assertFalse(constOpt.getAll().isEmpty());
+    getAndTestSymbol(constOpt, CONST_DEF, "const");
+    
   }
   
   @Test
