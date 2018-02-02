@@ -136,12 +136,10 @@ public class RowdyRunner {
           break;
         case FUNCTION:
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          if (!functionName.equals("main")) {
-            setAsGlobal(functionName, new Value(currentTreeNode));
-          } else {
-            setAsGlobal(functionName, new Value(currentTreeNode, true));
+          if (functionName.equals("main")) {
             main = parent;
           }
+          setAsGlobal(functionName, new Value(currentTreeNode, true));
           break;
         default:
           declareGlobals(currentTreeNode);
