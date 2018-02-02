@@ -127,8 +127,12 @@ public class RowdyRunner {
       currentID = currentTreeNode.symbol().id();
       switch (currentID) {
         case ASSIGN_STMT:
+          Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
-          setAsGlobal((Terminal) currentTreeNode.get(ID).symbol(), rightValue);
+          if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
+            rightValue.setAsConstant(true);
+          }
+          allocate(idTerminal, rightValue);
           break;
         case FUNCTION:
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
