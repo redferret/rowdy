@@ -706,7 +706,7 @@ public class RowdyRunner {
             bReslt = left <= right;
             break;
           case EQUAL:
-            if (leftAsBool != null && rightAsBool != null) {
+            if (leftAsBool != null || rightAsBool != null) {
               bReslt = Objects.equals(leftAsBool, rightAsBool);
             } else {
               bReslt = left == right;
