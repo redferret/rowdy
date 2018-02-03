@@ -510,7 +510,7 @@ public class RowdyRunner {
         throw new RuntimeException("The ID '" + value + "' doesn't exist "
                 + "on line " + curSeq.getLine());
       }
-      return val;
+      return new Value(val);
     } else {
       return value;
     }

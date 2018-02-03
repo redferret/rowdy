@@ -492,7 +492,7 @@ public class Rowdy {
         for (int p = 1; p < args.length; p++) {
           String in = args[p];
           if (Character.isDigit(in.charAt(0))) {
-            programParameters.add(new Value(Float.parseFloat(args[p])));
+            programParameters.add(new Value(Double.parseDouble(args[p])));
           } else {
             String argStr = args[p];
             if (argStr.equals("true") || argStr.equals("false")) {
