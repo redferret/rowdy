@@ -46,6 +46,10 @@
 		
 		->numberProgram();
 		->vars();
+		
+		const C = 1000;
+		C = func(){}; // should throw an exception
+		
 	}
 	
 	// vars will print the following:
