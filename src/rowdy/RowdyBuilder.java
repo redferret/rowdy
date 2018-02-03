@@ -20,7 +20,7 @@ public class RowdyBuilder {
   private Node root;
   
   private RowdyBuilder(Language language) {
-    line = 0;
+    line = 1;
     this.language = language;
     
   }
@@ -49,7 +49,7 @@ public class RowdyBuilder {
   private void buildAs(RowdyLexer parser, int programType) throws SyntaxException {
     this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(programType);
-    root = new Node(program, 0);
+    root = new Node(program, 1);
     currentToken = this.parser.getToken();
     if (currentToken == null){
       return;

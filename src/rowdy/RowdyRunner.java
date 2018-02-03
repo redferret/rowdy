@@ -753,7 +753,7 @@ public class RowdyRunner {
             switch (operator.id()) {
               case MINUS:
                 rightValue = (Value) executeExpr(cur, leftValue);
-                left = leftValue.valueToDouble();
+                left = (leftValue != null)? leftValue.valueToDouble() : 0;
                 right = rightValue.valueToDouble();
                 reslt = left - right;
                 return new Value(reslt);
