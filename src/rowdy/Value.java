@@ -19,6 +19,10 @@ public class Value {
     this.isConstant = isConstant;
   }
   
+  public Value(Value v){
+    this(v.getValue(), false);
+  }
+  
   public Value(Object value) {
     this(value, false);
   }
