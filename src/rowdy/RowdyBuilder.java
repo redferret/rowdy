@@ -46,7 +46,7 @@ public class RowdyBuilder {
     this.buildAs(parser, STMT_LIST);
   }
   
-  private void buildAs(RowdyLexer parser, int programType) throws SyntaxException {
+  public void buildAs(RowdyLexer parser, int programType) throws SyntaxException {
     this.parser = parser;
     NonTerminal program = (NonTerminal) language.getSymbol(programType);
     root = new Node(program, 1);

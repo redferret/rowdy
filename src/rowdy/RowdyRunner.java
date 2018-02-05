@@ -90,6 +90,7 @@ public class RowdyRunner {
    */
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
+    declareSystemConstants();
     declareGlobals(root);
     if (main == null){
       throw new MainNotFoundException("main method not found");
@@ -119,8 +120,6 @@ public class RowdyRunner {
     ArrayList<Node> children = parent.getAll();
     int currentID;
     Value rightValue;
-    
-    declareSystemConstants();
     
     for (int i = 0; i < children.size(); i++) {
       currentTreeNode = children.get(i);
@@ -330,6 +329,7 @@ public class RowdyRunner {
     // 1. Collect parameters
     Value funcVal = null;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+    // FIXME Need to look at more than just the first function
     if (!callStack.isEmpty()){
       funcVal = callStack.peek().getValue(funcName);
     } 

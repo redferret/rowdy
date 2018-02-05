@@ -108,6 +108,6 @@ public class Node {
 
   @Override
   public String toString() {
-    return def.toString();
+    return def.toString() + (children.isEmpty() ? "" : children.toString());
   }
 }

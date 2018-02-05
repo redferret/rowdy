@@ -49,6 +49,15 @@
 		
 		rightD = @root.getLeft().getRight();
 		
-		
+f = func() {
+ a = func() {print "A\n";}
+ g = func() {
+  h = func() {
+   ->a();
+  }
+  ->h();
+ }
+ ->g();
+}
 	}
 	
