@@ -575,7 +575,7 @@ public class RowdyRunner {
         }
         Symbol symbolType = cur.getLeftMost().symbol();
         switch (symbolType.id()) {
-          case CONCAT:
+          case CONCAT_EXPR:
             StringBuilder concatValue = new StringBuilder();
             concatValue.append(executeExpr(cur.get(EXPRESSION), leftValue).valueToString());
             Node atomTailNode = cur.get(EXPR_LIST);
@@ -584,13 +584,13 @@ public class RowdyRunner {
               atomTailNode = atomTailNode.get(EXPR_LIST);
             }
             return new Value(concatValue.toString());
-          case SLICE:
+          case SLICE_EXPR:
             String slice;
             slice = getValue(cur.get(EXPRESSION)).valueToString();
             int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToDouble().intValue();
             int rightBound = getValue(cur.get(ARITHM_EXPR, 1)).valueToDouble().intValue();
             return new Value(slice.substring(leftBound, rightBound));
-          case STRCMP:
+          case STRCMP_EXPR:
             String v1,
              v2;
             v1 = getValue(cur.get(EXPRESSION)).valueToString();
@@ -618,7 +618,7 @@ public class RowdyRunner {
             
             Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
             if (bodyType == null) {
-              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY, false);
               
               if (bodyType == null) {
                 List<Object> arrayList = new ArrayList<>(); 
@@ -630,9 +630,9 @@ public class RowdyRunner {
               
               HashMap<String, Object> keypairArray = new HashMap<>();
               Value key = firstValue;
-              Value keyValue = getValue(arrayBody.get(EXPRESSION));
+              Value keyValue = getValue(bodyType.get(EXPRESSION));
               keypairArray.put(key.getValue().toString(), keyValue.getValue());
-
+              arrayBody = bodyType;
               Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
               arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
               while(arrayBody != null && bodyType != null){
@@ -647,21 +647,23 @@ public class RowdyRunner {
             } else {
               List<Object> array = new ArrayList<>();
                 Value arrayValue = firstValue;
+                arrayBody = bodyType;
                 while (arrayValue != null){
                   array.add(arrayValue.getValue());
                   arrayValue = null;
-                  if (arrayBody.hasSymbols()) {
+                  if (arrayBody != null && arrayBody.hasSymbols()) {
                     arrayValue = getValue(arrayBody.get(EXPRESSION));
-                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY);
+                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
                   }
                 }
                 return new Value(array);
             }
-          case GET:
-            Value array = getValue(cur.get(EXPRESSION));
+          case GET_EXPR:
+            Node getExpr = cur.getLeftMost();
+            Value array = getValue(getExpr.get(EXPRESSION));
             if (array.getValue() instanceof List){
-              List<Value> list = (List<Value>)array.getValue();
-              Object arrayIndexValue = getValue(cur.get(EXPRESSION, 1)).getValue();
+              List<Object> list = (List<Object>)array.getValue();
+              Object arrayIndexValue = getValue(getExpr.get(EXPRESSION, 1)).getValue();
               int index;
               if (arrayIndexValue instanceof Integer){
                 index = (Integer)arrayIndexValue;
@@ -674,7 +676,7 @@ public class RowdyRunner {
               return new Value(list.get(index));
             } else {
               HashMap<String, Object> map = (HashMap)array.getValue();
-              Value key = getValue(cur.get(EXPRESSION, 1));
+              Value key = getValue(getExpr.get(EXPRESSION, 1));
               Value keyValue = new Value(map.get(key.getValue().toString()));
               return keyValue;
             }

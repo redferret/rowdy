@@ -1,6 +1,7 @@
 package rowdy;
 
 
+import growdy.GRBuilder;
 import growdy.GRowdy;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.exceptions.MainNotFoundException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -469,8 +472,17 @@ public class Rowdy {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-
-    GRowdy growdy = GRowdy.getInstance("Rowdy");
+    GRBuilder grBuilder;
+    try {
+      try (InputStream inputStream = Rowdy.class.getResourceAsStream("lang/Rowdy.gr"); 
+              ObjectInputStream in = new ObjectInputStream(inputStream)) {
+        grBuilder = (GRBuilder) in.readObject();
+      }
+      } catch (IOException | ClassNotFoundException i) {
+        throw new RuntimeException("There was a problem loading the Grammar: " + i.getLocalizedMessage());
+      }
+    
+    GRowdy growdy = GRowdy.getInstance(grBuilder);
     RowdyRunner rowdyProgram = new RowdyRunner();
     
     if (args.length > 0) {
@@ -516,7 +528,7 @@ public class Rowdy {
             break;
           }
           if (line.contains("\\\\")){
-            line = line.replace("\\\\", " ");
+            line = line.replace("\\\\", "\n");
             program.append(line);
             line = "";
           } else {
@@ -528,7 +540,7 @@ public class Rowdy {
           continue;
         }
         try {
-          growdy.buildFromString(line, STMT_LIST);
+          growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyProgram.initializeLine(growdy);
         } catch (ParseException | SyntaxException e) {
           handleException(rowdyProgram, e);
