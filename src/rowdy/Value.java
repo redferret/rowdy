@@ -1,5 +1,8 @@
 package rowdy;
 
+import growdy.Symbol;
+import growdy.Terminal;
+
 /**
  * The wrapper for a value in Rowdy. This value can be anything, even a 
  * Node, or a Function, or even another Rowdy program.

@@ -1,5 +1,10 @@
 package rowdy;
 
+import growdy.GRowdy;
+import growdy.Node;
+import growdy.NonTerminal;
+import growdy.Symbol;
+import growdy.Terminal;
 import rowdy.exceptions.MainNotFoundException;
 import rowdy.exceptions.ConstantReassignmentException;
 import java.util.ArrayList;
@@ -9,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Stack;
-import static rowdy.Rowdy.*;
+import static rowdy.lang.RowdyGrammarConstants.*;
 
 /**
  * Executes a parse tree given by a builder.
@@ -49,14 +54,14 @@ public class RowdyRunner {
     firstTimeInitialization = true;
   }
   
-  public void initialize(RowdyBuilder builder) {
+  public void initialize(GRowdy builder) {
     this.root = builder.getProgram();
     callStack.clear();
     activeLoops.clear();
     globalSymbolTable.clear();
   }
   
-  public void initializeLine(RowdyBuilder builder) {
+  public void initializeLine(GRowdy builder) {
     this.root = builder.getProgram();
   }
   
@@ -90,6 +95,7 @@ public class RowdyRunner {
    */
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
+    declareSystemConstants();
     declareGlobals(root);
     if (main == null){
       throw new MainNotFoundException("main method not found");
@@ -119,8 +125,6 @@ public class RowdyRunner {
     ArrayList<Node> children = parent.getAll();
     int currentID;
     Value rightValue;
-    
-    declareSystemConstants();
     
     for (int i = 0; i < children.size(); i++) {
       currentTreeNode = children.get(i);
@@ -220,7 +224,7 @@ public class RowdyRunner {
           }
           break;
         case BREAK_STMT:
-          if (!currentTreeNode.get(ID_OPTION).hasChildren()) {
+          if (!currentTreeNode.get(ID_OPTION).hasSymbols()) {
             if (activeLoops.isEmpty()) {
               throw new RuntimeException("No loop to break. Line " 
                       + currentTreeNode.getLine());
@@ -256,9 +260,9 @@ public class RowdyRunner {
           Node firstID = currentTreeNode.get(ID);
           Terminal t = (Terminal) executeExpr(firstID, null).getValue();
           allocate(t, new Value(keys.nextLine()));
-          if (currentTreeNode.hasChildren()) {
+          if (currentTreeNode.hasSymbols()) {
             Node paramsTail = currentTreeNode.get(PARAMS_TAIL);
-            while (paramsTail.hasChildren()) {
+            while (paramsTail.hasSymbols()) {
               currentTreeNode = paramsTail.get(ID);
               Value v = executeExpr(currentTreeNode, null);
               inValue = keys.nextLine();
@@ -280,7 +284,7 @@ public class RowdyRunner {
           StringBuilder printValue = new StringBuilder();
           printValue.append(getValue(currentTreeNode.get(EXPRESSION)).valueToString());
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
-          while (atomTailNode.hasChildren()) {
+          while (atomTailNode.hasSymbols()) {
             printValue.append(getValue(atomTailNode.get(EXPRESSION)).valueToString());
             atomTailNode = atomTailNode.get(EXPR_LIST);
           }
@@ -330,6 +334,7 @@ public class RowdyRunner {
     // 1. Collect parameters
     Value funcVal = null;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+    // FIXME Need to look at more than just the first function
     if (!callStack.isEmpty()){
       funcVal = callStack.peek().getValue(funcName);
     } 
@@ -343,10 +348,10 @@ public class RowdyRunner {
     }
     List<Value> parameterValues = new ArrayList<>();
     Node expr = cur.get(EXPRESSION, false);// This might be 'main'
-    if (expr != null && expr.hasChildren()) {
+    if (expr != null && expr.hasSymbols()) {
       parameterValues.add(getValue(cur.get(EXPRESSION)));
       Node atomTailNode = cur.get(EXPR_LIST);
-      while (atomTailNode.hasChildren()) {
+      while (atomTailNode.hasSymbols()) {
         parameterValues.add(getValue(atomTailNode.get(EXPRESSION)));
         atomTailNode = atomTailNode.get(EXPR_LIST);
       }
@@ -359,12 +364,12 @@ public class RowdyRunner {
     if (!parameterValues.isEmpty()) {
       Node functionBody = functionNode.get(FUNCTION_BODY);
       Node paramsNode = functionBody.get(PARAMETERS);
-      if (paramsNode.hasChildren()) {
+      if (paramsNode.hasSymbols()) {
         Value paramValue = executeExpr(paramsNode, null);
 
         paramsList.add(((Terminal) paramValue.getValue()).getName());
         Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
-        while (paramsTailNode.hasChildren()) {
+        while (paramsTailNode.hasSymbols()) {
           paramsList.add(((Terminal) executeExpr(paramsTailNode.get(ID), null).getValue()).getName());
           paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
         }
@@ -412,8 +417,25 @@ public class RowdyRunner {
         setAsGlobal(idTerminal, value);
       } else {
         try {
-          Function currentFunction = callStack.peek();
-          currentFunction.allocate(idTerminal, value);
+          Stack<Function> searchStack = new Stack<>();
+          while(!callStack.isEmpty()) {
+            searchStack.push(callStack.pop());
+          }
+          boolean valueFound = false;
+          while(!searchStack.isEmpty()) {
+            Function currentFunction = searchStack.peek();
+            Value v = currentFunction.getValue(idTerminal.getName());
+            if (v != null && !valueFound) {
+              currentFunction.allocate(idTerminal, value);
+              valueFound = true;
+            }
+            callStack.push(searchStack.pop());
+          }
+          if (!valueFound) {
+            Function currentFunction = callStack.peek();
+            currentFunction.allocate(idTerminal, value);
+          }
+          
         } catch (EmptyStackException e) {}
       }
     }
@@ -526,6 +548,9 @@ public class RowdyRunner {
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
   public Value executeExpr(Node cur, Value leftValue) throws ConstantReassignmentException {
+    if (cur == null) {
+      return leftValue;
+    }
     Node parent = cur;
     ArrayList<Node> children = cur.getAll();
     double left, right;
@@ -537,41 +562,41 @@ public class RowdyRunner {
     int curID = cur.symbol().id();
     switch (curID) {
       case EXPRESSION:
-        Node leftChild = cur.getLeftMostChild();
+        Node leftChild = cur.getLeftMost();
         if (leftChild == null) {
           return null;
         }
         switch (leftChild.symbol().id()) {
           case BOOL_TERM:
             leftValue = executeExpr(leftChild, leftValue);
-            return executeExpr(cur.get(BOOL_TERM_TAIL), leftValue);
+            return executeExpr(cur.get(BOOL_TERM_TAIL, false), leftValue);
           case ISSET_EXPR:
             return executeExpr(leftChild, leftValue);
         }
-        Symbol symbolType = cur.getLeftMostChild().symbol();
+        Symbol symbolType = cur.getLeftMost().symbol();
         switch (symbolType.id()) {
-          case CONCAT:
+          case CONCAT_EXPR:
             StringBuilder concatValue = new StringBuilder();
             concatValue.append(executeExpr(cur.get(EXPRESSION), leftValue).valueToString());
             Node atomTailNode = cur.get(EXPR_LIST);
-            while (atomTailNode.hasChildren()) {
+            while (atomTailNode.hasSymbols()) {
               concatValue.append(executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString());
               atomTailNode = atomTailNode.get(EXPR_LIST);
             }
             return new Value(concatValue.toString());
-          case SLICE:
+          case SLICE_EXPR:
             String slice;
             slice = getValue(cur.get(EXPRESSION)).valueToString();
             int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToDouble().intValue();
             int rightBound = getValue(cur.get(ARITHM_EXPR, 1)).valueToDouble().intValue();
             return new Value(slice.substring(leftBound, rightBound));
-          case STRCMP:
+          case STRCMP_EXPR:
             String v1,
              v2;
             v1 = getValue(cur.get(EXPRESSION)).valueToString();
             v2 = getValue(cur.get(EXPRESSION, 1)).valueToString();
             return new Value(v1.compareTo(v2));
-          case FUNC:
+          case ANONYMOUS_FUNC:
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
             return new Value(anonymousFunc);
           case ROUND_EXPR:
@@ -587,13 +612,13 @@ public class RowdyRunner {
             roundedValue = (double) Math.round(roundedValue * factor) / factor;
             return new Value(roundedValue);
           case ARRAY_EXPR:
-            Node arrayExpression = cur.getLeftMostChild();
+            Node arrayExpression = cur.getLeftMost();
             Value firstValue = getValue(arrayExpression.get(EXPRESSION));
             Node arrayBody = arrayExpression.get(ARRAY_BODY);
             
             Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
             if (bodyType == null) {
-              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
+              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY, false);
               
               if (bodyType == null) {
                 List<Object> arrayList = new ArrayList<>(); 
@@ -605,9 +630,9 @@ public class RowdyRunner {
               
               HashMap<String, Object> keypairArray = new HashMap<>();
               Value key = firstValue;
-              Value keyValue = getValue(arrayBody.get(EXPRESSION));
+              Value keyValue = getValue(bodyType.get(EXPRESSION));
               keypairArray.put(key.getValue().toString(), keyValue.getValue());
-
+              arrayBody = bodyType;
               Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
               arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
               while(arrayBody != null && bodyType != null){
@@ -622,21 +647,23 @@ public class RowdyRunner {
             } else {
               List<Object> array = new ArrayList<>();
                 Value arrayValue = firstValue;
+                arrayBody = bodyType;
                 while (arrayValue != null){
                   array.add(arrayValue.getValue());
                   arrayValue = null;
-                  if (arrayBody.hasChildren()) {
+                  if (arrayBody != null && arrayBody.hasSymbols()) {
                     arrayValue = getValue(arrayBody.get(EXPRESSION));
-                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY);
+                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
                   }
                 }
                 return new Value(array);
             }
-          case GET:
-            Value array = getValue(cur.get(EXPRESSION));
+          case GET_EXPR:
+            Node getExpr = cur.getLeftMost();
+            Value array = getValue(getExpr.get(EXPRESSION));
             if (array.getValue() instanceof List){
-              List<Value> list = (List<Value>)array.getValue();
-              Object arrayIndexValue = getValue(cur.get(EXPRESSION, 1)).getValue();
+              List<Object> list = (List<Object>)array.getValue();
+              Object arrayIndexValue = getValue(getExpr.get(EXPRESSION, 1)).getValue();
               int index;
               if (arrayIndexValue instanceof Integer){
                 index = (Integer)arrayIndexValue;
@@ -649,13 +676,13 @@ public class RowdyRunner {
               return new Value(list.get(index));
             } else {
               HashMap<String, Object> map = (HashMap)array.getValue();
-              Value key = getValue(cur.get(EXPRESSION, 1));
+              Value key = getValue(getExpr.get(EXPRESSION, 1));
               Value keyValue = new Value(map.get(key.getValue().toString()));
               return keyValue;
             }
         }
         throw new RuntimeException("Couldn't get value, "
-                + "undefined Node '" + cur.getLeftMostChild()+"' on line " + 
+                + "undefined Node '" + cur.getLeftMost()+"' on line " + 
                 cur.getLine());
       case ISSET_EXPR:
         Value resultBoolean = new Value(isset(cur.get(ID)));
@@ -688,12 +715,12 @@ public class RowdyRunner {
         if (relationChildren.isEmpty()) {
           return leftValue;
         }
-        cur = relationChildren.get(0);
-        operator = cur.symbol();
+        Node firstRel = relationChildren.get(0);
+        operator = firstRel.getLeftMost().symbol();
       
-        Object leftValueObject = fetch(leftValue, cur).getValue();
-        cur = relationChildren.get(1);
-        Object rightValueObject = getValue(cur).getValue();
+        Object leftValueObject = fetch(leftValue, firstRel).getValue();
+        Node secondRel = firstRel.get(ARITHM_EXPR);
+        Object rightValueObject = getValue(secondRel).getValue();
         
         Object leftAsBool = null, rightAsBool = null;
         left = 0;
@@ -702,7 +729,7 @@ public class RowdyRunner {
         } else if (leftValueObject instanceof Node) {
           leftAsBool = leftValueObject;
         } else {
-          left = fetch(leftValue, cur).valueToDouble();
+          left = fetch(leftValue, secondRel).valueToDouble();
         }
         right = 0;
         if (rightValueObject instanceof Boolean){
@@ -710,7 +737,7 @@ public class RowdyRunner {
         } else if (leftValueObject instanceof Node) {
           rightAsBool = rightValueObject;
         } else {
-          right = getValue(cur).valueToDouble();
+          right = getValue(secondRel).valueToDouble();
         }
         
         bReslt = null;
@@ -808,7 +835,11 @@ public class RowdyRunner {
         }
         return executeExpr(children.get(2), new Value(reslt));
       case TERM_TAIL:
-        ArrayList<Node> termChildren = cur.getAll();
+        Node leftMost = cur.getLeftMost();
+        if (leftMost == null) {
+          return leftValue;
+        }
+        ArrayList<Node> termChildren = leftMost.getAll();
         if (termChildren.size() < 1) {
           return leftValue;
         }
@@ -832,10 +863,15 @@ public class RowdyRunner {
       case ARITHM_EXPR:
         leftValue = (Value) executeExpr(children.get(0), leftValue);
         return executeExpr(children.get(1), leftValue);
+      case PAREN_EXPR:  
+        return executeExpr(parent.get(EXPRESSION), leftValue);
       case ID_OPTION:
       case PARAMETERS:
       case ATOMIC:
-        return executeExpr(parent.getLeftMostChild(), leftValue);
+      case ATOMIC_ID:
+      case ATOMIC_CONST:
+      case ATOMIC_FUNC_CALL:
+        return executeExpr(parent.getLeftMost(), leftValue);
       case ID:
         return new Value(cur.symbol());
       case CONST:
