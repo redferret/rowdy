@@ -3,28 +3,36 @@
 	// Demonstrates the 'round' function to help fix floating point errors
 	// and recursion.
 	
-	change = 0;
-	
 	func main (price, amt) {
-	
+		
 		if ((isset price) and (isset amt)) == false {
-			print "Illegal or Missing Arguments\n";
-			return 1;
+			print "Illegal or Missing Arguments\n"
+			return 1
 		}
 	
-		change = amt - price;
-		change = round change, 2;
+		change = amt - price
+		change = round change, 2
 		
-		chg = change;
-		
-		twenties	= ->getChange(20);
-		tens 		= ->getChange(10);
-		fives 		= ->getChange(5);
-		ones	 	= ->getChange(1);
-		quarters 	= ->getChange_recur(0.25, 0);
-		dimes 		= ->getChange(0.1);
-		nickels 	= ->getChange(0.05);
-		pennies 	= ->getChange(0.01);
+		chg = change
+		getChange = func(denom) {
+			loop qty: {
+				if (change >= denom) {
+					change = change - denom
+					qty = qty + 1
+					change = round change, 2
+				} else {
+					return qty
+				}
+			}
+		}
+		twenties	= ->getChange(20)
+		tens 		= ->getChange(10)
+		fives 		= ->getChange(5)
+		ones	 	= ->getChange(1)
+		quarters 	= ->getChange(0.25)
+		dimes 		= ->getChange(0.1)
+		nickels 	= ->getChange(0.05)
+		pennies 	= ->getChange(0.01)
 		
 		print
 		"Amount Due: ", price,		"\n",
@@ -38,29 +46,5 @@
 		"Quarters:	", quarters, 	"\n",
 		"Dimes:		", dimes, 		"\n",
 		"Nickels:	", nickels, 	"\n",
-		"Pennies:	", pennies, 	"\n\n";
-	}
-	
-	// With recursion
-	func getChange_recur (denom, qty) {
-		if (change >= denom) {
-			change = change - denom;
-			change = round change, 2;
-			return ->getChange_recur(denom, qty + 1);
-		} else {
-			return qty;
-		}
-	}
-	
-	// With a loop
-	func getChange (denom) {
-		loop qty: {
-			if (change >= denom) {
-				change = change - denom;
-				qty = qty + 1;
-				change = round change, 2;
-			} else {
-				return qty;
-			}
-		}
+		"Pennies:	", pennies, 	"\n\n"
 	}

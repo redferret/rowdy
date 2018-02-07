@@ -1,5 +1,6 @@
 package rowdy;
 
+import growdy.Terminal;
 import rowdy.exceptions.ConstantReassignmentException;
 import java.util.HashMap;
 import java.util.Objects;
