@@ -209,7 +209,7 @@ public class RowdyRunner {
                       "on line " + currentTreeNode.getLine());
             }
           } else {
-            allocate(loopIdTerminal, new Value(0));
+            allocateToCurrentFunction(loopIdTerminal, new Value(0));
           }
           activeLoops.push(currentTreeNode);
           currentTreeNode.setSeqActive(true);
@@ -317,6 +317,11 @@ public class RowdyRunner {
     }
   }
 
+  public void allocateToCurrentFunction(Terminal idTerminal, Value value) throws ConstantReassignmentException {
+    Function currentFunction = callStack.peek();
+    currentFunction.allocate(idTerminal, value);
+  }
+  
   /**
    * When a function is called, and not allocated, the method will collect the
    * actual parameters being passed into the function (if any) and then allocate
@@ -419,21 +424,16 @@ public class RowdyRunner {
         try {
           Stack<Function> searchStack = new Stack<>();
           while(!callStack.isEmpty()) {
-            searchStack.push(callStack.pop());
-          }
-          boolean valueFound = false;
-          while(!searchStack.isEmpty()) {
-            Function currentFunction = searchStack.peek();
+            Function currentFunction = callStack.pop();
+            searchStack.push(currentFunction);
             Value v = currentFunction.getValue(idTerminal.getName());
-            if (v != null && !valueFound) {
+            if (v == null || callStack.isEmpty()) {
               currentFunction.allocate(idTerminal, value);
-              valueFound = true;
+              break;
             }
-            callStack.push(searchStack.pop());
           }
-          if (!valueFound) {
-            Function currentFunction = callStack.peek();
-            currentFunction.allocate(idTerminal, value);
+          while(!searchStack.isEmpty()){
+            callStack.push(searchStack.pop());
           }
           
         } catch (EmptyStackException e) {}
@@ -511,22 +511,25 @@ public class RowdyRunner {
     if (value.getValue() instanceof Terminal) {
       // Look in the functions first
       String fetchIdName = ((Terminal) value.getValue()).getName();
-      Value valueFromFunction;
-      Stack<Function> functions = new Stack<>();
+      Value valueFromFunction = null;
+      boolean valueFound = false;
+      Stack<Function> searchStack = new Stack<>();
       while(!callStack.isEmpty()) {
         Function currentFunction = callStack.pop();
-        functions.push(currentFunction);
+        searchStack.push(currentFunction);
         valueFromFunction = currentFunction.getValue(value);
         if (valueFromFunction != null) {
-          while(!functions.isEmpty()) {
-            callStack.push(functions.pop());
-          }
-          return valueFromFunction;
+          valueFound = true;
+          break;
         }
       }
-      while(!functions.isEmpty()) {
-        callStack.push(functions.pop());
+      while(!searchStack.isEmpty()){
+        callStack.push(searchStack.pop());
       }
+      if (valueFound) {
+        return valueFromFunction;
+      }
+      
       Value val = globalSymbolTable.get(fetchIdName);
       if (val == null) {
         throw new RuntimeException("The ID '" + value + "' doesn't exist "
@@ -572,15 +575,18 @@ public class RowdyRunner {
           case BOOL_TERM:
             leftValue = executeExpr(leftChild, leftValue);
             return executeExpr(cur.get(BOOL_TERM_TAIL, false), leftValue);
-          case ISSET_EXPR:
-            return executeExpr(leftChild, leftValue);
         }
         Symbol symbolType = cur.getLeftMost().symbol();
         switch (symbolType.id()) {
+          case ISSET_EXPR:
+            Node issetExpr = cur.get(ISSET_EXPR);
+            Value resultBoolean = new Value(isset(issetExpr.get(ID)));
+            return resultBoolean;
           case CONCAT_EXPR:
+            Node concatExpr = cur.get(CONCAT_EXPR);
             StringBuilder concatValue = new StringBuilder();
-            concatValue.append(executeExpr(cur.get(EXPRESSION), leftValue).valueToString());
-            Node atomTailNode = cur.get(EXPR_LIST);
+            concatValue.append(executeExpr(concatExpr.get(EXPRESSION), leftValue).valueToString());
+            Node atomTailNode = concatExpr.get(EXPR_LIST);
             while (atomTailNode.hasSymbols()) {
               concatValue.append(executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString());
               atomTailNode = atomTailNode.get(EXPR_LIST);
@@ -588,15 +594,16 @@ public class RowdyRunner {
             return new Value(concatValue.toString());
           case SLICE_EXPR:
             String slice;
-            slice = getValue(cur.get(EXPRESSION)).valueToString();
-            int leftBound = getValue(cur.get(ARITHM_EXPR)).valueToDouble().intValue();
-            int rightBound = getValue(cur.get(ARITHM_EXPR, 1)).valueToDouble().intValue();
+            Node sliceExpr = cur.get(SLICE_EXPR);
+            slice = getValue(sliceExpr.get(EXPRESSION)).valueToString();
+            int leftBound = getValue(sliceExpr.get(ARITHM_EXPR)).valueToDouble().intValue();
+            int rightBound = getValue(sliceExpr.get(ARITHM_EXPR, 1)).valueToDouble().intValue();
             return new Value(slice.substring(leftBound, rightBound));
           case STRCMP_EXPR:
-            String v1,
-             v2;
-            v1 = getValue(cur.get(EXPRESSION)).valueToString();
-            v2 = getValue(cur.get(EXPRESSION, 1)).valueToString();
+            String v1,v2;
+            Node strcmpExpr = cur.get(STRCMP_EXPR);
+            v1 = getValue(strcmpExpr.get(EXPRESSION)).valueToString();
+            v2 = getValue(strcmpExpr.get(EXPRESSION, 1)).valueToString();
             return new Value(v1.compareTo(v2));
           case ANONYMOUS_FUNC:
             Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
@@ -617,11 +624,11 @@ public class RowdyRunner {
             Node arrayExpression = cur.getLeftMost();
             Value firstValue = getValue(arrayExpression.get(EXPRESSION));
             Node arrayBody = arrayExpression.get(ARRAY_BODY);
-            
+
             Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
             if (bodyType == null) {
               bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY, false);
-              
+
               if (bodyType == null) {
                 List<Object> arrayList = new ArrayList<>(); 
                 if (firstValue != null) {
@@ -629,7 +636,7 @@ public class RowdyRunner {
                 }
                 return new Value(arrayList);
               }
-              
+
               HashMap<String, Object> keypairArray = new HashMap<>();
               Value key = firstValue;
               Value keyValue = getValue(bodyType.get(EXPRESSION));
@@ -645,7 +652,7 @@ public class RowdyRunner {
                 arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
               }
               return new Value(keypairArray);
-              
+
             } else {
               List<Object> array = new ArrayList<>();
                 Value arrayValue = firstValue;
@@ -686,9 +693,6 @@ public class RowdyRunner {
         throw new RuntimeException("Couldn't get value, "
                 + "undefined Node '" + cur.getLeftMost()+"' on line " + 
                 cur.getLine());
-      case ISSET_EXPR:
-        Value resultBoolean = new Value(isset(cur.get(ID)));
-        return resultBoolean;
       case BOOL_TERM_TAIL:
       case BOOL_FACTOR_TAIL:
         ArrayList<Node> boolChildren = cur.getAll();
