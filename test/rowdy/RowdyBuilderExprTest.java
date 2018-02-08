@@ -27,7 +27,6 @@ public class RowdyBuilderExprTest {
   
   @Test
   public void testExpression() {
-    System.out.println(testCode);
     testExpressionTree(testCode, ASSIGN_STMT);
   }
   
