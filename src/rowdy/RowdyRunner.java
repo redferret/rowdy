@@ -209,7 +209,7 @@ public class RowdyRunner {
                       "on line " + currentTreeNode.getLine());
             }
           } else {
-            allocateToCurrentFunction(loopIdTerminal, new Value(0));
+            allocate(loopIdTerminal, new Value(0));
           }
           activeLoops.push(currentTreeNode);
           currentTreeNode.setSeqActive(true);
@@ -337,12 +337,10 @@ public class RowdyRunner {
    */
   public Value executeFunc(Node cur) throws ConstantReassignmentException {
     // 1. Collect parameters
-    Value funcVal = null;
+    Value funcVal;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
     // FIXME Need to look at more than just the first function
-    if (!callStack.isEmpty()){
-      funcVal = callStack.peek().getValue(funcName);
-    } 
+    funcVal = getValue(cur.get(ID));
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
         throw new RuntimeException("Function '" + funcName + "' not defined on "
@@ -423,19 +421,24 @@ public class RowdyRunner {
       } else {
         try {
           Stack<Function> searchStack = new Stack<>();
+          boolean found = false;
           while(!callStack.isEmpty()) {
             Function currentFunction = callStack.pop();
             searchStack.push(currentFunction);
             Value v = currentFunction.getValue(idTerminal.getName());
-            if (v == null || callStack.isEmpty()) {
+            if (v != null) {
               currentFunction.allocate(idTerminal, value);
+              found = true;
               break;
             }
           }
           while(!searchStack.isEmpty()){
             callStack.push(searchStack.pop());
           }
-          
+          if (!found){
+            Function currentFunction = callStack.peek();
+            currentFunction.allocate(idTerminal, value);
+          }
         } catch (EmptyStackException e) {}
       }
     }
