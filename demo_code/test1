@@ -6,13 +6,13 @@
 
 		Person = func (name, customerType) {
 			getCustomerType = func() {
-				return customerType;
+				return this.customerType;
 			}
 			getName = func(){
-				return name;
+				return this.name;
 			}
 			toString = func() {
-				return concat "Customer Type: ", customerType, "; Name: ", name;
+				return concat "Customer Type: ", this.customerType, "; Name: ", this.name;
 			}
 		}
 		

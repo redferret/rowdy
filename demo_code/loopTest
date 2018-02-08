@@ -1,24 +1,26 @@
 
 	func main() {
-		->f1();
+		->f1()
 	}
 	
 	func f1(){
 		loop x: {
-			->f2();
-			break;
+			print x, " - first\n"
+			->f2()
+			print x, " - fourth\n"
+			break
 		}
 	}
 	
 	func f2() {
 		loop x: {
-			x = 100;
-			print x, "\n";
-			break;
+			x = 100
+			print x, " - second\n"
+			break
 		}
 		loop x: {
-			x = 500;
-			print x, "\n";
-			break;
+			x = 500
+			print x, " - third\n"
+			break
 		}
 	}

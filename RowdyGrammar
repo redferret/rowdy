@@ -4,6 +4,7 @@ Rowdy
 <TERMINAL>
 
 ID				=> id;
+// TODO: Rename to CONSTANT
 CONST			=> constant;
 IF				=> "if";
 ELSE			=> "else";
@@ -44,7 +45,9 @@ ARRAY			=> "array";
 GET				=> "get";
 DEL				=> "del";
 PUT				=> "put";
+// TODO: Rename this to CONST
 CONST_DEF		=> "const";
+GLOBAL			=> "global"
 
 <SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % -> { }";
 
@@ -71,7 +74,11 @@ STATEMENT(	ID IF LOOP
 IF_STMT(IF)					=> IF EXPRESSION STMT_BLOCK ELSE_PART;
 ELSE_PART(ELSE)				=> ELSE STMT_BLOCK;
 LOOP_STMT(LOOP)				=> LOOP ID COLON STMT_BLOCK;		
+// TODO: Change CONST_OPT to ID_MODIFIER when the ticket is made
 ASSIGN_STMT(ID CONST_DEF)	=> CONST_OPT ID BECOMES EXPRESSION;
+ID_MODIFIER(CONST_DEF 
+	GLOBAL)					=> CONST_OPT* | GLOBAL_DEF*
+GLOBAL_DEF					=> GLOBAL
 CONST_OPT(CONST_DEF)		=> CONST_DEF;
 BREAK_STMT(BREAK)			=> BREAK ID_OPTION;
 ID_OPTION(ID)				=> ID;
