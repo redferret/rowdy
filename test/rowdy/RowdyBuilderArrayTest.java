@@ -1,11 +1,13 @@
 
 package rowdy;
 
-import org.junit.Test;
-import static rowdy.Rowdy.*;
-import static rowdy.testUtils.TestUtils.*;
-import static org.junit.Assert.*;
+import growdy.Node;
 
+import org.junit.Test;
+import static org.junit.Assert.*;
+import static rowdy.lang.RowdyGrammarConstants.*;
+import static growdy.testUtils.TestUtils.*;
+import static rowdy.testutils.TestUtils.getTestStatement;
 /**
  *
  * @author Richard
@@ -18,11 +20,12 @@ public class RowdyBuilderArrayTest {
     
     Node assignStmt = getTestStatement(testCode, ASSIGN_STMT);
     Node expr = getFromAndTestNotNull(assignStmt, EXPRESSION);
-    getAndTestSymbol(expr, GET, "get");
-    testContainsSymbols(expr, 
+    Node getExpr = getFromAndTestNotNull(expr, GET_EXPR);
+    getAndTestSymbol(getExpr, GET, "get");
+    testContainsSymbols(getExpr, 
             new int[]{GET,OPENPAREN,EXPRESSION,COMMA,EXPRESSION,CLOSEDPAREN});
-    boolean e1 = getFromAndTestNotNull(expr, EXPRESSION, 0).getAll().isEmpty();
-    boolean e2 = getFromAndTestNotNull(expr, EXPRESSION, 1).getAll().isEmpty();
+    boolean e1 = getFromAndTestNotNull(getExpr, EXPRESSION, 0).getAll().isEmpty();
+    boolean e2 = getFromAndTestNotNull(getExpr, EXPRESSION, 1).getAll().isEmpty();
     assertFalse(e1);
     assertFalse(e2);
   }
@@ -49,8 +52,8 @@ public class RowdyBuilderArrayTest {
     
     final int[] arraySymbols = new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY};
     Node arrayBody = getFromAndTestNotNull(arrayExpr, ARRAY_BODY);
-    testContainsSymbols(arrayBody, arraySymbols);
     Node arrayLinearBody = arrayBody.get(ARRAY_LINEAR_BODY);
+    testContainsSymbols(arrayLinearBody, arraySymbols);
     testContainsSymbols(arrayLinearBody, arraySymbols);
   }
   
@@ -62,10 +65,11 @@ public class RowdyBuilderArrayTest {
     Node expr = getFromAndTestNotNull(stmt, EXPRESSION);
     Node arrayExpr = getFromAndTestNotNull(expr, ARRAY_EXPR); 
     Node arrayBody = getFromAndTestNotNull(arrayExpr, ARRAY_BODY);
-    testContainsSymbols(arrayBody, 
+    Node keyValueBody = getFromAndTestNotNull(arrayBody,ARRAY_KEY_VALUE_BODY );
+    testContainsSymbols(keyValueBody, 
             new int[]{COLON, EXPRESSION, ARRAY_KEY_VALUE_BODY_TAIL});
     
-    Node arrayBodyTail = getFromAndTestNotNull(arrayBody, ARRAY_KEY_VALUE_BODY_TAIL);
+    Node arrayBodyTail = getFromAndTestNotNull(keyValueBody, ARRAY_KEY_VALUE_BODY_TAIL);
     testContainsSymbols(arrayBodyTail, 
             new int[]{COMMA, EXPRESSION, ARRAY_KEY_VALUE_BODY});
   }

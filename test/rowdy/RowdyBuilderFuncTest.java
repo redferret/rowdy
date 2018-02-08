@@ -1,10 +1,12 @@
 
 package rowdy;
 
+import growdy.Node;
 import org.junit.Test;
-import static rowdy.Rowdy.*;
-import static rowdy.testUtils.TestUtils.*;
+import static growdy.testUtils.TestUtils.*;
 import static org.junit.Assert.*;
+import static rowdy.lang.RowdyGrammarConstants.*;
+import static rowdy.testutils.TestUtils.getTestStatement;
 /**
  *
  * @author Richard DeSilvey
@@ -15,16 +17,16 @@ public class RowdyBuilderFuncTest {
   public void testFunction() {
     String testCode = "func name(a, b){}";
     
-    Node function = getTestProgram(testCode, FUNCTION);
-    assertTrue("Function shouldn't be empty", function.hasChildren());
+    Node function = getTestStatement(testCode, FUNCTION);
+    assertTrue("Function shouldn't be empty", function.hasSymbols());
     
     getAndTestSymbol(function, FUNC, "func");
     getFromAndTestNotNull(function, ID);
-    Node functionBody = getAndTestSymbol(function, FUNCTION_BODY, "func-body");
+    Node functionBody = getAndTestSymbol(function, FUNCTION_BODY, "function-body");
     
     testContainsSymbols(functionBody, 
             new int[]{OPENPAREN, PARAMETERS, CLOSEDPAREN, STMT_BLOCK});
-    Node parameters = getAndTestSymbol(functionBody, PARAMETERS, "params");
+    Node parameters = getAndTestSymbol(functionBody, PARAMETERS, "parameters");
     testContainsSymbols(parameters, new int[]{ID, PARAMS_TAIL});
     Node paramTail = getAndTestSymbol(parameters, PARAMS_TAIL, "params-tail");
     testContainsSymbols(paramTail, new int[]{COMMA, ID, PARAMS_TAIL});
@@ -38,7 +40,6 @@ public class RowdyBuilderFuncTest {
     testContainsSymbols(funcCall, 
             new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
     getAndTestSymbol(funcCall, CALL, "->");
-    testExpressionList(funcCall);
   }
   
   @Test
@@ -48,7 +49,6 @@ public class RowdyBuilderFuncTest {
     Node stmt = getTestStatement(testCode, ASSIGN_STMT);
     Node expr = getFromAndTestNotNull(stmt, EXPRESSION);
     Node anonFunc = getFromAndTestNotNull(expr, ANONYMOUS_FUNC);
-    testContainsSymbols(expr, new int[]{FUNC, ANONYMOUS_FUNC});
-    testContainsSymbols(anonFunc, new int[]{FUNCTION_BODY});
+    testContainsSymbols(anonFunc, new int[]{FUNC, FUNCTION_BODY});
   }
 }
