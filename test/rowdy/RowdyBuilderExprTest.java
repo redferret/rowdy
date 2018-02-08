@@ -1,14 +1,16 @@
 
 package rowdy;
 
+import growdy.Node;
+import static growdy.testUtils.TestUtils.getAndTestSymbol;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import static rowdy.Rowdy.*;
-import static rowdy.testUtils.TestUtils.*;
 import static org.junit.Assert.*;
+import static rowdy.lang.RowdyGrammarConstants.*;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  * Allows to test all forms of an expression tree.
@@ -25,12 +27,13 @@ public class RowdyBuilderExprTest {
   
   @Test
   public void testExpression() {
+    System.out.println(testCode);
     testExpressionTree(testCode, ASSIGN_STMT);
   }
   
   public void testExpressionTree(String testCode, int parentId) {
     Node stmt = getTestStatement(testCode, parentId);
-    Node expr = getAndTestSymbol(stmt, EXPRESSION, "expr");
+    Node expr = getAndTestSymbol(stmt, EXPRESSION, "expression").get(BOOL_EXPR);
     
     Node boolTerm = getAndTestSymbol(expr, BOOL_TERM, "bool-term");
     Node boolTermTail = getAndTestSymbol(expr, BOOL_TERM_TAIL, "bool-term-tail");
@@ -44,10 +47,11 @@ public class RowdyBuilderExprTest {
     testNodeLeftChild(boolFactorTail, 
             new int[][]{{AND, BOOL_FACTOR, BOOL_FACTOR_TAIL}});
     
-    Node arithmExpr = getAndTestSymbol(boolFactor, ARITHM_EXPR, "arith-expr");
+    Node arithmExpr = getAndTestSymbol(boolFactor, ARITHM_EXPR, "arithm-expr");
     Node relationOpt = getAndTestSymbol(boolFactor, RELATION_OPTION, "relation-option");
     
-    testNodeLeftChild(relationOpt, 
+    Node relationOpts = relationOpt.getLeftMost();
+    testNodeLeftChild(relationOpts, 
             new int[][]{{LESS, ARITHM_EXPR, RELATION_OPTION}, 
                         {GREATER, ARITHM_EXPR, RELATION_OPTION},
                         {EQUAL, ARITHM_EXPR, RELATION_OPTION}, 
@@ -58,16 +62,19 @@ public class RowdyBuilderExprTest {
     Node term = getAndTestSymbol(arithmExpr, TERM, "term");
     Node termTail = getAndTestSymbol(arithmExpr, TERM_TAIL, "term-tail");
     
-    testNodeLeftChild(termTail, 
+    Node termPlusMinus = termTail.getLeftMost();
+    testNodeLeftChild(termPlusMinus, 
             new int[][]{{PLUS, TERM, TERM_TAIL}, {MINUS, TERM, TERM_TAIL}});
     
     Node factor = getAndTestSymbol(term, FACTOR, "factor");
     Node factorTail = getAndTestSymbol(term, FACTOR_TAIL, "factor-tail");
     
     testNodeLeftChild(factor, 
-            new int[][]{{ATOMIC}, {MINUS, FACTOR}, 
+            new int[][]{{PAREN_EXPR},
+                        {ATOMIC}, {MINUS, FACTOR}, 
                         {OPENPAREN, EXPRESSION, CLOSEDPAREN}});
-    testNodeLeftChild(factorTail, 
+    Node factorLeft = factorTail.getLeftMost();
+    testNodeLeftChild(factorLeft, 
             new int[][]{{MULTIPLY, FACTOR, FACTOR_TAIL}, 
                         {DIVIDE, FACTOR, FACTOR_TAIL}, 
                         {MOD, FACTOR, FACTOR_TAIL}, 
@@ -76,12 +83,12 @@ public class RowdyBuilderExprTest {
   
   
   public void testNodeLeftChild(Node testNode, final int cases[][]) {
-    if (testNode.hasChildren()){
+    if (testNode != null && testNode.hasSymbols()){
       boolean containsCase = false;
       for (int[] testCase : cases){
         for (int id : testCase) {
           Node node = testNode.get(id, false);
-          if (node != null && node.getLeftMostChild() != null) {
+          if (node != null && node.getLeftMost() != null) {
             containsCase = true;
             break;
           }

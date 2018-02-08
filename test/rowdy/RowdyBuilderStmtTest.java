@@ -2,11 +2,11 @@
 package rowdy;
 
 import org.junit.Test;
-import rowdy.exceptions.ParseException;
-import rowdy.exceptions.SyntaxException;
-import static rowdy.Rowdy.*;
-import static rowdy.testUtils.TestUtils.*;
+import growdy.Node;
 import static org.junit.Assert.*;
+import static growdy.testUtils.TestUtils.*;
+import static rowdy.lang.RowdyGrammarConstants.*;
+import static rowdy.testutils.TestUtils.getTestStatement;
 /**
  *
  * @author Richard
@@ -17,62 +17,19 @@ public class RowdyBuilderStmtTest {
   public void testStmtBlock() {
     String testCode = "func main(){}";
     
-    Node function = getTestProgram(testCode, FUNCTION);
-    Node functionBody = getAndTestSymbol(function, FUNCTION_BODY, "func-body");
+    Node function = getTestStatement(testCode, FUNCTION);
+    Node functionBody = getFromAndTestNotNull(function, FUNCTION_BODY);
     Node stmtBlock = getFromAndTestNotNull(functionBody, STMT_BLOCK);
     testContainsSymbols(stmtBlock, new int[]{LCURLY, STMT_LIST, RCURLY});
     
   }
-  
-  /**
-   * Test of getProgram method, of class RowdyBuilder.
-   */
-  @Test
-  public void testGetProgramAsSingleLine() {
-    
-    String testCode = "main = func(){}";
-    
-    Node root = getRootSingleLine(testCode);
-    assertNotNull(root);
-    String actual = root.symbol().getSymbolAsString();
-    String expected = "stmt-list";
-    assertEquals(expected, actual);
-    
-    Node assignStmt = root.get(STATEMENT).get(ASSIGN_STMT);
-    actual = assignStmt.symbol().getSymbolAsString();
-    expected = "assign-stmt";
-    assertEquals(expected, actual);
-  }
 
-  @Test
-  public void testGetProgramAsProgram() {
-    String testCode = "func main(){}";
-    
-    try {
-      parser.parseLine(testCode);
-      builder.build(parser);
-    } catch (ParseException | SyntaxException ex) {
-      fail("Couldn't get program");
-    }
-    Node root = builder.getProgram();
-    assertNotNull(root);
-    String actual = root.symbol().getSymbolAsString();
-    String expected = "prog";
-    assertEquals("No program found", expected, actual);
-    
-    Node definition = getAndTestSymbol(root, DEFINITION, "def");
-    Node function = getAndTestSymbol(definition, FUNCTION, "function");
-    
-    Node mainFunc = getFromAndTestNotNull(function, ID);
-    testForTerminal(mainFunc, "main");
-  }
-  
   @Test
   public void testAssignStatement() {
     String testCode = "a = 100";
     Node assignStmt = getTestStatement(testCode, ASSIGN_STMT);
     
-    getAndTestSymbol(assignStmt, ID, "ID");
+    getAndTestSymbol(assignStmt, ID, "id");
     getAndTestSymbol(assignStmt, BECOMES, "=");
     testContainsSymbols(assignStmt, new int[]{CONST_OPT, ID, BECOMES, EXPRESSION});
     
@@ -159,8 +116,7 @@ public class RowdyBuilderStmtTest {
             new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
     
     testCode = "->function(0, \"Hello\", apples)";
-    functionCall = getTestStatement(testCode, FUNC_CALL);
-    testExpressionList(functionCall);
+    getTestStatement(testCode, FUNC_CALL);
   }
   
   @Test
@@ -178,7 +134,7 @@ public class RowdyBuilderStmtTest {
     readStmt = getTestStatement(testCode, READ_STMT);
     
     Node paramsTail = getFromAndTestNotNull(readStmt, PARAMS_TAIL);
-    while(paramsTail.hasChildren()) {
+    while(paramsTail.hasSymbols()) {
       getAndTestSymbol(paramsTail, COMMA, ",");
       getFromAndTestNotNull(paramsTail, ID);
       paramsTail = getFromAndTestNotNull(paramsTail, PARAMS_TAIL);
@@ -194,9 +150,7 @@ public class RowdyBuilderStmtTest {
     testContainsSymbols(printStmt, new int[]{PRINT, EXPRESSION, EXPR_LIST});
     
     testCode = "print a1, a2, a3, a4, a5, 100, \"Hello World!\"";
-    printStmt = getTestStatement(testCode, PRINT_STMT);
-    
-    testExpressionList(printStmt);
+    getTestStatement(testCode, PRINT_STMT);
     
   }
   
