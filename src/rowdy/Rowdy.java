@@ -3,6 +3,7 @@ package rowdy;
 
 import growdy.GRBuilder;
 import growdy.GRowdy;
+import growdy.exceptions.AmbiguousGrammarException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,30 +24,36 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
  */
 public class Rowdy {
   
+  public static GRBuilder getBuilder() {
+    GRBuilder grBuilder = null;
+      try {
+        try (InputStream inputStream = Rowdy.class.getResourceAsStream("lang/Rowdy.gr"); 
+                ObjectInputStream in = new ObjectInputStream(inputStream)) {
+          grBuilder = (GRBuilder) in.readObject();
+        }
+        } catch (IOException | ClassNotFoundException i) {
+          throw new RuntimeException("There was a problem loading the Grammar: " + i.getLocalizedMessage());
+        }
+
+      return grBuilder;
+  }
+  
   /**
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    GRBuilder grBuilder;
-    try {
-      try (InputStream inputStream = Rowdy.class.getResourceAsStream("lang/Rowdy.gr"); 
-              ObjectInputStream in = new ObjectInputStream(inputStream)) {
-        grBuilder = (GRBuilder) in.readObject();
-      }
-      } catch (IOException | ClassNotFoundException i) {
-        throw new RuntimeException("There was a problem loading the Grammar: " + i.getLocalizedMessage());
-      }
-    
-    GRowdy growdy = GRowdy.getInstance(grBuilder);
-    RowdyRunner rowdyProgram = new RowdyRunner();
-    
-    if (args.length > 0) {
-      String programFileName = args[0];
+      GRBuilder grBuilder = getBuilder();
 
-      try {
-        growdy.buildFromSource(programFileName);
+      GRowdy growdy = GRowdy.getInstance(grBuilder);
+      RowdyRunner rowdyProgram = new RowdyRunner();
+
+      if (args.length > 0) {
+        String programFileName = args[0];
+
+        try {
+          growdy.buildFromSource(programFileName);
         rowdyProgram.initialize(growdy);
-      } catch (IOException | SyntaxException | ParseException e) {
+      } catch (IOException | SyntaxException | ParseException | AmbiguousGrammarException e) {
         handleException(rowdyProgram, e);
         System.exit(500);
       }
@@ -97,7 +104,7 @@ public class Rowdy {
         try {
           growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyProgram.initializeLine(growdy);
-        } catch (ParseException | SyntaxException e) {
+        } catch (ParseException | SyntaxException | AmbiguousGrammarException e) {
           handleException(rowdyProgram, e);
           continue;
         }

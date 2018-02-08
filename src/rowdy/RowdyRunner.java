@@ -567,6 +567,8 @@ public class RowdyRunner {
           return null;
         }
         switch (leftChild.symbol().id()) {
+          case BOOL_EXPR:
+            leftChild = leftChild.getLeftMost();
           case BOOL_TERM:
             leftValue = executeExpr(leftChild, leftValue);
             return executeExpr(cur.get(BOOL_TERM_TAIL, false), leftValue);
@@ -794,22 +796,26 @@ public class RowdyRunner {
           throw new RuntimeException("Factors not found");
         }
       case FACTOR_TAIL:
+      case FACTOR_TAIL_MOD:
+      case FACTOR_TAIL_POW:
+      case FACTOR_TAIL_DIV:
+      case FACTOR_TAIL_MUL:
         ArrayList<Node> factorTailChildren = cur.getAll();
         if (factorTailChildren.isEmpty()) {
           return leftValue;
         }
-        cur = factorTailChildren.get(0);
-        if (cur.symbol() instanceof NonTerminal) {
-          return executeExpr(cur, leftValue);
+        Node factorTail = cur.getLeftMost();
+        if (factorTail.symbol() instanceof NonTerminal) {
+          return executeExpr(factorTail, leftValue);
         }
-        operator = cur.symbol();
+        operator = factorTail.symbol();
         if (operator.id() == OPENPAREN) {
-          cur = factorTailChildren.get(1);
-          return executeExpr(cur, leftValue);
+          factorTail = factorTailChildren.get(1);
+          return executeExpr(factorTail, leftValue);
         }
-        cur = factorTailChildren.get(1);
-        left = fetch(leftValue, cur).valueToDouble();
-        right = getValue(cur).valueToDouble();
+        factorTail = factorTailChildren.get(1);
+        left = fetch(leftValue, factorTail).valueToDouble();
+        right = getValue(factorTail).valueToDouble();
         reslt = null;
         switch (operator.id()) {
           case MULTIPLY:
@@ -818,7 +824,7 @@ public class RowdyRunner {
           case DIVIDE:
             if (right == 0){
               throw new ArithmeticException("Division by 0 on line "+
-                      cur.getLine());
+                      factorTail.getLine());
             }
             reslt = left / right;
             break;
@@ -828,12 +834,14 @@ public class RowdyRunner {
           case MOD:
             if (right == 0){
               throw new ArithmeticException("Division by 0 on line "+
-                      cur.getLine());
+                      factorTail.getLine());
             }
             reslt = left % right;
             break;
         }
         return executeExpr(children.get(2), new Value(reslt));
+      case TERM_PLUS:
+      case TERM_MINUS:
       case TERM_TAIL:
         Node leftMost = cur.getLeftMost();
         if (leftMost == null) {
