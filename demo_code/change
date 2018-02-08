@@ -15,12 +15,14 @@
 		
 		chg = change
 		getChange = func(denom) {
+			change = this.change
 			loop qty: {
 				if (change >= denom) {
 					change = change - denom
 					qty = qty + 1
 					change = round change, 2
 				} else {
+					this.change = change
 					return qty
 				}
 			}
