@@ -282,10 +282,20 @@ public class RowdyRunner {
           break;
         case PRINT_STMT:
           StringBuilder printValue = new StringBuilder();
-          printValue.append(getValue(currentTreeNode.get(EXPRESSION)).valueToString());
+          Value printVal = getValue(currentTreeNode.get(EXPRESSION));
+          if (printVal == null) {
+            printValue.append("null");
+          } else {
+            printValue.append(printVal.valueToString());
+          }
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasSymbols()) {
-            printValue.append(getValue(atomTailNode.get(EXPRESSION)).valueToString());
+            printVal = getValue(currentTreeNode.get(EXPRESSION));
+            if (printVal == null) {
+              printValue.append("null");
+            } else {
+              printValue.append(printVal.valueToString());
+            }
             atomTailNode = atomTailNode.get(EXPR_LIST);
           }
           char c;
@@ -339,7 +349,7 @@ public class RowdyRunner {
     // 1. Collect parameters
     Value funcVal;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
-    // FIXME Need to look at more than just the first function
+    
     funcVal = getValue(cur.get(ID));
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
@@ -485,13 +495,13 @@ public class RowdyRunner {
     if (value == null) {
       return false;
     }
-    String v = ((Terminal) value.getValue()).getName();
-    Value val = globalSymbolTable.get(v);
-    if (val == null) {
-      Function currentFunction = callStack.peek();
-      return (currentFunction.getValue(value) != null);
+    Value foundValue = fetchInCallStack(value);
+    if (foundValue == null) {
+      String fetchIdName = ((Terminal) value.getValue()).getName();
+      return globalSymbolTable.get(fetchIdName) != null;
+    } else {
+      return true;
     }
-    return true;
   }
 
   /**
@@ -513,26 +523,11 @@ public class RowdyRunner {
     }
     if (value.getValue() instanceof Terminal) {
       // Look in the functions first
+      Value foundValue = fetchInCallStack(value);
+      if (foundValue != null){
+        return foundValue;
+      }
       String fetchIdName = ((Terminal) value.getValue()).getName();
-      Value valueFromFunction = null;
-      boolean valueFound = false;
-      Stack<Function> searchStack = new Stack<>();
-      while(!callStack.isEmpty()) {
-        Function currentFunction = callStack.pop();
-        searchStack.push(currentFunction);
-        valueFromFunction = currentFunction.getValue(value);
-        if (valueFromFunction != null) {
-          valueFound = true;
-          break;
-        }
-      }
-      while(!searchStack.isEmpty()){
-        callStack.push(searchStack.pop());
-      }
-      if (valueFound) {
-        return valueFromFunction;
-      }
-      
       Value val = globalSymbolTable.get(fetchIdName);
       if (val == null) {
         throw new RuntimeException("The ID '" + value + "' doesn't exist "
@@ -542,6 +537,28 @@ public class RowdyRunner {
     } else {
       return value;
     }
+  }
+  
+  public Value fetchInCallStack(Value value) {
+    Value valueFromFunction = null;
+    boolean valueFound = false;
+    Stack<Function> searchStack = new Stack<>();
+    while(!callStack.isEmpty()) {
+      Function currentFunction = callStack.pop();
+      searchStack.push(currentFunction);
+      valueFromFunction = currentFunction.getValue(value);
+      if (valueFromFunction != null) {
+        valueFound = true;
+        break;
+      }
+    }
+    while(!searchStack.isEmpty()){
+      callStack.push(searchStack.pop());
+    }
+    if (valueFound) {
+      return valueFromFunction;
+    }
+    return null;
   }
   
   /**
@@ -717,8 +734,10 @@ public class RowdyRunner {
           default:
             bReslt = false;
         }
-        cur = boolChildren.get(2);
-        return executeExpr(cur, new Value(bReslt));
+        if (boolChildren.size() < 3) {
+          return new Value(bReslt);
+        }
+        return executeExpr(boolChildren.get(2), new Value(bReslt));
       case RELATION_OPTION:
         ArrayList<Node> relationChildren = cur.getAll();
         if (relationChildren.isEmpty()) {
@@ -846,6 +865,9 @@ public class RowdyRunner {
             reslt = left % right;
             break;
         }
+        if (cur.get(TERM_TAIL, false) == null) {
+          return new Value(reslt);
+        }
         return executeExpr(children.get(2), new Value(reslt));
       case TERM_PLUS:
       case TERM_MINUS:
@@ -871,12 +893,18 @@ public class RowdyRunner {
             reslt = left - right;
             break;
         }
+        if (leftMost.get(TERM_TAIL, false) == null) {
+          return new Value(reslt);
+        }
         return executeExpr(termChildren.get(2), new Value(reslt));
       case TERM:
       case BOOL_TERM:
       case BOOL_FACTOR:
       case ARITHM_EXPR:
         leftValue = (Value) executeExpr(children.get(0), leftValue);
+        if (children.size() == 1) {
+          return leftValue;
+        }
         return executeExpr(children.get(1), leftValue);
       case PAREN_EXPR:  
         return executeExpr(parent.get(EXPRESSION), leftValue);

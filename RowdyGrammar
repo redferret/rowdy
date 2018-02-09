@@ -47,7 +47,7 @@ DEL				=> "del";
 PUT				=> "put";
 // TODO: Rename this to CONST
 CONST_DEF		=> "const";
-GLOBAL			=> "global"
+GLOBAL			=> "global";
 
 <SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % -> { }";
 
@@ -77,8 +77,8 @@ LOOP_STMT(LOOP)				=> LOOP ID COLON STMT_BLOCK;
 // TODO: Change CONST_OPT to ID_MODIFIER when the ticket is made
 ASSIGN_STMT(ID CONST_DEF)	=> CONST_OPT ID BECOMES EXPRESSION;
 ID_MODIFIER(CONST_DEF 
-	GLOBAL)					=> CONST_OPT* | GLOBAL_DEF*
-GLOBAL_DEF					=> GLOBAL
+	GLOBAL)					=> CONST_OPT* | GLOBAL_DEF*;
+GLOBAL_DEF(GLOBAL)			=> GLOBAL;
 CONST_OPT(CONST_DEF)		=> CONST_DEF;
 BREAK_STMT(BREAK)			=> BREAK ID_OPTION;
 ID_OPTION(ID)				=> ID;
