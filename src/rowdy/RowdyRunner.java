@@ -339,7 +339,7 @@ public class RowdyRunner {
     // 1. Collect parameters
     Value funcVal;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
-    // FIXME Need to look at more than just the first function
+    
     funcVal = getValue(cur.get(ID));
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
@@ -485,13 +485,13 @@ public class RowdyRunner {
     if (value == null) {
       return false;
     }
-    String v = ((Terminal) value.getValue()).getName();
-    Value val = globalSymbolTable.get(v);
-    if (val == null) {
-      Function currentFunction = callStack.peek();
-      return (currentFunction.getValue(value) != null);
+    Value foundValue = fetchInCallStack(value);
+    if (foundValue == null) {
+      String fetchIdName = ((Terminal) value.getValue()).getName();
+      return globalSymbolTable.get(fetchIdName) != null;
+    } else {
+      return true;
     }
-    return true;
   }
 
   /**
@@ -513,26 +513,11 @@ public class RowdyRunner {
     }
     if (value.getValue() instanceof Terminal) {
       // Look in the functions first
+      Value foundValue = fetchInCallStack(value);
+      if (foundValue != null){
+        return foundValue;
+      }
       String fetchIdName = ((Terminal) value.getValue()).getName();
-      Value valueFromFunction = null;
-      boolean valueFound = false;
-      Stack<Function> searchStack = new Stack<>();
-      while(!callStack.isEmpty()) {
-        Function currentFunction = callStack.pop();
-        searchStack.push(currentFunction);
-        valueFromFunction = currentFunction.getValue(value);
-        if (valueFromFunction != null) {
-          valueFound = true;
-          break;
-        }
-      }
-      while(!searchStack.isEmpty()){
-        callStack.push(searchStack.pop());
-      }
-      if (valueFound) {
-        return valueFromFunction;
-      }
-      
       Value val = globalSymbolTable.get(fetchIdName);
       if (val == null) {
         throw new RuntimeException("The ID '" + value + "' doesn't exist "
@@ -542,6 +527,28 @@ public class RowdyRunner {
     } else {
       return value;
     }
+  }
+  
+  public Value fetchInCallStack(Value value) {
+    Value valueFromFunction = null;
+    boolean valueFound = false;
+    Stack<Function> searchStack = new Stack<>();
+    while(!callStack.isEmpty()) {
+      Function currentFunction = callStack.pop();
+      searchStack.push(currentFunction);
+      valueFromFunction = currentFunction.getValue(value);
+      if (valueFromFunction != null) {
+        valueFound = true;
+        break;
+      }
+    }
+    while(!searchStack.isEmpty()){
+      callStack.push(searchStack.pop());
+    }
+    if (valueFound) {
+      return valueFromFunction;
+    }
+    return null;
   }
   
   /**
@@ -877,6 +884,9 @@ public class RowdyRunner {
       case BOOL_FACTOR:
       case ARITHM_EXPR:
         leftValue = (Value) executeExpr(children.get(0), leftValue);
+        if (children.size() == 1) {
+          return leftValue;
+        }
         return executeExpr(children.get(1), leftValue);
       case PAREN_EXPR:  
         return executeExpr(parent.get(EXPRESSION), leftValue);
