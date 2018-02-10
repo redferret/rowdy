@@ -18,9 +18,9 @@ public class ArithmExpr extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    Term term = (Term) cur.getLeftMost();
-    TermTail termTail = (TermTail) cur.get(TERM_TAIL);
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    Term term = (Term) getLeftMost();
+    TermTail termTail = (TermTail) get(TERM_TAIL);
     leftValue = term.execute(leftValue);
     return termTail.execute(leftValue);
   }

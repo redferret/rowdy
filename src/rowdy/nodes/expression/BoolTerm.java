@@ -19,9 +19,9 @@ public class BoolTerm extends RowdyNode {
   }
 
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    BoolFactor boolFactor = (BoolFactor) cur.getLeftMost();
-    BoolFactorTail boolFactorTail = (BoolFactorTail) cur.get(BOOL_FACTOR_TAIL);
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    BoolFactor boolFactor = (BoolFactor) getLeftMost();
+    BoolFactorTail boolFactorTail = (BoolFactorTail) get(BOOL_FACTOR_TAIL);
     leftValue = boolFactor.execute(leftValue);
     return boolFactorTail.execute(leftValue);
   }

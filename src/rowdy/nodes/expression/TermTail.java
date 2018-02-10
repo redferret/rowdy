@@ -21,10 +21,10 @@ public class TermTail extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    RowdyNode child = (RowdyNode) cur.getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    RowdyNode child = (RowdyNode) getLeftMost();
     if (child == null) {
-      return leftValue;
+      return runner.fetch(leftValue, child);
     }
     Term term = (Term) child.get(TERM);
     TermTail termTail = (TermTail) child.get(TERM_TAIL);

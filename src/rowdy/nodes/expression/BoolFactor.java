@@ -18,9 +18,9 @@ public class BoolFactor extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    ArithmExpr arithmExpr = (ArithmExpr) cur.getLeftMost();
-    RelationOpt relationOpt = (RelationOpt) cur.get(RELATION_OPTION);
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    ArithmExpr arithmExpr = (ArithmExpr) getLeftMost();
+    RelationOpt relationOpt = (RelationOpt) get(RELATION_OPTION);
     leftValue = arithmExpr.execute(leftValue);
     return relationOpt.execute(leftValue);
   }

@@ -26,8 +26,8 @@ public class ArrayExpression extends RowdyNode {
   }
 
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    Node arrayExpression = cur.getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    Node arrayExpression = getLeftMost();
     Value firstValue = runner.getValue(arrayExpression.get(EXPRESSION));
     Node arrayBody = arrayExpression.get(ARRAY_BODY);
 

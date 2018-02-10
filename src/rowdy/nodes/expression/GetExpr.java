@@ -22,8 +22,8 @@ public class GetExpr extends RowdyNode {
   }
 
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    Node getExpr = cur.getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    Node getExpr = getLeftMost();
     Value array = runner.getValue(getExpr.get(EXPRESSION));
     if (array.getValue() instanceof List){
       List<Object> list = (List<Object>)array.getValue();

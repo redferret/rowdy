@@ -18,9 +18,9 @@ public class Term extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    Factor factor = (Factor) cur.getLeftMost();
-    FactorTail factorTail = (FactorTail) cur.get(FACTOR_TAIL);
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    Factor factor = (Factor) getLeftMost();
+    FactorTail factorTail = (FactorTail) get(FACTOR_TAIL);
     leftValue = factor.execute(leftValue);
     return factorTail.execute(leftValue);
   }

@@ -101,6 +101,9 @@ public class Rowdy {
         if (program.toString().isEmpty()){
           continue;
         }
+        if (program.toString().equalsIgnoreCase("exit")) {
+          break;
+        }
         try {
           growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyProgram.initializeLine(growdy);
@@ -114,7 +117,7 @@ public class Rowdy {
         } catch (Exception | ConstantReassignmentException e) {
           handleException(rowdyProgram, e);
         }
-      }while(!line.equalsIgnoreCase("exit"));
+      }while(true);
     }
 
   }

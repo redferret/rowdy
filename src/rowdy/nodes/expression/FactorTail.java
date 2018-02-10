@@ -24,10 +24,10 @@ public class FactorTail extends RowdyNode {
   }
   
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    RowdyNode child = (RowdyNode) cur.getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    RowdyNode child = (RowdyNode) getLeftMost();
     if (child == null) {
-      return leftValue;
+      return runner.fetch(leftValue, this);
     }
     Factor factor = (Factor) child.get(FACTOR);
     FactorTail factorTail = (FactorTail) child.get(FACTOR_TAIL);

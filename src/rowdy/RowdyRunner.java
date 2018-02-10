@@ -352,7 +352,7 @@ public class RowdyRunner {
     Value funcVal;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
     
-    funcVal = getValue(cur.get(ID));
+    funcVal = fetch(getIdAsValue(cur.get(ID)), cur);
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
         throw new RuntimeException("Function '" + funcName + "' not defined on "
@@ -491,6 +491,10 @@ public class RowdyRunner {
     return isset(o);
   }
 
+  public Value getIdAsValue(Node id) {
+    return new Value((Terminal)id.symbol());
+  }
+  
   public boolean isset(Value value) {
     if (value == null) {
       return false;
@@ -585,7 +589,8 @@ public class RowdyRunner {
             return ((Expression)cur).execute();
           case ISSET_EXPR:
             Node issetExpr = cur.get(ISSET_EXPR);
-            Value resultBoolean = new Value(isset(issetExpr.get(ID)));
+            Value idTerm = getIdAsValue(issetExpr.get(ID));
+            Value resultBoolean = new Value(isset(idTerm));
             return resultBoolean;
           case CONCAT_EXPR:
             Node concatExpr = cur.get(CONCAT_EXPR);

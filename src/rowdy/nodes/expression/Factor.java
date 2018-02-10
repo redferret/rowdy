@@ -22,8 +22,8 @@ public class Factor extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    RowdyNode child = (RowdyNode) cur.getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    RowdyNode child = (RowdyNode) getLeftMost();
     
     switch(child.symbol().id()) {
       case FACTOR_MINUS:

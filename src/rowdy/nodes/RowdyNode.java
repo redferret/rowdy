@@ -22,11 +22,7 @@ public class RowdyNode extends Node {
   }
   
   public final Value execute() throws ConstantReassignmentException {
-    return execute(this, null);
-  }
-  
-  public final Value execute(Value leftValue) throws ConstantReassignmentException {
-    return execute(this, leftValue);
+    return execute(null);
   }
   
   /**
@@ -36,7 +32,7 @@ public class RowdyNode extends Node {
    * @return
    * @throws ConstantReassignmentException 
    */
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
     return leftValue;
   }
 }

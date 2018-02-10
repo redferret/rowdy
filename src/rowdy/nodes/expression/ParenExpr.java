@@ -18,8 +18,8 @@ public class ParenExpr extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    Expression expr = (Expression) cur.get(EXPRESSION);
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    Expression expr = (Expression) get(EXPRESSION);
     return expr.execute(leftValue);
   }
 }

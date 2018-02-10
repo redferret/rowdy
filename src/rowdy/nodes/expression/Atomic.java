@@ -21,8 +21,8 @@ public class Atomic extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    RowdyNode child = (RowdyNode) cur.getLeftMost().getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    RowdyNode child = (RowdyNode) getLeftMost().getLeftMost();
     switch(child.symbol().id()) {
       case ID:
         return new Value(child.symbol());

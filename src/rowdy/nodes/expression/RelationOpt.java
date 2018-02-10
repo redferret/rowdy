@@ -12,7 +12,6 @@ import static rowdy.lang.RowdyGrammarConstants.ARITHM_GREATEREQUAL;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_LESS;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_LESSEQUAL;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_NOTEQUAL;
-import static rowdy.lang.RowdyGrammarConstants.RELATION_OPTION;
 import rowdy.nodes.RowdyNode;
 
 /**
@@ -25,13 +24,13 @@ public class RelationOpt extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    RowdyNode child = (RowdyNode) cur.getLeftMost();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    RowdyNode child = (RowdyNode) getLeftMost();
     if (child == null) {
-      return leftValue;
+      return runner.fetch(leftValue, this);
     }
     ArithmExpr arithmExpr = (ArithmExpr) child.get(ARITHM_EXPR);
-    leftValue = runner.fetch(leftValue, cur);
+    leftValue = runner.fetch(leftValue, this);
     Value rightValue = arithmExpr.execute(leftValue);
     double left, right;
     if (leftValue.getValue() instanceof Boolean) {

@@ -18,12 +18,16 @@ public class Expression extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    RowdyNode node = (RowdyNode) cur.getLeftMost();
-    BoolTerm boolTerm = (BoolTerm) node.getLeftMost();
-    BoolTermTail boolTermTail = (BoolTermTail) node.get(BOOL_TERM_TAIL);
-    leftValue = boolTerm.execute();
-    return boolTermTail.execute(leftValue);
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    RowdyNode node = (RowdyNode) getLeftMost();
+    if (node.symbol().id() == BOOL_EXPR) {
+      BoolTerm boolTerm = (BoolTerm) node.getLeftMost();
+      BoolTermTail boolTermTail = (BoolTermTail) node.get(BOOL_TERM_TAIL);
+      leftValue = boolTerm.execute();
+      return boolTermTail.execute(leftValue);
+    } else {
+      return runner.executeExpr(this, leftValue);
+    }
   }
   
 }

@@ -21,16 +21,16 @@ public class BoolFactorTail extends RowdyNode {
     super(def, lineNumber, runner);
   }
   @Override
-  public Value execute(RowdyNode cur, Value leftValue) throws ConstantReassignmentException {
-    ArrayList<Node> boolChildren = cur.getAll();
+  public Value execute(Value leftValue) throws ConstantReassignmentException {
+    ArrayList<Node> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
-      return leftValue;
+      return runner.fetch(leftValue, this);
     }
-    leftValue = runner.fetch(leftValue, cur);
+    leftValue = runner.fetch(leftValue, this);
     boolean bLeft = leftValue.valueToBoolean();
-    BoolFactor boolFactor = (BoolFactor) cur.get(BOOL_FACTOR);
+    BoolFactor boolFactor = (BoolFactor) get(BOOL_FACTOR);
     boolean bRight = boolFactor.execute(leftValue).valueToBoolean();
-    BoolFactorTail boolFactorTail = (BoolFactorTail) cur.get(BOOL_FACTOR_TAIL);
+    BoolFactorTail boolFactorTail = (BoolFactorTail) get(BOOL_FACTOR_TAIL);
     
     return boolFactorTail.execute(new Value(bLeft && bRight));
   }
