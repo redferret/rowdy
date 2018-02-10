@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
+import rowdy.nodes.expression.Expression;
 
 /**
  * Executes a parse tree given by a builder.
@@ -585,6 +586,9 @@ public class RowdyRunner {
     int curID = cur.symbol().id();
     switch (curID) {
       case EXPRESSION:
+        if (cur.symbol().id() == EXPRESSION) {
+          return ((Expression)cur).execute();
+        }
         Node leftChild = cur.getLeftMost();
         if (leftChild == null) {
           return null;

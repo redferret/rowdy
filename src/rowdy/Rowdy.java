@@ -15,6 +15,7 @@ import growdy.exceptions.SyntaxException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
+import rowdy.nodes.RowdyNodeFactory;
 
 /**
  * Main driver class. The grammar, terminals/non-terminals and the hint table
@@ -43,10 +44,9 @@ public class Rowdy {
    */
   public static void main(String[] args) {
       GRBuilder grBuilder = getBuilder();
-
-      GRowdy growdy = GRowdy.getInstance(grBuilder);
       RowdyRunner rowdyProgram = new RowdyRunner();
-
+      RowdyNodeFactory factory = new RowdyNodeFactory(rowdyProgram);
+      GRowdy growdy = GRowdy.getInstance(grBuilder, factory);
       if (args.length > 0) {
         String programFileName = args[0];
 
