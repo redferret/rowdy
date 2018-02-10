@@ -291,7 +291,7 @@ public class RowdyRunner {
           }
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasSymbols()) {
-            printVal = getValue(currentTreeNode.get(EXPRESSION));
+            printVal = getValue(atomTailNode.get(EXPRESSION));
             if (printVal == null) {
               printValue.append("null");
             } else {
