@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
+import rowdy.nodes.expression.ArithmExpr;
 import rowdy.nodes.expression.Expression;
 
 /**
@@ -379,12 +380,10 @@ public class RowdyRunner {
       Node functionBody = functionNode.get(FUNCTION_BODY);
       Node paramsNode = functionBody.get(PARAMETERS);
       if (paramsNode.hasSymbols()) {
-        Value paramValue = executeExpr(paramsNode, null);
-
-        paramsList.add(((Terminal) paramValue.getValue()).getName());
+        paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
         Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
         while (paramsTailNode.hasSymbols()) {
-          paramsList.add(((Terminal) executeExpr(paramsTailNode.get(ID), null).getValue()).getName());
+          paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
           paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
         }
       }
@@ -577,6 +576,8 @@ public class RowdyRunner {
     }
     int curID = cur.symbol().id();
     switch (curID) {
+      case ARITHM_EXPR:
+        return ((ArithmExpr)cur).execute();
       case EXPRESSION:
         Symbol symbolType = cur.getLeftMost().symbol();
         switch (symbolType.id()) {
@@ -614,7 +615,8 @@ public class RowdyRunner {
             return new Value(anonymousFunc);
           case ROUND_EXPR:
             Node roundExpr = cur.get(ROUND_EXPR);
-            Value valueToRound = getValue(roundExpr.get(ID));
+            Value idToRound = new Value((Terminal)roundExpr.get(ID).symbol());
+            Value valueToRound = fetch(idToRound, cur);
             double roundedValue = valueToRound.valueToDouble();
             int precision = getValue(roundExpr.get(ARITHM_EXPR)).valueToDouble().intValue();
             double factor = 1;

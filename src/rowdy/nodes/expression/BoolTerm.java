@@ -9,7 +9,7 @@ import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
 import rowdy.nodes.RowdyNode;
 
 /**
- *
+ *fr = func(c) {f = (c * 1.8) + 32 return round f, 2}
  * @author Richard
  */
 public class BoolTerm extends RowdyNode {
