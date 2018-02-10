@@ -31,8 +31,7 @@ public class RelationOpt extends RowdyNode {
       return leftValue;
     }
     ArithmExpr arithmExpr = (ArithmExpr) child.get(ARITHM_EXPR);
-    RelationOpt relationOpt = (RelationOpt) child.get(RELATION_OPTION);
-    leftValue = runner.fetch(leftValue, child);
+    leftValue = runner.fetch(leftValue, cur);
     Value rightValue = arithmExpr.execute(leftValue);
     double left, right;
     if (leftValue.getValue() instanceof Boolean) {
@@ -47,17 +46,17 @@ public class RelationOpt extends RowdyNode {
     }
     switch(child.symbol().id()) {
       case ARITHM_LESS:
-        return relationOpt.execute(new Value(left < right));
+        return new Value(left < right);
       case ARITHM_LESSEQUAL:
-        return relationOpt.execute(new Value(left <= right));
+        return new Value(left <= right);
       case ARITHM_EQUAL:
-        return relationOpt.execute(new Value(left == right));
+        return new Value(left == right);
       case ARITHM_GREATEREQUAL:
-        return relationOpt.execute(new Value(left >= right));
+        return new Value(left >= right);
       case ARITHM_GREATER:
-        return relationOpt.execute(new Value(left > right));
+        return new Value(left > right);
       case ARITHM_NOTEQUAL:
-        return relationOpt.execute(new Value(left != right));
+        return new Value(left != right);
       default:
         return leftValue;
     }
