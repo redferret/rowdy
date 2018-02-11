@@ -9,18 +9,32 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import rowdy.nodes.RowdyNode;
+import rowdy.nodes.RowdyNodeFactory;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.exceptions.MainNotFoundException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
-import rowdy.nodes.RowdyNode;
-import rowdy.nodes.RowdyNodeFactory;
 
 /**
  * Main driver class. The grammar, terminals/non-terminals and the hint table
@@ -139,11 +153,50 @@ public class Rowdy {
     return grBuilder;
   }
 
+  public void loadNativeJava(Class c) throws IllegalAccessException, 
+          IllegalArgumentException, InvocationTargetException {
+    
+    Collection<Method> methods = new ArrayList<>();
+    for (Method method : c.getMethods()) {
+      if (method.isAnnotationPresent(JavaHookin.class)) {
+        methods.add(method);
+      }
+    }
+
+    for (Method method : methods) {
+      Object value = method.invoke(null);
+      allocateNativeJavaHookin(method.getName(), (NativeJavaHookin) value);
+    }
+  }
+
   public void allocateNativeJavaHookin(String functionName, NativeJavaHookin nativeJavaHookin) {
     try {
       rowdyProgram.allocate(new Terminal("id", ID, functionName), new Value(nativeJavaHookin));
     } catch (ConstantReassignmentException ex) {
       handleException(ex);
+    }
+  }
+  
+  public void loadJarLibs(String pathToJar) throws IOException, 
+          ClassNotFoundException, URISyntaxException, IllegalAccessException, 
+          IllegalArgumentException, InvocationTargetException {
+    
+    JarFile jarFile = new JarFile(pathToJar);
+    Enumeration<JarEntry> e = jarFile.entries();
+
+    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+    URLClassLoader cl = URLClassLoader.newInstance(urls);
+
+    while (e.hasMoreElements()) {
+      JarEntry je = e.nextElement();
+      if (je.isDirectory() || !je.getName().endsWith(".class")) {
+        continue;
+      }
+      // -6 because of .class
+      String className = je.getName().substring(0, je.getName().length() - 6);
+      className = className.replace('/', '.');
+      Class c = cl.loadClass(className);
+      loadNativeJava(c);
     }
   }
   
@@ -153,20 +206,22 @@ public class Rowdy {
   public static void main(String[] args) {
     Rowdy rowdy = new Rowdy(args);
     
-    rowdy.allocateNativeJavaHookin("pow", (Object... parameters) -> {
-      double a = Double.parseDouble(((Value) parameters[0]).valueToString());
-      double b = Double.parseDouble(((Value) parameters[1]).valueToString());
-      return new Value(Math.pow(a, b));
-    });
+    try {
+      rowdy.loadJarLibs("bin/RowdyLib.jar");
+    } catch (IOException | ClassNotFoundException | URISyntaxException | 
+            IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+      rowdy.handleException(ex);
+    }
     
     rowdy.run();
   }
 
-  private void handleException(Throwable e) {
+  public void handleException(Throwable e) {
     System.out.println(e.getClass().getCanonicalName() + ": " + e.getLocalizedMessage());
     rowdyProgram.dumpCallStack();
     if (verbose) {
       e.printStackTrace();
     }
   }
+  
 }
