@@ -2,8 +2,8 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyRunner;
 import rowdy.Value;
+import rowdy.nodes.RowdyNode;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL;
@@ -11,7 +11,6 @@ import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL_DIV;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL_MOD;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL_MUL;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL_POW;
-import rowdy.nodes.RowdyNode;
 
 /**
  *
