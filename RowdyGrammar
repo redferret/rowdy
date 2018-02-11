@@ -48,6 +48,7 @@ PUT				=> "put";
 // TODO: Rename this to CONST
 CONST_DEF		=> "const";
 GLOBAL			=> "global";
+NATIVE			=> "native";
 
 <SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % -> { }";
 
@@ -55,8 +56,8 @@ GLOBAL			=> "global";
 
 // ********************** Program Start **************************
 
-PROGRAM(FUNC)									=> DEFINITION;
-DEFINITION(FUNC)								=> FUNCTION DEFINITION;
+PROGRAM(FUNC NATIVE)							=> DEFINITION;
+DEFINITION(FUNC NATIVE)							=> FUNCTION DEFINITION;
 
 // ********************** Statements *****************************
 STMT_BLOCK(LCURLY)								=> LCURLY STMT_LIST RCURLY;
@@ -90,6 +91,7 @@ PUT_STMT_TAIL(COLON)		=> COMMA EXPRESSION;
 DEL_STMT(DEL)				=> DEL OPENPAREN ATOMIC COMMA ARITHM_EXPR CLOSEDPAREN; 
 
 // ********************** Function **************************
+NATIVE_FUNC_OPT(NATIVE)		=> NATIVE;
 
 // Replace part of this with FUNC_BODY_EXPR when #32 is being worked on
 FUNC_CALL(CALL)				=> CALL ID OPENPAREN EXPRESSION EXPR_LIST CLOSEDPAREN;
@@ -98,7 +100,7 @@ FUNC_CALL(CALL)				=> CALL ID OPENPAREN EXPRESSION EXPR_LIST CLOSEDPAREN;
 FUNC_BODY_EXPR(OPENPAREN)	=> OPENPAREN EXPRESSION EXPR_LIST CLOSEDPAREN;
 
 FUNCTION_BODY(OPENPAREN)	=> OPENPAREN PARAMETERS CLOSEDPAREN STMT_BLOCK;
-FUNCTION(FUNC)				=> FUNC ID FUNCTION_BODY;
+FUNCTION(FUNC NATIVE)		=> NATIVE_FUNC_OPT FUNC ID FUNCTION_BODY;
 ANONYMOUS_FUNC(FUNC)		=> FUNC FUNCTION_BODY;
 
 PARAMETERS(ID)				=> ID PARAMS_TAIL;

@@ -5,7 +5,7 @@ import org.junit.Test;
 import growdy.Node;
 import static org.junit.Assert.*;
 import static growdy.testUtils.TestUtils.*;
-import static rowdy.lang.RowdyGrammarConstants.*;
+import static rowdy.testlang.lang.RowdyGrammarConstants.*;
 import static rowdy.testutils.TestUtils.getTestStatement;
 /**
  *

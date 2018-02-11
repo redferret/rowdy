@@ -31,7 +31,7 @@ public class Atomic extends RowdyNode {
       case FUNC_CALL:
         return runner.executeFunc(child);
       default:
-        return leftValue;
+        return runner.fetch(leftValue, this);
     }
   }
 }

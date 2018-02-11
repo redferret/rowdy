@@ -7,17 +7,15 @@ import growdy.Symbol;
 import growdy.Terminal;
 import rowdy.exceptions.MainNotFoundException;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.expression.*;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
-import rowdy.nodes.expression.ArithmExpr;
-import rowdy.nodes.expression.ArrayExpression;
-import rowdy.nodes.expression.Expression;
+
 
 /**
  * Executes a parse tree given by a builder.
@@ -58,13 +56,6 @@ public class RowdyRunner {
   }
   
   public void initialize(GRowdy builder) {
-    this.root = builder.getProgram();
-    callStack.clear();
-    activeLoops.clear();
-    globalSymbolTable.clear();
-  }
-  
-  public void initializeLine(GRowdy builder) {
     this.root = builder.getProgram();
   }
   
@@ -142,11 +133,21 @@ public class RowdyRunner {
           allocate(idTerminal, rightValue);
           break;
         case FUNCTION:
+          Node nativeOpt = currentTreeNode.get(NATIVE_FUNC_OPT);
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          if (functionName.equals("main")) {
-            main = parent;
+          if (nativeOpt.hasSymbols()) {
+            try {
+              fetch(getIdAsValue(currentTreeNode.get(ID)), currentTreeNode);
+            } catch (Exception e) {
+              throw new RuntimeException("Native Java Code not defined for '" + 
+                      functionName + "' on line " + currentTreeNode.getLine());
+            }
+          } else {
+            if (functionName.equals("main")) {
+              main = parent;
+            }
+            setAsGlobal(functionName, new Value(currentTreeNode, true));
           }
-          setAsGlobal(functionName, new Value(currentTreeNode, true));
           break;
         default:
           declareGlobals(currentTreeNode);
@@ -190,8 +191,8 @@ public class RowdyRunner {
           allocate(idTerminal, rightValue);
           break;
         case IF_STMT:
-          Node ifExpr = currentTreeNode.get(EXPRESSION);
-          Value ifExprValue = getValue(ifExpr);
+          Expression ifExpr = (Expression) currentTreeNode.get(EXPRESSION);
+          Value ifExprValue = ifExpr.execute();
           if (ifExprValue.valueToBoolean()) {
             Node ifStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
             executeStmt(ifStmtList, seqControl);
@@ -376,41 +377,47 @@ public class RowdyRunner {
       parameterValues = programParamValues;
     }
     
-    Node functionNode = (Node) funcVal.getValue();
-    List<String> paramsList = new ArrayList<>();
-    if (!parameterValues.isEmpty()) {
-      Node functionBody = functionNode.get(FUNCTION_BODY);
-      Node paramsNode = functionBody.get(PARAMETERS);
-      if (paramsNode.hasSymbols()) {
-        paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
-        Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
-        while (paramsTailNode.hasSymbols()) {
-          paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
-          paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+    if (funcVal.getValue() instanceof Node) {
+      Node functionNode = (Node) funcVal.getValue();
+      List<String> paramsList = new ArrayList<>();
+      if (!parameterValues.isEmpty()) {
+        Node functionBody = functionNode.get(FUNCTION_BODY);
+        Node paramsNode = functionBody.get(PARAMETERS);
+        if (paramsNode.hasSymbols()) {
+          paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
+          Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
+          while (paramsTailNode.hasSymbols()) {
+            paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
+            paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+          }
         }
       }
+      // 2. Copy actual parameters to formal parameters
+      HashMap<String, Value> params = new HashMap<>();
+      String paramName;
+      for (int p = 0; p < paramsList.size(); p++) {
+        paramName = paramsList.get(p);
+        params.put(paramName, parameterValues.get(p));
+      }
+      // 3. Push the function onto the call stack
+      Function function = new Function(funcName, params, cur.getLine());
+      callStack.push(function);
+      // 4. Get and execute the stmt-list
+      Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+      Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
+      seqControl.setSeqActive(true);
+      executeStmt(stmtList, seqControl);
+      // When finished, remove the function from the
+      // call stack and free it's memory then return
+      // it's value.
+      function = callStack.pop();
+      function.free();
+      return function.getReturnValue();
+    } else {
+      NativeJavaHookin hookin = (NativeJavaHookin) funcVal.getValue();
+      Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
+      return (Value) hookin.execute((Object[]) values);
     }
-    // 2. Copy actual parameters to formal parameters
-    HashMap<String, Value> params = new HashMap<>();
-    String paramName;
-    for (int p = 0; p < paramsList.size(); p++) {
-      paramName = paramsList.get(p);
-      params.put(paramName, parameterValues.get(p));
-    }
-    // 3. Push the function onto the call stack
-    Function function = new Function(funcName, params, cur.getLine());
-    callStack.push(function);
-    // 4. Get and execute the stmt-list
-    Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
-    seqControl.setSeqActive(true);
-    executeStmt(stmtList, seqControl);
-    // When finished, remove the function from the
-    // call stack and free it's memory then return
-    // it's value.
-    function = callStack.pop();
-    function.free();
-    return function.getReturnValue();
   }
 
   /**

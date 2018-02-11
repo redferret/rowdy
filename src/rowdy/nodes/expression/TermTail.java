@@ -37,7 +37,7 @@ public class TermTail extends RowdyNode {
       case TERM_MINUS:
         return termTail.execute(new Value(left - right));
       default:
-        return leftValue;
+        return runner.fetch(leftValue, this);
     }
     
   }

@@ -1,4 +1,6 @@
 
+	native func pow(a, b)
+
 	func main(max) {
 		if (isset max) == false {
 			max = 1000
@@ -10,4 +12,5 @@
 			x = y
 			y = z
 		}
+		print "pow(2, 7) = ", ->pow(2, 7), "\n"
 	}

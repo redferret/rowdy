@@ -83,4 +83,21 @@
 		print 1 + 4 ^ (5 - 2), "\n"; // Evaluates to 1 + 4 ^ 3 => 1 + 64 => 65.0
 		print (1 + 4) ^ (5 - 2), "\n"; // Evaluates to 5 ^ 3 => 125.0
 		print 5 % 10 + 1, "\n"; // Evaluates to 6
+		
+		f = func() {\\
+			loop x: {\\
+				x=x+1\\
+				if x > MAX {\\
+					break\\
+				}else{\\
+					print x, "\n"\\
+				}\\
+			}\\
+		} \\
+		loop x: {\\
+			->f() \\
+			break\\
+		} \\
+		print "Done\n"\\
+		
 	}

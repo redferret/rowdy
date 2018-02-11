@@ -57,7 +57,7 @@ public class RelationOpt extends RowdyNode {
       case ARITHM_NOTEQUAL:
         return new Value(left != right);
       default:
-        return leftValue;
+        return runner.fetch(leftValue, this);
     }
   }
 }

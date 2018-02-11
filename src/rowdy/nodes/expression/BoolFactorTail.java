@@ -4,12 +4,11 @@ package rowdy.nodes.expression;
 import growdy.Node;
 import growdy.Symbol;
 import java.util.ArrayList;
-import rowdy.RowdyRunner;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
-import rowdy.nodes.RowdyNode;
 
 /**
  *
