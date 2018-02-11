@@ -18,8 +18,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class Factor extends RowdyNode {
 
-  public Factor(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public Factor(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {

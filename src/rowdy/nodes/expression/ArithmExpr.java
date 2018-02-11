@@ -14,8 +14,8 @@ import static rowdy.lang.RowdyGrammarConstants.TERM_TAIL;
  */
 public class ArithmExpr extends RowdyNode {
 
-  public ArithmExpr(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public ArithmExpr(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {

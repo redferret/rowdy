@@ -14,8 +14,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class BoolTerm extends RowdyNode {
   
-  public BoolTerm(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public BoolTerm(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
 
   @Override

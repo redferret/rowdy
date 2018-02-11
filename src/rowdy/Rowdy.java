@@ -15,6 +15,7 @@ import growdy.exceptions.SyntaxException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
+import rowdy.nodes.RowdyNode;
 import rowdy.nodes.RowdyNodeFactory;
 
 /**
@@ -45,7 +46,8 @@ public class Rowdy {
   public static void main(String[] args) {
       GRBuilder grBuilder = getBuilder();
       RowdyRunner rowdyProgram = new RowdyRunner();
-      RowdyNodeFactory factory = new RowdyNodeFactory(rowdyProgram);
+      RowdyNodeFactory factory = new RowdyNodeFactory();
+      RowdyNode.initRunner(rowdyProgram);
       GRowdy growdy = GRowdy.getInstance(grBuilder, factory);
       if (args.length > 0) {
         String programFileName = args[0];

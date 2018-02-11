@@ -17,8 +17,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class BoolTermTail extends RowdyNode {
   
-  public BoolTermTail(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public BoolTermTail(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   
   @Override

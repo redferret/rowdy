@@ -16,6 +16,7 @@ import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
 import rowdy.nodes.expression.ArithmExpr;
+import rowdy.nodes.expression.ArrayExpression;
 import rowdy.nodes.expression.Expression;
 
 /**
@@ -181,7 +182,8 @@ public class RowdyRunner {
           System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
-          rightValue = getValue(currentTreeNode.get(EXPRESSION));
+          Expression assignExpr = (Expression) currentTreeNode.get(EXPRESSION);
+          rightValue = assignExpr.execute();
           if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
             rightValue.setAsConstant(true);
           }
@@ -632,52 +634,7 @@ public class RowdyRunner {
             roundedValue = (double) Math.round(roundedValue * factor) / factor;
             return new Value(roundedValue);
           case ARRAY_EXPR:
-            Node arrayExpression = cur.getLeftMost();
-            Value firstValue = getValue(arrayExpression.get(EXPRESSION));
-            Node arrayBody = arrayExpression.get(ARRAY_BODY);
-
-            Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
-            if (bodyType == null) {
-              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY, false);
-
-              if (bodyType == null) {
-                List<Object> arrayList = new ArrayList<>(); 
-                if (firstValue != null) {
-                  arrayList.add(firstValue.getValue());
-                }
-                return new Value(arrayList);
-              }
-
-              HashMap<String, Object> keypairArray = new HashMap<>();
-              Value key = firstValue;
-              Value keyValue = getValue(bodyType.get(EXPRESSION));
-              keypairArray.put(key.getValue().toString(), keyValue.getValue());
-              arrayBody = bodyType;
-              Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-              arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-              while(arrayBody != null && bodyType != null){
-                key = getValue(bodyTail.get(EXPRESSION));
-                keyValue = getValue(arrayBody.get(EXPRESSION));
-                keypairArray.put(key.getValue().toString(), keyValue.getValue());
-                bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-                arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-              }
-              return new Value(keypairArray);
-
-            } else {
-              List<Object> array = new ArrayList<>();
-                Value arrayValue = firstValue;
-                arrayBody = bodyType;
-                while (arrayValue != null){
-                  array.add(arrayValue.getValue());
-                  arrayValue = null;
-                  if (arrayBody != null && arrayBody.hasSymbols()) {
-                    arrayValue = getValue(arrayBody.get(EXPRESSION));
-                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
-                  }
-                }
-                return new Value(array);
-            }
+            return ((ArrayExpression)cur.getLeftMost()).execute();
           case GET_EXPR:
             Node getExpr = cur.getLeftMost();
             Value array = getValue(getExpr.get(EXPRESSION));

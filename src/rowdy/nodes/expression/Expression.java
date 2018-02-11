@@ -14,12 +14,15 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  */
 public class Expression extends RowdyNode {
 
-  public Expression(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public Expression(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
     RowdyNode node = (RowdyNode) getLeftMost();
+    if (node == null) {
+      return runner.fetch(leftValue, this);
+    }
     if (node.symbol().id() == BOOL_EXPR) {
       BoolTerm boolTerm = (BoolTerm) node.getLeftMost();
       BoolTermTail boolTermTail = (BoolTermTail) node.get(BOOL_TERM_TAIL);

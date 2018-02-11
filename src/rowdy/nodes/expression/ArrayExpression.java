@@ -21,15 +21,15 @@ import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
  */
 public class ArrayExpression extends RowdyNode {
 
-  public ArrayExpression(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public ArrayExpression(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
 
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    Node arrayExpression = getLeftMost();
-    Value firstValue = runner.getValue(arrayExpression.get(EXPRESSION));
-    Node arrayBody = arrayExpression.get(ARRAY_BODY);
+    Expression arrayExpression = (Expression) get(EXPRESSION);
+    Value firstValue = arrayExpression.execute();
+    Node arrayBody = get(ARRAY_BODY);
 
     Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
     if (bodyType == null) {
@@ -45,14 +45,17 @@ public class ArrayExpression extends RowdyNode {
 
       HashMap<String, Object> keypairArray = new HashMap<>();
       Value key = firstValue;
-      Value keyValue = runner.getValue(bodyType.get(EXPRESSION));
+      Expression bodyTypeExpr = (Expression) bodyType.get(EXPRESSION);
+      Value keyValue = bodyTypeExpr.execute();
       keypairArray.put(key.getValue().toString(), keyValue.getValue());
       arrayBody = bodyType;
       Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
       arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
       while (arrayBody != null && bodyType != null) {
-        key = runner.getValue(bodyTail.get(EXPRESSION));
-        keyValue = runner.getValue(arrayBody.get(EXPRESSION));
+        Expression keyExpr = (Expression) bodyTail.get(EXPRESSION);
+        key = keyExpr.execute();
+        bodyTypeExpr = (Expression) arrayBody.get(EXPRESSION); 
+        keyValue = bodyTypeExpr.execute();
         keypairArray.put(key.getValue().toString(), keyValue.getValue());
         bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
         arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
@@ -67,7 +70,8 @@ public class ArrayExpression extends RowdyNode {
         array.add(arrayValue.getValue());
         arrayValue = null;
         if (arrayBody != null && arrayBody.hasSymbols()) {
-          arrayValue = runner.getValue(arrayBody.get(EXPRESSION));
+          Expression bodyTypeExpr = (Expression) bodyType.get(EXPRESSION);
+          arrayValue = bodyTypeExpr.execute();
           arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
         }
       }

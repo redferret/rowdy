@@ -15,8 +15,8 @@ import static rowdy.lang.RowdyGrammarConstants.ID;
  */
 public class RoundExpr extends RowdyNode {
 
-  public RoundExpr(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public RoundExpr(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
 
   @Override

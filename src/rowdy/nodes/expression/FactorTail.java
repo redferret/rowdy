@@ -19,8 +19,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class FactorTail extends RowdyNode {
 
-  public FactorTail(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public FactorTail(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   
   @Override

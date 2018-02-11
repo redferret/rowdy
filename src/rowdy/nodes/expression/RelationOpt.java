@@ -20,8 +20,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class RelationOpt extends RowdyNode {
   
-  public RelationOpt(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public RelationOpt(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {

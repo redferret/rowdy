@@ -17,8 +17,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class Atomic extends RowdyNode {
 
-  public Atomic(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public Atomic(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {

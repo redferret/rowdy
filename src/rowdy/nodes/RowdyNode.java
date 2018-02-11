@@ -14,15 +14,18 @@ import rowdy.exceptions.ConstantReassignmentException;
  */
 public class RowdyNode extends Node {
   
-  protected RowdyRunner runner;
+  protected static RowdyRunner runner;
   
-  public RowdyNode(Symbol def, int lineNumber, RowdyRunner runner) {
+  public RowdyNode(Symbol def, int lineNumber) {
     super(def, lineNumber);
-    this.runner = runner;
   }
   
   public final Value execute() throws ConstantReassignmentException {
     return execute(null);
+  }
+  
+  public static void initRunner(RowdyRunner runner) {
+    RowdyNode.runner = runner;
   }
   
   /**

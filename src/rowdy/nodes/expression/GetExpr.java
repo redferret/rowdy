@@ -17,8 +17,8 @@ import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
  */
 public class GetExpr extends RowdyNode {
 
-  public GetExpr(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public GetExpr(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
 
   @Override

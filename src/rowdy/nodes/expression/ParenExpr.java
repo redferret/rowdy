@@ -14,8 +14,8 @@ import rowdy.nodes.RowdyNode;
  */
 public class ParenExpr extends RowdyNode {
 
-  public ParenExpr(Symbol def, int lineNumber, RowdyRunner runner) {
-    super(def, lineNumber, runner);
+  public ParenExpr(Symbol def, int lineNumber) {
+    super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
