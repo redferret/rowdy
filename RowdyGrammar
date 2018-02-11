@@ -35,7 +35,7 @@ CONCAT			=> "concat";
 SLICE			=> "slice";
 STRCMP			=> "strcmp";
 FUNC			=> "func";
-CALL			=> "->";
+CALL			=> "$";
 RETURN			=> "return";
 ISSET			=> "isset";
 ROUND			=> "round";
@@ -50,7 +50,7 @@ CONST_DEF		=> "const";
 GLOBAL			=> "global";
 NATIVE			=> "native";
 
-<SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % -> { }";
+<SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % -> $ { }";
 
 <BEGIN>
 

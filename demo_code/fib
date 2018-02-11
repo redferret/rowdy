@@ -12,5 +12,5 @@
 			x = y
 			y = z
 		}
-		print "pow(2, 7) = ", ->pow(2, 7), "\n"
+		print "pow(2, 7) = ", $pow(2, 7), "\n"
 	}

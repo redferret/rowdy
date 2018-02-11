@@ -12,11 +12,11 @@
 		anonymous = func() {
 			print "Hello Anonymous!\n"
 		}
-		->anonymous()
+		$anonymous()
 		
-		->service(callbackFunc)
+		$service(callbackFunc)
 		
-		->doSomething( func (response){
+		$doSomething( func (response){
 			print "Success: ", response, "\n"
 		}, func (response){
 			print "Failure: ", response, "\n"
@@ -28,13 +28,13 @@
 	}
 	
 	func service(callback) {
-		->callback("Hello World!")
+		$callback("Hello World!")
 	}
 	
 	func doSomething(success, failure, someConditionIsTrue) {
 		if someConditionIsTrue {
-			->success("All is well")
+			$success("All is well")
 		} else {
-			->failure("Something went wrong")
+			$failure("Something went wrong")
 		}
 	}
