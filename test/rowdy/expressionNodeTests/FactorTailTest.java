@@ -7,6 +7,9 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.FactorTail;
+import static rowdy.testlang.lang.RowdyGrammarConstants.FACTOR_TAIL;
+import static rowdy.testutils.TestUtils.getTestStatement;
+import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -27,14 +30,13 @@ public class FactorTailTest extends TestCase {
    * Test of execute method, of class FactorTail.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    FactorTail instance = null;
-    Value expResult = null;
+    String testCode = "* 5";
+    Value leftValue = new Value(4);
+    FactorTail instance = (FactorTail) getTestStatement(testCode, FACTOR_TAIL);
+    trimEmptyChildren(instance);
+    Value expResult = new Value(20.0);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
   }
   
 }

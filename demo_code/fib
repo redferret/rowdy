@@ -12,13 +12,17 @@
 			x = y
 			y = z
 		}
-		map = $createMap()
-		$println(map)
-		$put(map, "key", func() {
-			return 10
-		})
-		$println(map)
-		$println($get(map, "key"))
-		f = $get(map, "key")
-		$println(concat $f(), " was returned")
+		
+		list = array(7, 5, 3, 8)
+		print list, "\n"
+		
+		squareAll = func(list) {
+			sqrs = $List()
+			$forEach(list, func(item){
+				$add(sqrs, item ^ 2)
+			})
+			return sqrs
+		}
+		sqrs = $squareAll(list)
+		$println(sqrs)
 	}

@@ -17,7 +17,7 @@ public class Function {
   private final String name;
   private HashMap<String, Value> symbolTable;
   private final int lineCalledOn;
-  private NativeJavaHookin nativeJavaHookin;
+  private NativeJava nativeJavaHookin;
   
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
     this.name = name;
@@ -26,7 +26,7 @@ public class Function {
     this.lineCalledOn = lineCalledOn;
   }
 
-  public void setNativeJavaHookin(NativeJavaHookin nativeJavaHookin) {
+  public void setNativeJavaHookin(NativeJava nativeJavaHookin) {
     this.nativeJavaHookin = nativeJavaHookin;
   }
   

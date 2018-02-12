@@ -7,6 +7,8 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.TermTail;
+import static rowdy.testlang.lang.RowdyGrammarConstants.TERM_TAIL;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -27,14 +29,12 @@ public class TermTailTest extends TestCase {
    * Test of execute method, of class TermTail.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    TermTail instance = null;
-    Value expResult = null;
+    String testCode = "+ 100";
+    Value leftValue = new Value(100);
+    TermTail instance = (TermTail) getTestStatement(testCode, TERM_TAIL);
+    Value expResult = new Value(200.0);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
   }
   
 }

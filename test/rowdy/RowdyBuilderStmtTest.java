@@ -103,10 +103,10 @@ public class RowdyBuilderStmtTest {
   
   @Test
   public void testFunctionCallStatement() {
-    String testCode = "->function()";
+    String testCode = "$function()";
     Node functionCall = getTestStatement(testCode, FUNC_CALL);
     
-    getAndTestSymbol(functionCall, CALL, "->");
+    getAndTestSymbol(functionCall, CALL, "$");
     Node id = getFromAndTestNotNull(functionCall, ID);
     testForTerminal(id, "function");
     getAndTestSymbol(functionCall, OPENPAREN, "(");
@@ -115,7 +115,7 @@ public class RowdyBuilderStmtTest {
     testContainsSymbols(functionCall, 
             new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
     
-    testCode = "->function(0, \"Hello\", apples)";
+    testCode = "$function(0, \"Hello\", apples)";
     getTestStatement(testCode, FUNC_CALL);
   }
   

@@ -34,12 +34,12 @@ public class RowdyBuilderFuncTest {
   
   @Test
   public void testFunctionCall() {
-    String testCode = "->fun(1, 2, A)";
+    String testCode = "$fun(1, 2, A)";
     
     Node funcCall = getTestStatement(testCode, FUNC_CALL);
     testContainsSymbols(funcCall, 
             new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
-    getAndTestSymbol(funcCall, CALL, "->");
+    getAndTestSymbol(funcCall, CALL, "$");
   }
   
   @Test

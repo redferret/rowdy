@@ -109,7 +109,7 @@ public class RowdyBuilderExprTest {
     list.add(new Object[]{"e= 5 / 6"});
     list.add(new Object[]{"e= 5 % 6"});
     list.add(new Object[]{"e= 5 ^ -6"});
-    list.add(new Object[]{"e= a *->a() + ->b()"});
+    list.add(new Object[]{"e= a *$a() + $b()"});
     list.add(new Object[]{"e= a or b"});
     list.add(new Object[]{"e= a < b"});
     list.add(new Object[]{"e= a > b"});
@@ -118,7 +118,7 @@ public class RowdyBuilderExprTest {
     list.add(new Object[]{"e= a == b"});
     list.add(new Object[]{"e= a != ((a or b and c) != false)"});
     list.add(new Object[]{"e= a or c and b"});
-    list.add(new Object[]{"e= ->a() or b"});
+    list.add(new Object[]{"e= $a() or b"});
     list.add(new Object[]{"e= (a / (b))"});
     return list;
   }

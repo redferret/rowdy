@@ -2,6 +2,7 @@ package rowdy;
 
 import growdy.Symbol;
 import growdy.Terminal;
+import java.util.Objects;
 
 /**
  * The wrapper for a value in Rowdy. This value can be anything, even a 
@@ -96,6 +97,24 @@ public class Value {
     return value;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Value) {
+      Value vother = (Value) obj;
+      return vother.value.equals(value);
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 59 * hash + Objects.hashCode(this.value);
+    hash = 59 * hash + (this.isConstant ? 1 : 0);
+    return hash;
+  }
+  
   public String toString() {
     if (value == null) {
       return "null";

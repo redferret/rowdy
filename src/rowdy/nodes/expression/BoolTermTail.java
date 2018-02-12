@@ -4,7 +4,7 @@ package rowdy.nodes.expression;
 import growdy.Node;
 import growdy.Symbol;
 import java.util.ArrayList;
-import rowdy.RowdyRunner;
+import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_TERM;

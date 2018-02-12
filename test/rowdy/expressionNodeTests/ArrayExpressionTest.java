@@ -1,12 +1,17 @@
  
 package rowdy.expressionNodeTests;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.ArrayExpression;
+import static rowdy.testlang.lang.RowdyGrammarConstants.ARRAY_EXPR;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -27,14 +32,14 @@ public class ArrayExpressionTest extends TestCase {
    * Test of execute method, of class ArrayExpression.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    ArrayExpression instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    String testCode = "array(1, 2, 3)";
+    ArrayExpression instance = (ArrayExpression) getTestStatement(testCode, ARRAY_EXPR);
+    List<Object> expResult = Arrays.asList(1, 2, 3);
+    List<Object> result = (List<Object>) instance.execute().getValue();
+    
+    for (int i = 0; i < 3; i++) {
+      assertEquals(((Integer)expResult.get(i)).toString(), (String)result.get(i));
+    }
   }
   
 }
