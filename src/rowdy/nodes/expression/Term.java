@@ -2,11 +2,11 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyRunner;
+import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL;
-import rowdy.nodes.RowdyNode;
+
 
 /**
  *

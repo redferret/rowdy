@@ -414,7 +414,13 @@ public class RowdyRunner {
     } else {
       NativeJavaHookin hookin = (NativeJavaHookin) funcVal.getValue();
       Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
-      return (Value) hookin.execute((Object[]) values);
+      Object[] methodValues = new Object[values.length];
+      int i = 0;
+      for (Value val : parameterValues) {
+        methodValues[i++] = val.getValue();
+      }
+      Object returnValue = hookin.execute((Object[]) methodValues);
+      return returnValue == null ? new Value((Object) null) : new Value(returnValue);
     }
   }
 
@@ -606,12 +612,13 @@ public class RowdyRunner {
             Value resultBoolean = new Value(isset(idTerm));
             return resultBoolean;
           case CONCAT_EXPR:
-            Node concatExpr = cur.get(CONCAT_EXPR);
             StringBuilder concatValue = new StringBuilder();
-            concatValue.append(executeExpr(concatExpr.get(EXPRESSION), leftValue).valueToString());
-            Node atomTailNode = concatExpr.get(EXPR_LIST);
+            Expression concatExpr = (Expression) cur.getLeftMost().get(EXPRESSION);
+            concatValue.append(concatExpr.execute(leftValue).valueToString());
+            Node atomTailNode = cur.getLeftMost().get(EXPR_LIST);
             while (atomTailNode.hasSymbols()) {
-              concatValue.append(executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString());
+              concatExpr = (Expression) atomTailNode.get(EXPRESSION);
+              concatValue.append(concatExpr.execute(leftValue).valueToString());
               atomTailNode = atomTailNode.get(EXPR_LIST);
             }
             return new Value(concatValue.toString());
@@ -646,28 +653,6 @@ public class RowdyRunner {
             return new Value(roundedValue);
           case ARRAY_EXPR:
             return ((ArrayExpression)cur.getLeftMost()).execute();
-          case GET_EXPR:
-            Node getExpr = cur.getLeftMost();
-            Value array = getValue(getExpr.get(EXPRESSION));
-            if (array.getValue() instanceof List){
-              List<Object> list = (List<Object>)array.getValue();
-              Object arrayIndexValue = getValue(getExpr.get(EXPRESSION, 1)).getValue();
-              int index;
-              if (arrayIndexValue instanceof Integer){
-                index = (Integer)arrayIndexValue;
-              }else if (arrayIndexValue instanceof Double){
-                index = ((Double)arrayIndexValue).intValue();
-              } else {
-                String strRep = (String) arrayIndexValue;
-                index = Integer.parseInt(strRep);
-              }
-              return new Value(list.get(index));
-            } else {
-              HashMap<String, Object> map = (HashMap)array.getValue();
-              Value key = getValue(getExpr.get(EXPRESSION, 1));
-              Value keyValue = new Value(map.get(key.getValue().toString()));
-              return keyValue;
-            }
         }
         throw new RuntimeException("Couldn't get value, "
                 + "undefined Node '" + cur.getLeftMost()+"' on line " + 

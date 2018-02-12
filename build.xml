@@ -17,7 +17,9 @@
   </path>
   
   <target name="-post-compile">
-    <copy file="bin/RowdyLib.jar" todir="${dist.dir}/bin"/>
+    <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
+    <copy file="../RowdyLib/dist/RowdyLib.jar" todir="${dist.dir}/bin"/>
+    <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./bin"/>
     <copy todir="${dist.dir}/bin/core">
       <fileset dir="bin/core"/>
     </copy>      

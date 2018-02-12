@@ -16,12 +16,10 @@ import rowdy.exceptions.MainNotFoundException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,10 +27,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
@@ -73,8 +67,7 @@ public class Rowdy {
         rowdyProgram.initialize(growdy);
         rowdyProgram.declareGlobals();
         try {
-
-          loadJarLibs("bin/RowdyLib.jar");
+          loadJarLibs("bin/");
         } catch (IOException | ClassNotFoundException | URISyntaxException | 
                 IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
           handleException(ex);
@@ -175,8 +168,8 @@ public class Rowdy {
     }
 
     for (Method method : methods) {
-      Object value = method.invoke(null);
-      allocateNativeJavaHookin(method.getName(), (NativeJavaHookin) value);
+      NativeJavaHookin hookin = (NativeJavaHookin) method.invoke(null);
+      allocateNativeJavaHookin(method.getName(), hookin);
     }
   }
 
@@ -188,26 +181,41 @@ public class Rowdy {
     }
   }
   
-  public void loadJarLibs(String pathToJar) throws IOException, 
+  public List<String> getJarFileNames(String path) {
+    File[] files = new File(path)
+            .listFiles((File dir, String name) -> name.endsWith(".jar"));
+    List<String> fileNames = new ArrayList<>();
+    for (File file : files) {
+      fileNames.add(file.getName());
+    }
+    return fileNames;
+  }
+
+  public void loadJarLibs(String pathToJars) throws IOException, 
           ClassNotFoundException, URISyntaxException, IllegalAccessException, 
           IllegalArgumentException, InvocationTargetException {
     
-    try (JarFile jarFile = new JarFile(pathToJar)) {
-      Enumeration<JarEntry> e = jarFile.entries();
-      
-      URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-      URLClassLoader cl = URLClassLoader.newInstance(urls);
-      
-      while (e.hasMoreElements()) {
-        JarEntry je = e.nextElement();
-        if (je.isDirectory() || !je.getName().endsWith(".class")) {
-          continue;
+    List<String> jarFileNames = getJarFileNames(pathToJars);
+    
+    for (String jarName : jarFileNames ) {
+      String pathToJar = pathToJars + jarName;
+      try (JarFile jarFile = new JarFile(pathToJar)) {
+        Enumeration<JarEntry> e = jarFile.entries();
+
+        URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+        URLClassLoader cl = URLClassLoader.newInstance(urls);
+
+        while (e.hasMoreElements()) {
+          JarEntry je = e.nextElement();
+          if (je.isDirectory() || !je.getName().endsWith(".class")) {
+            continue;
+          }
+          // -6 because of .class
+          String className = je.getName().substring(0, je.getName().length() - 6);
+          className = className.replace('/', '.');
+          Class c = cl.loadClass(className);
+          loadNativeJava(c);
         }
-        // -6 because of .class
-        String className = je.getName().substring(0, je.getName().length() - 6);
-        className = className.replace('/', '.');
-        Class c = cl.loadClass(className);
-        loadNativeJava(c);
       }
     }
   }

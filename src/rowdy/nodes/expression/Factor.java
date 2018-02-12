@@ -2,7 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyRunner;
+import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.ATOMIC;
@@ -10,7 +10,7 @@ import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_MINUS;
 import static rowdy.lang.RowdyGrammarConstants.PAREN_EXPR;
-import rowdy.nodes.RowdyNode;
+
 
 /**
  *
