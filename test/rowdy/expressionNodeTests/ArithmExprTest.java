@@ -7,6 +7,8 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.ArithmExpr;
+import static rowdy.testlang.lang.RowdyGrammarConstants.ARITHM_EXPR;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -27,14 +29,11 @@ public class ArithmExprTest extends TestCase {
    * Test of execute method, of class ArithmExpr.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    ArithmExpr instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
+    String testCode = "5 + 9 - 8";
+    ArithmExpr instance = (ArithmExpr) getTestStatement(testCode, ARITHM_EXPR);
+    Value expResult = new Value(6.0);
+    Value result = instance.execute();
     assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
   }
   
 }

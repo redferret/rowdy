@@ -4,7 +4,6 @@ package rowdy.nodes;
 import growdy.Node;
 import growdy.Symbol;
 import growdy.NodeFactory;
-import rowdy.RowdyInstance;
 import rowdy.nodes.expression.*;
 import static rowdy.lang.RowdyGrammarConstants.*;
 
@@ -43,6 +42,8 @@ public class RowdyNodeFactory implements NodeFactory {
         return new Atomic(symbol, line);
       case ARRAY_EXPR:
         return new ArrayExpression(symbol, line);
+      case ROUND_EXPR:
+        return new RoundExpr(symbol, line);
       default:
         return new RowdyNode(symbol, line);
     }

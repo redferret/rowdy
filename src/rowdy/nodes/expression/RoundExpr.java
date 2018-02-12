@@ -2,7 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyInstance;
+import growdy.Terminal;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
@@ -21,9 +21,10 @@ public class RoundExpr extends RowdyNode {
 
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    Value valueToRound = runner.getValue(get(ID));
+    Value valueToRound = runner.fetch(runner.getIdAsValue(get(ID)), this);
     double roundedValue = valueToRound.valueToDouble();
-    int precision = runner.getValue(get(ARITHM_EXPR)).valueToDouble().intValue();
+    ArithmExpr arithmExpr = (ArithmExpr) get(ARITHM_EXPR);
+    int precision = arithmExpr.execute().valueToDouble().intValue();
     double factor = 1;
     while (precision > 0) {
       factor *= 10;

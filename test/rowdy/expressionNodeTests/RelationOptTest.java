@@ -7,6 +7,9 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.RelationOpt;
+import static rowdy.testlang.lang.RowdyGrammarConstants.RELATION_OPTION;
+import static rowdy.testutils.TestUtils.getTestStatement;
+import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -27,14 +30,13 @@ public class RelationOptTest extends TestCase {
    * Test of execute method, of class RelationOpt.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    RelationOpt instance = null;
-    Value expResult = null;
+    String testCode = ">= 100";
+    Value leftValue = new Value(1000);
+    RelationOpt instance = (RelationOpt) getTestStatement(testCode, RELATION_OPTION);
+    trimEmptyChildren(instance);
+    Value expResult = new Value(true);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
   }
   
 }

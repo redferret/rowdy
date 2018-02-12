@@ -1,12 +1,15 @@
  
 package rowdy.expressionNodeTests;
 
+import growdy.Node;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.Expression;
+import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSION;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -27,14 +30,11 @@ public class ExpressionTest extends TestCase {
    * Test of execute method, of class Expression.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    Expression instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
+    String testCode = "3 + 8 - 9 * 19 >= 100";
+    Expression instance = (Expression) getTestStatement(testCode, EXPRESSION);
+    Value expResult = new Value(false);
+    Value result = instance.execute();
     assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
   }
   
 }

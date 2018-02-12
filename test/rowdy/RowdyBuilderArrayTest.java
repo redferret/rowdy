@@ -15,22 +15,6 @@ import static rowdy.testutils.TestUtils.getTestStatement;
 public class RowdyBuilderArrayTest {
   
   @Test
-  public void testArrayAccess() {
-    String testCode = "e = get(arr, 5)";
-    
-    Node assignStmt = getTestStatement(testCode, ASSIGN_STMT);
-    Node expr = getFromAndTestNotNull(assignStmt, EXPRESSION);
-    Node getExpr = getFromAndTestNotNull(expr, GET_EXPR);
-    getAndTestSymbol(getExpr, GET, "get");
-    testContainsSymbols(getExpr, 
-            new int[]{GET,OPENPAREN,EXPRESSION,COMMA,EXPRESSION,CLOSEDPAREN});
-    boolean e1 = getFromAndTestNotNull(getExpr, EXPRESSION, 0).getAll().isEmpty();
-    boolean e2 = getFromAndTestNotNull(getExpr, EXPRESSION, 1).getAll().isEmpty();
-    assertFalse(e1);
-    assertFalse(e2);
-  }
-  
-  @Test
   public void testEmptyLinearArray() {
     String testCode = "a = array()";
     Node stmt = getTestStatement(testCode, ASSIGN_STMT);

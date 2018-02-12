@@ -7,6 +7,9 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.BoolTermTail;
+import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_EXPR;
+import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -27,14 +30,11 @@ public class BoolTermTailTest extends TestCase {
    * Test of execute method, of class BoolTermTail.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    BoolTermTail instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
+    String testCode = "or (1 == 0)";
+    BoolTermTail instance = (BoolTermTail) getTestStatement(testCode, BOOL_TERM_TAIL);
+    Value expResult = new Value(true);
+    Value result = instance.execute(new Value(true));
     assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
   }
   
 }

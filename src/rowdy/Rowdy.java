@@ -209,16 +209,11 @@ public class Rowdy {
   public void loadNativeJava(Class c) throws IllegalAccessException, 
           IllegalArgumentException, InvocationTargetException {
     
-    Collection<Method> methods = new ArrayList<>();
     for (Method method : c.getMethods()) {
       if (method.isAnnotationPresent(JavaHookin.class)) {
-        methods.add(method);
+        NativeJava hookin = (NativeJava) method.invoke(null);
+        allocateNativeJavaHookin(method.getName(), hookin);
       }
-    }
-
-    for (Method method : methods) {
-      NativeJava hookin = (NativeJava) method.invoke(null);
-      allocateNativeJavaHookin(method.getName(), hookin);
     }
   }
 

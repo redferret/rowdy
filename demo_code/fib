@@ -17,10 +17,12 @@
 		print list, "\n"
 		
 		squareAll = func(list) {
+			sqrs = $List()
 			$forEach(list, func(item){
-				print (item ^ 2), " "
+				$add(sqrs, item ^ 2)
 			})
+			return sqrs
 		}
-		$squareAll(list)
-		$println()
+		sqrs = $squareAll(list)
+		$println(sqrs)
 	}
