@@ -78,6 +78,10 @@ public class RowdyRunner {
     executeStmt(root, null);
   }
   
+  public void declareGlobals() throws ConstantReassignmentException {
+    this.declareGlobals(root);
+  }
+  
   /**
    * Runs the program loaded into the parse tree. You need to first 
    * initialize the runner with a builder and flag if it's
@@ -90,7 +94,6 @@ public class RowdyRunner {
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareSystemConstants();
-    declareGlobals(root);
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
@@ -136,12 +139,7 @@ public class RowdyRunner {
           Node nativeOpt = currentTreeNode.get(NATIVE_FUNC_OPT);
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
           if (nativeOpt.hasSymbols()) {
-            try {
-              fetch(getIdAsValue(currentTreeNode.get(ID)), currentTreeNode);
-            } catch (Exception e) {
-              throw new RuntimeException("Native Java Code not defined for '" + 
-                      functionName + "' on line " + currentTreeNode.getLine());
-            }
+            setAsGlobal(functionName, new Value());
           } else {
             if (functionName.equals("main")) {
               main = parent;
@@ -420,6 +418,13 @@ public class RowdyRunner {
     }
   }
 
+  public void allocateIfExists(Terminal idTerminal, Value value) throws ConstantReassignmentException {
+    Value exists = globalSymbolTable.get(idTerminal.getName());
+    if (exists != null) {
+      globalSymbolTable.replace(idTerminal.getName(), value);
+    }
+  }
+  
   /**
    * If the variable is not a global variable it
    * will allocate the variable to the current function if it doesn't exist.
@@ -477,8 +482,7 @@ public class RowdyRunner {
       globalSymbolTable.put(idName, value);
     } else {
       if (!curValue.isConstant()) {
-        globalSymbolTable.remove(idName);
-        globalSymbolTable.put(idName, value);
+        globalSymbolTable.replace(idName, value);
       } else {
         throw new ConstantReassignmentException(idName);
       }

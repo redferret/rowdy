@@ -55,8 +55,7 @@ public class Function {
       symbolTable.put(idName, value);
     } else {
       if (!curValue.isConstant()){
-        symbolTable.remove(idName);
-        symbolTable.put(idName, value);
+        symbolTable.replace(idName, value);
       } else {
         throw new ConstantReassignmentException(idName, this.lineCalledOn);
       }

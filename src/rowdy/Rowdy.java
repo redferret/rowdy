@@ -71,7 +71,18 @@ public class Rowdy {
       try {
         growdy.buildFromSource(programFileName);
         rowdyProgram.initialize(growdy);
-      } catch (IOException | SyntaxException | ParseException | AmbiguousGrammarException e) {
+        rowdyProgram.declareGlobals();
+        try {
+
+          loadJarLibs("bin/RowdyLib.jar");
+        } catch (IOException | ClassNotFoundException | URISyntaxException | 
+                IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+          handleException(ex);
+        }
+        
+        
+      } catch (IOException | SyntaxException | ParseException | 
+              AmbiguousGrammarException | ConstantReassignmentException e) {
         handleException(e);
         System.exit(500);
       }
@@ -171,7 +182,7 @@ public class Rowdy {
 
   public void allocateNativeJavaHookin(String functionName, NativeJavaHookin nativeJavaHookin) {
     try {
-      rowdyProgram.allocate(new Terminal("id", ID, functionName), new Value(nativeJavaHookin));
+      rowdyProgram.allocateIfExists(new Terminal("id", ID, functionName), new Value(nativeJavaHookin));
     } catch (ConstantReassignmentException ex) {
       handleException(ex);
     }
@@ -181,22 +192,23 @@ public class Rowdy {
           ClassNotFoundException, URISyntaxException, IllegalAccessException, 
           IllegalArgumentException, InvocationTargetException {
     
-    JarFile jarFile = new JarFile(pathToJar);
-    Enumeration<JarEntry> e = jarFile.entries();
-
-    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-    URLClassLoader cl = URLClassLoader.newInstance(urls);
-
-    while (e.hasMoreElements()) {
-      JarEntry je = e.nextElement();
-      if (je.isDirectory() || !je.getName().endsWith(".class")) {
-        continue;
+    try (JarFile jarFile = new JarFile(pathToJar)) {
+      Enumeration<JarEntry> e = jarFile.entries();
+      
+      URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+      URLClassLoader cl = URLClassLoader.newInstance(urls);
+      
+      while (e.hasMoreElements()) {
+        JarEntry je = e.nextElement();
+        if (je.isDirectory() || !je.getName().endsWith(".class")) {
+          continue;
+        }
+        // -6 because of .class
+        String className = je.getName().substring(0, je.getName().length() - 6);
+        className = className.replace('/', '.');
+        Class c = cl.loadClass(className);
+        loadNativeJava(c);
       }
-      // -6 because of .class
-      String className = je.getName().substring(0, je.getName().length() - 6);
-      className = className.replace('/', '.');
-      Class c = cl.loadClass(className);
-      loadNativeJava(c);
     }
   }
   
@@ -205,14 +217,6 @@ public class Rowdy {
    */
   public static void main(String[] args) {
     Rowdy rowdy = new Rowdy(args);
-    
-    try {
-      rowdy.loadJarLibs("bin/RowdyLib.jar");
-    } catch (IOException | ClassNotFoundException | URISyntaxException | 
-            IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-      rowdy.handleException(ex);
-    }
-    
     rowdy.run();
   }
 
