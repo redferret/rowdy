@@ -53,11 +53,11 @@ f = func() {
  a = func() {print "A\n";}
  g = func() {
   h = func() {
-   ->a();
+   $a();
   }
-  ->h();
+  $h();
  }
- ->g();
+ $g();
 }
 	}
 	

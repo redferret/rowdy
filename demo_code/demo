@@ -6,13 +6,13 @@
 	}
 	
 	func main() {
-		print (->myfunc(1, 3)), "\n";
-		nullValue = ->noReturn();
+		print ($myfunc(1, 3)), "\n";
+		nullValue = $noReturn();
 		print nullValue, "\n";
 		
 		func1 = func2;
 		
-		->func1(2, 8);
+		$func1(2, 8);
 		count = 1;
 		// Strings, print statements have concat built into them, so it's not always 
 		// needed and may be more efficient to not use concat statements inside print statements
@@ -44,8 +44,8 @@
 		print (( ( strcmp "AAA", "AAA") == 0 ) ), "\n";
 		print "STRCMP: ", ( ( strcmp "AAA", "AAA") == 0), "\n";
 		
-		->numberProgram();
-		->vars();
+		$numberProgram();
+		$vars();
 		
 		const C = 1000;
 		C = func(){}; // should throw an exception
@@ -58,7 +58,7 @@
 	// 12
 	func vars() {
 		print "Variables\n";
-		->f2();
+		$f2();
 	}
 	func f1(v1) {
 		v1 = 100;
@@ -67,7 +67,7 @@
 	func f2() {
 		v1 = 12;
 		print v1, "\n"; // 12
-		->f1(v1);
+		$f1(v1);
 		print v1, "\n"; // Still 12
 	}
 
@@ -83,4 +83,21 @@
 		print 1 + 4 ^ (5 - 2), "\n"; // Evaluates to 1 + 4 ^ 3 => 1 + 64 => 65.0
 		print (1 + 4) ^ (5 - 2), "\n"; // Evaluates to 5 ^ 3 => 125.0
 		print 5 % 10 + 1, "\n"; // Evaluates to 6
+		
+		f = func() {\\
+			loop x: {\\
+				x=x+1\\
+				if x > MAX {\\
+					break\\
+				}else{\\
+					print x, "\n"\\
+				}\\
+			}\\
+		} \\
+		loop x: {\\
+			$f() \\
+			break\\
+		} \\
+		print "Done\n"\\
+		
 	}

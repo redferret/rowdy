@@ -1,12 +1,12 @@
 
 	func main() {
-		->f1()
+		$f1()
 	}
 	
 	func f1(){
 		loop x: {
 			print x, " - first\n"
-			->f2()
+			$f2()
 			print x, " - fourth\n"
 			break
 		}

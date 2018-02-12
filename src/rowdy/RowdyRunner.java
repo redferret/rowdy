@@ -7,14 +7,15 @@ import growdy.Symbol;
 import growdy.Terminal;
 import rowdy.exceptions.MainNotFoundException;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.expression.*;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
+
 
 /**
  * Executes a parse tree given by a builder.
@@ -56,13 +57,6 @@ public class RowdyRunner {
   
   public void initialize(GRowdy builder) {
     this.root = builder.getProgram();
-    callStack.clear();
-    activeLoops.clear();
-    globalSymbolTable.clear();
-  }
-  
-  public void initializeLine(GRowdy builder) {
-    this.root = builder.getProgram();
   }
   
   /**
@@ -84,6 +78,10 @@ public class RowdyRunner {
     executeStmt(root, null);
   }
   
+  public void declareGlobals() throws ConstantReassignmentException {
+    this.declareGlobals(root);
+  }
+  
   /**
    * Runs the program loaded into the parse tree. You need to first 
    * initialize the runner with a builder and flag if it's
@@ -96,7 +94,6 @@ public class RowdyRunner {
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareSystemConstants();
-    declareGlobals(root);
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
@@ -139,11 +136,16 @@ public class RowdyRunner {
           allocate(idTerminal, rightValue);
           break;
         case FUNCTION:
+          Node nativeOpt = currentTreeNode.get(NATIVE_FUNC_OPT);
           String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          if (functionName.equals("main")) {
-            main = parent;
+          if (nativeOpt.hasSymbols()) {
+            setAsGlobal(functionName, new Value());
+          } else {
+            if (functionName.equals("main")) {
+              main = parent;
+            }
+            setAsGlobal(functionName, new Value(currentTreeNode, true));
           }
-          setAsGlobal(functionName, new Value(currentTreeNode, true));
           break;
         default:
           declareGlobals(currentTreeNode);
@@ -179,15 +181,16 @@ public class RowdyRunner {
           System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
-          rightValue = getValue(currentTreeNode.get(EXPRESSION));
+          Expression assignExpr = (Expression) currentTreeNode.get(EXPRESSION);
+          rightValue = assignExpr.execute();
           if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
             rightValue.setAsConstant(true);
           }
           allocate(idTerminal, rightValue);
           break;
         case IF_STMT:
-          Node ifExpr = currentTreeNode.get(EXPRESSION);
-          Value ifExprValue = getValue(ifExpr);
+          Expression ifExpr = (Expression) currentTreeNode.get(EXPRESSION);
+          Value ifExprValue = ifExpr.execute();
           if (ifExprValue.valueToBoolean()) {
             Node ifStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
             executeStmt(ifStmtList, seqControl);
@@ -290,7 +293,7 @@ public class RowdyRunner {
           }
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasSymbols()) {
-            printVal = getValue(currentTreeNode.get(EXPRESSION));
+            printVal = getValue(atomTailNode.get(EXPRESSION));
             if (printVal == null) {
               printValue.append("null");
             } else {
@@ -350,7 +353,7 @@ public class RowdyRunner {
     Value funcVal;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
     
-    funcVal = getValue(cur.get(ID));
+    funcVal = fetch(getIdAsValue(cur.get(ID)), cur);
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
         throw new RuntimeException("Function '" + funcName + "' not defined on "
@@ -372,45 +375,62 @@ public class RowdyRunner {
       parameterValues = programParamValues;
     }
     
-    Node functionNode = (Node) funcVal.getValue();
-    List<String> paramsList = new ArrayList<>();
-    if (!parameterValues.isEmpty()) {
-      Node functionBody = functionNode.get(FUNCTION_BODY);
-      Node paramsNode = functionBody.get(PARAMETERS);
-      if (paramsNode.hasSymbols()) {
-        Value paramValue = executeExpr(paramsNode, null);
-
-        paramsList.add(((Terminal) paramValue.getValue()).getName());
-        Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
-        while (paramsTailNode.hasSymbols()) {
-          paramsList.add(((Terminal) executeExpr(paramsTailNode.get(ID), null).getValue()).getName());
-          paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+    if (funcVal.getValue() instanceof Node) {
+      Node functionNode = (Node) funcVal.getValue();
+      List<String> paramsList = new ArrayList<>();
+      if (!parameterValues.isEmpty()) {
+        Node functionBody = functionNode.get(FUNCTION_BODY);
+        Node paramsNode = functionBody.get(PARAMETERS);
+        if (paramsNode.hasSymbols()) {
+          paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
+          Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
+          while (paramsTailNode.hasSymbols()) {
+            paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
+            paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+          }
         }
       }
+      // 2. Copy actual parameters to formal parameters
+      HashMap<String, Value> params = new HashMap<>();
+      String paramName;
+      for (int p = 0; p < paramsList.size(); p++) {
+        paramName = paramsList.get(p);
+        params.put(paramName, parameterValues.get(p));
+      }
+      // 3. Push the function onto the call stack
+      Function function = new Function(funcName, params, cur.getLine());
+      callStack.push(function);
+      // 4. Get and execute the stmt-list
+      Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+      Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
+      seqControl.setSeqActive(true);
+      executeStmt(stmtList, seqControl);
+      // When finished, remove the function from the
+      // call stack and free it's memory then return
+      // it's value.
+      function = callStack.pop();
+      function.free();
+      return function.getReturnValue();
+    } else {
+      NativeJavaHookin hookin = (NativeJavaHookin) funcVal.getValue();
+      Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
+      Object[] methodValues = new Object[values.length];
+      int i = 0;
+      for (Value val : parameterValues) {
+        methodValues[i++] = val.getValue();
+      }
+      Object returnValue = hookin.execute((Object[]) methodValues);
+      return returnValue == null ? new Value((Object) null) : new Value(returnValue);
     }
-    // 2. Copy actual parameters to formal parameters
-    HashMap<String, Value> params = new HashMap<>();
-    String paramName;
-    for (int p = 0; p < paramsList.size(); p++) {
-      paramName = paramsList.get(p);
-      params.put(paramName, parameterValues.get(p));
-    }
-    // 3. Push the function onto the call stack
-    Function function = new Function(funcName, params, cur.getLine());
-    callStack.push(function);
-    // 4. Get and execute the stmt-list
-    Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
-    seqControl.setSeqActive(true);
-    executeStmt(stmtList, seqControl);
-    // When finished, remove the function from the
-    // call stack and free it's memory then return
-    // it's value.
-    function = callStack.pop();
-    function.free();
-    return function.getReturnValue();
   }
 
+  public void allocateIfExists(Terminal idTerminal, Value value) throws ConstantReassignmentException {
+    Value exists = globalSymbolTable.get(idTerminal.getName());
+    if (exists != null) {
+      globalSymbolTable.replace(idTerminal.getName(), value);
+    }
+  }
+  
   /**
    * If the variable is not a global variable it
    * will allocate the variable to the current function if it doesn't exist.
@@ -468,8 +488,7 @@ public class RowdyRunner {
       globalSymbolTable.put(idName, value);
     } else {
       if (!curValue.isConstant()) {
-        globalSymbolTable.remove(idName);
-        globalSymbolTable.put(idName, value);
+        globalSymbolTable.replace(idName, value);
       } else {
         throw new ConstantReassignmentException(idName);
       }
@@ -491,6 +510,10 @@ public class RowdyRunner {
     return isset(o);
   }
 
+  public Value getIdAsValue(Node id) {
+    return new Value((Terminal)id.symbol());
+  }
+  
   public boolean isset(Value value) {
     if (value == null) {
       return false;
@@ -574,41 +597,28 @@ public class RowdyRunner {
     if (cur == null) {
       return leftValue;
     }
-    Node parent = cur;
-    ArrayList<Node> children = cur.getAll();
-    double left, right;
-    boolean bLeft, bRight;
-    Boolean bReslt;
-    Value rightValue;
-    Double reslt;
-    Symbol operator;
     int curID = cur.symbol().id();
     switch (curID) {
+      case ARITHM_EXPR:
+        return ((ArithmExpr)cur).execute();
       case EXPRESSION:
-        Node leftChild = cur.getLeftMost();
-        if (leftChild == null) {
-          return null;
-        }
-        switch (leftChild.symbol().id()) {
-          case BOOL_EXPR:
-            leftChild = leftChild.getLeftMost();
-          case BOOL_TERM:
-            leftValue = executeExpr(leftChild, leftValue);
-            return executeExpr(cur.get(BOOL_TERM_TAIL, false), leftValue);
-        }
         Symbol symbolType = cur.getLeftMost().symbol();
         switch (symbolType.id()) {
+          case BOOL_EXPR:
+            return ((Expression)cur).execute();
           case ISSET_EXPR:
             Node issetExpr = cur.get(ISSET_EXPR);
-            Value resultBoolean = new Value(isset(issetExpr.get(ID)));
+            Value idTerm = getIdAsValue(issetExpr.get(ID));
+            Value resultBoolean = new Value(isset(idTerm));
             return resultBoolean;
           case CONCAT_EXPR:
-            Node concatExpr = cur.get(CONCAT_EXPR);
             StringBuilder concatValue = new StringBuilder();
-            concatValue.append(executeExpr(concatExpr.get(EXPRESSION), leftValue).valueToString());
-            Node atomTailNode = concatExpr.get(EXPR_LIST);
+            Expression concatExpr = (Expression) cur.getLeftMost().get(EXPRESSION);
+            concatValue.append(concatExpr.execute(leftValue).valueToString());
+            Node atomTailNode = cur.getLeftMost().get(EXPR_LIST);
             while (atomTailNode.hasSymbols()) {
-              concatValue.append(executeExpr(atomTailNode.get(EXPRESSION), leftValue).valueToString());
+              concatExpr = (Expression) atomTailNode.get(EXPRESSION);
+              concatValue.append(concatExpr.execute(leftValue).valueToString());
               atomTailNode = atomTailNode.get(EXPR_LIST);
             }
             return new Value(concatValue.toString());
@@ -630,7 +640,8 @@ public class RowdyRunner {
             return new Value(anonymousFunc);
           case ROUND_EXPR:
             Node roundExpr = cur.get(ROUND_EXPR);
-            Value valueToRound = getValue(roundExpr.get(ID));
+            Value idToRound = new Value((Terminal)roundExpr.get(ID).symbol());
+            Value valueToRound = fetch(idToRound, cur);
             double roundedValue = valueToRound.valueToDouble();
             int precision = getValue(roundExpr.get(ARITHM_EXPR)).valueToDouble().intValue();
             double factor = 1;
@@ -641,286 +652,11 @@ public class RowdyRunner {
             roundedValue = (double) Math.round(roundedValue * factor) / factor;
             return new Value(roundedValue);
           case ARRAY_EXPR:
-            Node arrayExpression = cur.getLeftMost();
-            Value firstValue = getValue(arrayExpression.get(EXPRESSION));
-            Node arrayBody = arrayExpression.get(ARRAY_BODY);
-
-            Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
-            if (bodyType == null) {
-              bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY, false);
-
-              if (bodyType == null) {
-                List<Object> arrayList = new ArrayList<>(); 
-                if (firstValue != null) {
-                  arrayList.add(firstValue.getValue());
-                }
-                return new Value(arrayList);
-              }
-
-              HashMap<String, Object> keypairArray = new HashMap<>();
-              Value key = firstValue;
-              Value keyValue = getValue(bodyType.get(EXPRESSION));
-              keypairArray.put(key.getValue().toString(), keyValue.getValue());
-              arrayBody = bodyType;
-              Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-              arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-              while(arrayBody != null && bodyType != null){
-                key = getValue(bodyTail.get(EXPRESSION));
-                keyValue = getValue(arrayBody.get(EXPRESSION));
-                keypairArray.put(key.getValue().toString(), keyValue.getValue());
-                bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-                arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-              }
-              return new Value(keypairArray);
-
-            } else {
-              List<Object> array = new ArrayList<>();
-                Value arrayValue = firstValue;
-                arrayBody = bodyType;
-                while (arrayValue != null){
-                  array.add(arrayValue.getValue());
-                  arrayValue = null;
-                  if (arrayBody != null && arrayBody.hasSymbols()) {
-                    arrayValue = getValue(arrayBody.get(EXPRESSION));
-                    arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
-                  }
-                }
-                return new Value(array);
-            }
-          case GET_EXPR:
-            Node getExpr = cur.getLeftMost();
-            Value array = getValue(getExpr.get(EXPRESSION));
-            if (array.getValue() instanceof List){
-              List<Object> list = (List<Object>)array.getValue();
-              Object arrayIndexValue = getValue(getExpr.get(EXPRESSION, 1)).getValue();
-              int index;
-              if (arrayIndexValue instanceof Integer){
-                index = (Integer)arrayIndexValue;
-              }else if (arrayIndexValue instanceof Double){
-                index = ((Double)arrayIndexValue).intValue();
-              } else {
-                String strRep = (String) arrayIndexValue;
-                index = Integer.parseInt(strRep);
-              }
-              return new Value(list.get(index));
-            } else {
-              HashMap<String, Object> map = (HashMap)array.getValue();
-              Value key = getValue(getExpr.get(EXPRESSION, 1));
-              Value keyValue = new Value(map.get(key.getValue().toString()));
-              return keyValue;
-            }
+            return ((ArrayExpression)cur.getLeftMost()).execute();
         }
         throw new RuntimeException("Couldn't get value, "
                 + "undefined Node '" + cur.getLeftMost()+"' on line " + 
                 cur.getLine());
-      case BOOL_TERM_TAIL:
-      case BOOL_FACTOR_TAIL:
-        ArrayList<Node> boolChildren = cur.getAll();
-        if (boolChildren.isEmpty()) {
-          return leftValue;
-        }
-        cur = boolChildren.get(0);
-        operator = cur.symbol();
-        bLeft = fetch(leftValue, cur).valueToBoolean();
-        cur = boolChildren.get(1);
-        bRight = getValue(cur).valueToBoolean();
-        switch (operator.id()) {
-          case AND:
-            bReslt = bLeft && bRight;
-            break;
-          case OR:
-            bReslt = bLeft || bRight;
-            break;
-          default:
-            bReslt = false;
-        }
-        if (boolChildren.size() < 3) {
-          return new Value(bReslt);
-        }
-        return executeExpr(boolChildren.get(2), new Value(bReslt));
-      case RELATION_OPTION:
-        ArrayList<Node> relationChildren = cur.getAll();
-        if (relationChildren.isEmpty()) {
-          return leftValue;
-        }
-        Node firstRel = relationChildren.get(0);
-        operator = firstRel.getLeftMost().symbol();
-      
-        Object leftValueObject = fetch(leftValue, firstRel).getValue();
-        Node secondRel = firstRel.get(ARITHM_EXPR);
-        Object rightValueObject = getValue(secondRel).getValue();
-        
-        Object leftAsBool = null, rightAsBool = null;
-        left = 0;
-        if (leftValueObject instanceof Boolean){
-          leftAsBool = leftValueObject;
-        } else if (leftValueObject instanceof Node) {
-          leftAsBool = leftValueObject;
-        } else {
-          left = fetch(leftValue, secondRel).valueToDouble();
-        }
-        right = 0;
-        if (rightValueObject instanceof Boolean){
-          rightAsBool = rightValueObject;
-        } else if (leftValueObject instanceof Node) {
-          rightAsBool = rightValueObject;
-        } else {
-          right = getValue(secondRel).valueToDouble();
-        }
-        
-        bReslt = null;
-        switch (operator.id()) {
-          case LESS:
-            bReslt = left < right;
-            break;
-          case LESSEQUAL:
-            bReslt = left <= right;
-            break;
-          case EQUAL:
-            if (leftAsBool != null || rightAsBool != null) {
-              bReslt = Objects.equals(leftAsBool, rightAsBool);
-            } else {
-              bReslt = left == right;
-            }
-            break;
-          case GREATEREQUAL:
-            bReslt = left >= right;
-            break;
-          case GREATER:
-            bReslt = left > right;
-            break;
-          case NOTEQUAL:
-            if (leftAsBool != null && rightAsBool != null) {
-              bReslt = !Objects.equals(leftAsBool, rightAsBool);
-            } else {
-              bReslt = left != right;
-            }
-            break;
-        }
-        return new Value(bReslt);
-      case FACTOR:
-        ArrayList<Node> factorChildren = cur.getAll();
-        if (factorChildren.size() > 0) {
-          cur = factorChildren.get(0);
-          if (cur.symbol() instanceof Terminal) {
-            operator = cur.symbol();
-            cur = factorChildren.get(1);
-            switch (operator.id()) {
-              case MINUS:
-                rightValue = (Value) executeExpr(cur, leftValue);
-                left = (leftValue != null)? leftValue.valueToDouble() : 0;
-                right = rightValue.valueToDouble();
-                reslt = left - right;
-                return new Value(reslt);
-              default:
-                return executeExpr(cur, leftValue);
-            }
-          } else {
-            return executeExpr(cur, leftValue);
-          }
-        } else {
-          throw new RuntimeException("Factors not found");
-        }
-      case FACTOR_TAIL:
-      case FACTOR_TAIL_MOD:
-      case FACTOR_TAIL_POW:
-      case FACTOR_TAIL_DIV:
-      case FACTOR_TAIL_MUL:
-        ArrayList<Node> factorTailChildren = cur.getAll();
-        if (factorTailChildren.isEmpty()) {
-          return leftValue;
-        }
-        Node factorTail = cur.getLeftMost();
-        if (factorTail.symbol() instanceof NonTerminal) {
-          return executeExpr(factorTail, leftValue);
-        }
-        operator = factorTail.symbol();
-        if (operator.id() == OPENPAREN) {
-          factorTail = factorTailChildren.get(1);
-          return executeExpr(factorTail, leftValue);
-        }
-        factorTail = factorTailChildren.get(1);
-        left = fetch(leftValue, factorTail).valueToDouble();
-        right = getValue(factorTail).valueToDouble();
-        reslt = null;
-        switch (operator.id()) {
-          case MULTIPLY:
-            reslt = left * right;
-            break;
-          case DIVIDE:
-            if (right == 0){
-              throw new ArithmeticException("Division by 0 on line "+
-                      factorTail.getLine());
-            }
-            reslt = left / right;
-            break;
-          case POW:
-            reslt = Math.pow(left, right);
-            break;
-          case MOD:
-            if (right == 0){
-              throw new ArithmeticException("Division by 0 on line "+
-                      factorTail.getLine());
-            }
-            reslt = left % right;
-            break;
-        }
-        if (cur.get(TERM_TAIL, false) == null) {
-          return new Value(reslt);
-        }
-        return executeExpr(children.get(2), new Value(reslt));
-      case TERM_PLUS:
-      case TERM_MINUS:
-      case TERM_TAIL:
-        Node leftMost = cur.getLeftMost();
-        if (leftMost == null) {
-          return leftValue;
-        }
-        ArrayList<Node> termChildren = leftMost.getAll();
-        if (termChildren.size() < 1) {
-          return leftValue;
-        }
-        operator = termChildren.get(0).symbol();
-        cur = termChildren.get(1);
-        left = fetch(leftValue, cur).valueToDouble();
-        right = getValue(cur).valueToDouble();
-        reslt = null;
-        switch (operator.id()) {
-          case PLUS:
-            reslt = left + right;
-            break;
-          case MINUS:
-            reslt = left - right;
-            break;
-        }
-        if (leftMost.get(TERM_TAIL, false) == null) {
-          return new Value(reslt);
-        }
-        return executeExpr(termChildren.get(2), new Value(reslt));
-      case TERM:
-      case BOOL_TERM:
-      case BOOL_FACTOR:
-      case ARITHM_EXPR:
-        leftValue = (Value) executeExpr(children.get(0), leftValue);
-        if (children.size() == 1) {
-          return leftValue;
-        }
-        return executeExpr(children.get(1), leftValue);
-      case PAREN_EXPR:  
-        return executeExpr(parent.get(EXPRESSION), leftValue);
-      case ID_OPTION:
-      case PARAMETERS:
-      case ATOMIC:
-      case ATOMIC_ID:
-      case ATOMIC_CONST:
-      case ATOMIC_FUNC_CALL:
-        return executeExpr(parent.getLeftMost(), leftValue);
-      case ID:
-        return new Value(cur.symbol());
-      case CONST:
-        return new Value(((Terminal) cur.symbol()).getName());
-      case FUNC_CALL:
-        return executeFunc(cur);
       default:
         return leftValue;
     }

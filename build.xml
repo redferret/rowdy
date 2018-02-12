@@ -9,12 +9,20 @@
 <!-- in the project's Project Properties dialog box.-->
 <project name="rowdy" default="test" basedir=".">
   
-  
-
   <path id="classpath.test">
     <pathelement location="${main.build.dir}"/>
     <path refid="classpath.base" />
   </path>
+  
+  <target name="-post-compile">
+    <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
+    <copy file="../RowdyLib/dist/RowdyLib.jar" todir="${dist.dir}/bin"/>
+    <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./bin"/>
+    <copy todir="${dist.dir}/bin/core">
+      <fileset dir="bin/core"/>
+    </copy>      
+  </target>
+  
   <import file="nbproject/build-impl.xml"/>
   
 </project>

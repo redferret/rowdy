@@ -1,0 +1,43 @@
+
+
+func main () {
+	$f1()
+	$a1()
+}
+
+func f1() {
+	v5 = 10
+	print v5, " = v5 in f1\n" // 10
+	f2 = func() {
+		v5 = 23
+	}
+	$f2()
+	print v5, " = v5 in f1, mutated by f2\n" // 23, v5 still belongs to f1, f2 mutated it
+	
+	
+	f3 = func(v5) {
+		v5 = 100
+		print v5, " = v5 in f3\n"
+	}
+	$f3(0) // Initialize the parameter
+	// f3 will have it's own v5
+	// you define it in the header of the function
+	print v5, " = v5 in f1\n" // still 23
+
+	$f3() // Not initializing, no initialization will cause
+	// v5 to be scoped to f1... this will change in the future
+	print v5, " = v5 in f1\n" // 100
+}
+
+func a1 () {
+	const A = 1000
+	a2 = func() {
+	    const B = 90 // B doesn't exist here or in a1, this will be allocated in a2
+		print A, " = A, in a2\n"
+		print B, " = B, in a2\n"
+	}
+	$a2() 
+	print "Printing B in a1, this will throw an exception\n"
+	
+	print B, "\n" // This should throw an exception, B only belongs to a2
+}

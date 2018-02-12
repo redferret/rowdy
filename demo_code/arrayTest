@@ -3,7 +3,7 @@
 		a1 = array(0, 1, 2, array("A","B", array(100, 500), 90),4,5)
 		print a1, "\n"
 		
-		->printAll(a1, 6)
+		$printAll(a1, 6)
 		
 		a2 = array(1:2, 10:6, "KEY":55)
 		print a2, "\n"
@@ -17,7 +17,7 @@
 				print "Second Function\n"
 			},
 		)
-		->executeAll(functions, 2)
+		$executeAll(functions, 2)
 		
 		print (concat get(array("first", "second"), 0), "\n")
 	}
@@ -25,7 +25,7 @@
 	func executeAll(functions, length) {
 		loop i: {
 			function = get(functions, i)
-			->function()
+			$function()
 			i = i + 1
 			if (i == length) {
 				break

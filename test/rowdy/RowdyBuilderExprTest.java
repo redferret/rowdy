@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import static org.junit.Assert.*;
-import static rowdy.lang.RowdyGrammarConstants.*;
+import static rowdy.testlang.lang.RowdyGrammarConstants.*;
 import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**

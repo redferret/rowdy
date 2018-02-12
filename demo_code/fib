@@ -1,4 +1,6 @@
 
+	import "core.rowdy"
+	
 	func main(max) {
 		if (isset max) == false {
 			max = 1000
@@ -10,4 +12,13 @@
 			x = y
 			y = z
 		}
+		map = $createMap()
+		$println(map)
+		$put(map, "key", func() {
+			return 10
+		})
+		$println(map)
+		$println($get(map, "key"))
+		f = $get(map, "key")
+		$println(concat $f(), " was returned")
 	}

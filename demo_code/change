@@ -15,26 +15,24 @@
 		
 		chg = change
 		getChange = func(denom) {
-			change = this.change
 			loop qty: {
 				if (change >= denom) {
 					change = change - denom
 					qty = qty + 1
 					change = round change, 2
 				} else {
-					this.change = change
 					return qty
 				}
 			}
 		}
-		twenties	= ->getChange(20)
-		tens 		= ->getChange(10)
-		fives 		= ->getChange(5)
-		ones	 	= ->getChange(1)
-		quarters 	= ->getChange(0.25)
-		dimes 		= ->getChange(0.1)
-		nickels 	= ->getChange(0.05)
-		pennies 	= ->getChange(0.01)
+		twenties	= $getChange(20)
+		tens 		= $getChange(10)
+		fives 		= $getChange(5)
+		ones	 	= $getChange(1)
+		quarters 	= $getChange(0.25)
+		dimes 		= $getChange(0.1)
+		nickels 	= $getChange(0.05)
+		pennies 	= $getChange(0.01)
 		
 		print
 		"Amount Due: ", price,		"\n",

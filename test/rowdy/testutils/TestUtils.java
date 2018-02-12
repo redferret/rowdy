@@ -7,8 +7,6 @@ import growdy.Node;
 import growdy.exceptions.AmbiguousGrammarException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import static rowdy.Rowdy.getBuilder;
 

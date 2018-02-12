@@ -17,7 +17,8 @@ public class Function {
   private final String name;
   private HashMap<String, Value> symbolTable;
   private final int lineCalledOn;
-
+  private NativeJavaHookin nativeJavaHookin;
+  
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
     this.name = name;
     this.symbolTable = params;
@@ -25,6 +26,14 @@ public class Function {
     this.lineCalledOn = lineCalledOn;
   }
 
+  public void setNativeJavaHookin(NativeJavaHookin nativeJavaHookin) {
+    this.nativeJavaHookin = nativeJavaHookin;
+  }
+  
+  public boolean isNativeFunction() {
+    return nativeJavaHookin != null;
+  }
+  
   public int getLineCalledOn() {
     return lineCalledOn;
   }
@@ -46,8 +55,7 @@ public class Function {
       symbolTable.put(idName, value);
     } else {
       if (!curValue.isConstant()){
-        symbolTable.remove(idName);
-        symbolTable.put(idName, value);
+        symbolTable.replace(idName, value);
       } else {
         throw new ConstantReassignmentException(idName, this.lineCalledOn);
       }
