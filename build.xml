@@ -15,9 +15,14 @@
     <pathelement location="${main.build.dir}"/>
     <path refid="classpath.base" />
   </path>
+  
   <target name="-post-compile">
-    <copy file="bin/RowdyLib.jar" todir="${dist.dir}/bin"/>        
+    <copy file="bin/RowdyLib.jar" todir="${dist.dir}/bin"/>
+    <copy todir="${dist.dir}/bin/core">
+      <fileset dir="bin/core"/>
+    </copy>      
   </target>
+  
   <import file="nbproject/build-impl.xml"/>
   
 </project>
