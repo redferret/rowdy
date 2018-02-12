@@ -69,7 +69,7 @@ public class ArrayExpression extends RowdyNode {
         array.add(arrayValue.getValue());
         arrayValue = null;
         if (arrayBody != null && arrayBody.hasSymbols()) {
-          Expression bodyTypeExpr = (Expression) bodyType.get(EXPRESSION);
+          Expression bodyTypeExpr = (Expression) arrayBody.get(EXPRESSION);
           arrayValue = bodyTypeExpr.execute();
           arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
         }

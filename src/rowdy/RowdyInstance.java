@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
+import rowdy.nodes.RowdyNode;
 
 
 /**
@@ -22,7 +23,7 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  *
  * @author Richard DeSilvey
  */
-public class RowdyRunner {
+public class RowdyInstance {
 
   private Node root;
   /**
@@ -46,7 +47,7 @@ public class RowdyRunner {
   
   private boolean firstTimeInitialization;
 
-  public RowdyRunner() {
+  public RowdyInstance() {
     this.root = null;
     main = null;
     callStack = new Stack<>();
@@ -335,6 +336,23 @@ public class RowdyRunner {
     currentFunction.allocate(idTerminal, value);
   }
   
+  public Value executeFunc(Node cur) throws ConstantReassignmentException {
+    String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+    List<Value> parameterValues = new ArrayList<>();
+    Node expr = cur.get(EXPRESSION, false);// This might be 'main'
+    if (expr != null && expr.hasSymbols()) {
+      parameterValues.add(getValue(cur.get(EXPRESSION)));
+      Node atomTailNode = cur.get(EXPR_LIST);
+      while (atomTailNode.hasSymbols()) {
+        parameterValues.add(getValue(atomTailNode.get(EXPRESSION)));
+        atomTailNode = atomTailNode.get(EXPR_LIST);
+      }
+    } else if (funcName.equals("main")){
+      parameterValues = programParamValues;
+    }
+    return executeFunc(cur, parameterValues);
+  }
+  
   /**
    * When a function is called, and not allocated, the method will collect the
    * actual parameters being passed into the function (if any) and then allocate
@@ -345,10 +363,11 @@ public class RowdyRunner {
    * returned but the return stmt is still called.
    *
    * @param cur The function being called
+   * @param parameterValues
    * @return The function's return value
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public Value executeFunc(Node cur) throws ConstantReassignmentException {
+  public Value executeFunc(Node cur, List<Value> parameterValues) throws ConstantReassignmentException {
     // 1. Collect parameters
     Value funcVal;
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
@@ -361,18 +380,6 @@ public class RowdyRunner {
       } else {
         funcVal = globalSymbolTable.get(funcName);
       }
-    }
-    List<Value> parameterValues = new ArrayList<>();
-    Node expr = cur.get(EXPRESSION, false);// This might be 'main'
-    if (expr != null && expr.hasSymbols()) {
-      parameterValues.add(getValue(cur.get(EXPRESSION)));
-      Node atomTailNode = cur.get(EXPR_LIST);
-      while (atomTailNode.hasSymbols()) {
-        parameterValues.add(getValue(atomTailNode.get(EXPRESSION)));
-        atomTailNode = atomTailNode.get(EXPR_LIST);
-      }
-    } else if (funcName.equals("main")){
-      parameterValues = programParamValues;
     }
     
     if (funcVal.getValue() instanceof Node) {
@@ -412,14 +419,14 @@ public class RowdyRunner {
       function.free();
       return function.getReturnValue();
     } else {
-      NativeJavaHookin hookin = (NativeJavaHookin) funcVal.getValue();
+      NativeJava nativeJava = (NativeJava) funcVal.getValue();
       Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
       Object[] methodValues = new Object[values.length];
       int i = 0;
       for (Value val : parameterValues) {
         methodValues[i++] = val.getValue();
       }
-      Object returnValue = hookin.execute((Object[]) methodValues);
+      Object returnValue = nativeJava.execute(this, (Object[]) methodValues);
       return returnValue == null ? new Value((Object) null) : new Value(returnValue);
     }
   }

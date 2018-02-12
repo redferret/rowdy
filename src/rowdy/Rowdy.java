@@ -40,14 +40,14 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
  * @author Richard DeSilvey
  */
 public class Rowdy {
-  private final RowdyRunner rowdyProgram;
+  private final RowdyInstance rowdyProgram;
   private final GRowdy growdy;
   private final String[] args;
   private String programFileName;
   private boolean verbose;
   
   public Rowdy(String[] args) {
-    rowdyProgram = new RowdyRunner();
+    rowdyProgram = new RowdyInstance();
     this.args = args;
     GRBuilder grBuilder = getBuilder();
     RowdyNodeFactory factory = new RowdyNodeFactory();
@@ -214,12 +214,12 @@ public class Rowdy {
     }
 
     for (Method method : methods) {
-      NativeJavaHookin hookin = (NativeJavaHookin) method.invoke(null);
+      NativeJava hookin = (NativeJava) method.invoke(null);
       allocateNativeJavaHookin(method.getName(), hookin);
     }
   }
 
-  public void allocateNativeJavaHookin(String functionName, NativeJavaHookin nativeJavaHookin) {
+  public void allocateNativeJavaHookin(String functionName, NativeJava nativeJavaHookin) {
     try {
       rowdyProgram.allocateIfExists(new Terminal("id", ID, functionName), new Value(nativeJavaHookin));
     } catch (ConstantReassignmentException ex) {

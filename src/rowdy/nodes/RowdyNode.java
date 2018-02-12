@@ -3,7 +3,7 @@ package rowdy.nodes;
 
 import growdy.Node;
 import growdy.Symbol;
-import rowdy.RowdyRunner;
+import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 
@@ -14,7 +14,7 @@ import rowdy.exceptions.ConstantReassignmentException;
  */
 public class RowdyNode extends Node {
   
-  protected static RowdyRunner runner;
+  protected static RowdyInstance runner;
   
   public RowdyNode(Symbol def, int lineNumber) {
     super(def, lineNumber);
@@ -24,7 +24,7 @@ public class RowdyNode extends Node {
     return execute(null);
   }
   
-  public static void initRunner(RowdyRunner runner) {
+  public static void initRunner(RowdyInstance runner) {
     RowdyNode.runner = runner;
   }
   

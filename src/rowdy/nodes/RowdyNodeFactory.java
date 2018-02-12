@@ -4,7 +4,7 @@ package rowdy.nodes;
 import growdy.Node;
 import growdy.Symbol;
 import growdy.NodeFactory;
-import rowdy.RowdyRunner;
+import rowdy.RowdyInstance;
 import rowdy.nodes.expression.*;
 import static rowdy.lang.RowdyGrammarConstants.*;
 

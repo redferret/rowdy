@@ -3,7 +3,7 @@ package rowdy.nodes.expression;
 
 import growdy.Symbol;
 import growdy.Terminal;
-import rowdy.RowdyRunner;
+import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.CONST;
