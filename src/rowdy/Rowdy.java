@@ -54,11 +54,11 @@ public class Rowdy {
     RowdyNode.initRunner(rowdyProgram);
     growdy = GRowdy.getInstance(grBuilder, factory);
     programFileName = "";
-    if (args.length == 1) {
+    if (args.length > 1) {
       verbose = args[args.length - 1].equalsIgnoreCase("-verbose");
-      if (!verbose) {
-        programFileName = args[0];
-      }
+      programFileName = args[0];
+    } else if (args.length == 1){
+      verbose = args[args.length - 1].equalsIgnoreCase("-verbose");
     }
   }
   
