@@ -1,9 +1,5 @@
 
-	native func pow(a, b)
-	native func println(string)
-	native func createMap()
-	native func put(map, key, value)
-	native func get(map, key)
+	import "core.rowdy"
 	
 	func main(max) {
 		if (isset max) == false {
@@ -16,8 +12,6 @@
 			x = y
 			y = z
 		}
-		print "pow(2, 7) = ", $pow(2, 7), "\n"
-		$println(concat "pow(2, 7) = ", $pow(2, 7))
 		map = $createMap()
 		$println(map)
 		$put(map, "key", func() {

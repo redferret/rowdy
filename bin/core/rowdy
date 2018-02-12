@@ -1,2 +1,6 @@
 
 native func pow(a, b)
+native func println(string)
+native func createMap()
+native func put(map, key, value)
+native func get(map, key)

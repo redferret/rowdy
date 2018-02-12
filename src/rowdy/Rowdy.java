@@ -3,6 +3,7 @@ package rowdy;
 
 import growdy.GRBuilder;
 import growdy.GRowdy;
+import growdy.Node;
 import growdy.Terminal;
 import growdy.exceptions.AmbiguousGrammarException;
 import java.io.IOException;
@@ -27,7 +28,9 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import static rowdy.lang.RowdyGrammarConstants.CONST;
 import static rowdy.lang.RowdyGrammarConstants.ID;
+import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -61,10 +64,18 @@ public class Rowdy {
   
   public void run() {
     if (!programFileName.isEmpty()) {
-      
+      List<Node> programTrees = new ArrayList<>();
       try {
         growdy.buildFromSource(programFileName);
         rowdyProgram.initialize(growdy);
+        loadImports(growdy.getProgram(), programTrees);
+        programTrees.forEach(tree -> {
+          try {
+            rowdyProgram.declareGlobals(tree);
+          } catch (ConstantReassignmentException ex) {
+            handleException(ex);
+          }
+        });
         rowdyProgram.declareGlobals();
         try {
           loadJarLibs("bin/");
@@ -141,6 +152,41 @@ public class Rowdy {
         }
       } while (true);
     }
+  }
+  
+  public List<String> getImports(Node root) {
+    Node currentTreeNode;
+    ArrayList<Node> children = root.getAll();
+    int currentID;
+    List<String> importPaths = new ArrayList<>();
+    for (int i = 0; i < children.size(); i++) {
+      currentTreeNode = children.get(i);
+      currentID = currentTreeNode.symbol().id();
+      switch (currentID) {
+        case IMPORTS:
+          Node imports = currentTreeNode.get(CONST, false);
+          if (imports != null) {
+            String importPath = ((Terminal) imports.symbol()).getName().replaceAll("\\.", "/").replaceAll("\"", "");
+            importPaths.add(importPath);
+          }
+      }
+    }
+    return importPaths;
+  }
+  
+  public void loadImports(Node program, List<Node> programTrees) {
+    List<String> localImports = getImports(program);
+    localImports.forEach(imprt -> {
+      String importPath = "bin/" + imprt;
+      try {
+        growdy.buildFromSource(importPath);
+        Node subProgram = growdy.getProgram();
+        programTrees.add(subProgram);
+        loadImports(subProgram, programTrees);
+      } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
+        handleException(ex);
+      }
+    });
   }
   
   public static GRBuilder getBuilder() {

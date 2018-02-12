@@ -9,8 +9,6 @@
 <!-- in the project's Project Properties dialog box.-->
 <project name="rowdy" default="test" basedir=".">
   
-  
-
   <path id="classpath.test">
     <pathelement location="${main.build.dir}"/>
     <path refid="classpath.base" />

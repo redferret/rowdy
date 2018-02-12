@@ -54,7 +54,7 @@ IMPORT			=> "import";
 
 // ********************** Program Start **************************
 
-PROGRAM(FUNC NATIVE)							=> IMPORTS DEFINITION;
+PROGRAM(FUNC NATIVE IMPORT)					 	=> IMPORTS DEFINITION;
 IMPORTS(IMPORT)  								=> IMPORT CONST IMPORTS;
 DEFINITION(FUNC NATIVE)							=> FUNCTION DEFINITION;
 
