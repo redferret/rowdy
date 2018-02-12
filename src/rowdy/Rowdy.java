@@ -59,6 +59,9 @@ public class Rowdy {
       programFileName = args[0];
     } else if (args.length == 1){
       verbose = args[args.length - 1].equalsIgnoreCase("-verbose");
+      if (!verbose) {
+        programFileName = args[0];
+      }
     }
   }
   
