@@ -41,7 +41,6 @@ ROUND			=> "round";
 LCURLY			=> "{";
 RCURLY			=> "}";
 ARRAY			=> "array";
-// TODO: Rename this to CONST
 CONST			=> "const";
 GLOBAL			=> "global";
 NATIVE			=> "native";
