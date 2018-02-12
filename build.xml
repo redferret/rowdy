@@ -14,7 +14,7 @@
     <path refid="classpath.base" />
   </path>
   
-  <target name="-post-compile">
+  <target name="-post-compile-custom">
     <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
     <copy file="../RowdyLib/dist/RowdyLib.jar" todir="${dist.dir}/bin"/>
     <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./bin"/>
