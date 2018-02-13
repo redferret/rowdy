@@ -4,8 +4,8 @@ package rowdy.nodes.expression;
 import growdy.Symbol;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.lang.RowdyGrammarConstants.TERM;
 import rowdy.nodes.RowdyNode;
+import static rowdy.lang.RowdyGrammarConstants.TERM;
 import static rowdy.lang.RowdyGrammarConstants.TERM_TAIL;
 
 /**

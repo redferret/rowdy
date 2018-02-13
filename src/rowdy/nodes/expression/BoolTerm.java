@@ -2,11 +2,11 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyInstance;
+import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
-import rowdy.nodes.RowdyNode;
+
 
 /**
  *fr = func(c) {f = (c * 1.8) + 32 return round f, 2}
