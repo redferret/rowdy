@@ -130,7 +130,8 @@ public class RowdyInstance {
       switch (currentID) {
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
-          rightValue = getValue(currentTreeNode.get(EXPRESSION));
+          Expression assignExpr = (Expression)currentTreeNode.get(EXPRESSION);
+          rightValue = assignExpr.execute();
           if (currentTreeNode.get(CONST_OPT).get(CONST, false) != null) {
             rightValue.setAsConstant(true);
           }
@@ -262,15 +263,14 @@ public class RowdyInstance {
           Scanner keys = new Scanner(System.in);
           String inValue;
           Node firstID = currentTreeNode.get(ID);
-          Terminal t = (Terminal) executeExpr(firstID, null).getValue();
+          Terminal t = (Terminal) firstID.symbol();
           allocate(t, new Value(keys.nextLine()));
           if (currentTreeNode.hasSymbols()) {
             Node paramsTail = currentTreeNode.get(PARAMS_TAIL);
             while (paramsTail.hasSymbols()) {
               currentTreeNode = paramsTail.get(ID);
-              Value v = executeExpr(currentTreeNode, null);
-              inValue = keys.nextLine();
-              allocate((Terminal) v.getValue(), new Value(inValue));
+              t = (Terminal) currentTreeNode.symbol();
+              allocate(t, new Value(keys.nextLine()));
               paramsTail = paramsTail.get(PARAMS_TAIL);
             }
           }
@@ -281,7 +281,8 @@ public class RowdyInstance {
         case RETURN_STMT:
           Function functionReturning = callStack.peek();
           seqControl.setSeqActive(false);
-          Value toSet = getValue(currentTreeNode.get(EXPRESSION));
+          Expression retrunExpr = (Expression)currentTreeNode.get(EXPRESSION);
+          Value toSet = retrunExpr.execute();
           functionReturning.setReturnValue(toSet);
           break;
         case PRINT_STMT:
@@ -343,10 +344,12 @@ public class RowdyInstance {
     List<Value> parameterValues = new ArrayList<>();
     Node expr = cur.get(EXPRESSION, false);// This might be 'main'
     if (expr != null && expr.hasSymbols()) {
-      parameterValues.add(getValue(cur.get(EXPRESSION)));
+      Expression paramValue = (Expression)cur.get(EXPRESSION);
+      parameterValues.add(paramValue.execute());
       Node atomTailNode = cur.get(EXPR_LIST);
       while (atomTailNode.hasSymbols()) {
-        parameterValues.add(getValue(atomTailNode.get(EXPRESSION)));
+        paramValue = (Expression)atomTailNode.get(EXPRESSION);
+        parameterValues.add(paramValue.execute());
         atomTailNode = atomTailNode.get(EXPR_LIST);
       }
     } else if (funcName.equals("main")){
@@ -508,17 +511,6 @@ public class RowdyInstance {
     setAsGlobal(cur.getName(), value);
   }
 
-  /**
-   *
-   * @param cur
-   * @return
-   * @throws ConstantReassignmentException
-   */
-  public boolean isset(Node cur) throws ConstantReassignmentException {
-    Value o = (Value) executeExpr(cur, null);
-    return isset(o);
-  }
-
   public Value getIdAsValue(Node id) {
     return new Value((Terminal)id.symbol());
   }
@@ -534,19 +526,6 @@ public class RowdyInstance {
     } else {
       return true;
     }
-  }
-
-  /**
-   * Performs the same task as getValue(Value) but uses a tree node to access
-   * the atom.
-   *
-   * @param cur The tree node
-   * @return A value object with an atom stored in it.
-   * @throws rowdy.exceptions.ConstantReassignmentException
-   */
-  public Value getValue(Node cur) throws ConstantReassignmentException {
-    Value value = (Value) executeExpr(cur, null);
-    return fetch(value, cur);
   }
   
   public Value fetch(Value value, Node curSeq) {
@@ -592,84 +571,6 @@ public class RowdyInstance {
       return valueFromFunction;
     }
     return null;
-  }
-  
-  /**
-   * Fetches a value from the tree by either accessing an ID, a CONST, or
-   * evaluating an expression.
-   *
-   * @param cur The current tree node being searched
-   * @param leftValue The left value of an expression
-   * @return The value of the expression
-   * @throws rowdy.exceptions.ConstantReassignmentException
-   */
-  public Value executeExpr(Node cur, Value leftValue) throws ConstantReassignmentException {
-    if (cur == null) {
-      return leftValue;
-    }
-    int curID = cur.symbol().id();
-    switch (curID) {
-      case ARITHM_EXPR:
-        return ((ArithmExpr)cur).execute();
-      case EXPRESSION:
-        Symbol symbolType = cur.getLeftMost().symbol();
-        switch (symbolType.id()) {
-          case BOOL_EXPR:
-            return ((Expression)cur).execute();
-          case ISSET_EXPR:
-            Node issetExpr = cur.get(ISSET_EXPR);
-            Value idTerm = getIdAsValue(issetExpr.get(ID));
-            Value resultBoolean = new Value(isset(idTerm));
-            return resultBoolean;
-          case CONCAT_EXPR:
-            StringBuilder concatValue = new StringBuilder();
-            Expression concatExpr = (Expression) cur.getLeftMost().get(EXPRESSION);
-            concatValue.append(concatExpr.execute(leftValue).valueToString());
-            Node atomTailNode = cur.getLeftMost().get(EXPR_LIST);
-            while (atomTailNode.hasSymbols()) {
-              concatExpr = (Expression) atomTailNode.get(EXPRESSION);
-              concatValue.append(concatExpr.execute(leftValue).valueToString());
-              atomTailNode = atomTailNode.get(EXPR_LIST);
-            }
-            return new Value(concatValue.toString());
-          case SLICE_EXPR:
-            String slice;
-            Node sliceExpr = cur.get(SLICE_EXPR);
-            slice = getValue(sliceExpr.get(EXPRESSION)).valueToString();
-            int leftBound = getValue(sliceExpr.get(ARITHM_EXPR)).valueToDouble().intValue();
-            int rightBound = getValue(sliceExpr.get(ARITHM_EXPR, 1)).valueToDouble().intValue();
-            return new Value(slice.substring(leftBound, rightBound));
-          case STRCMP_EXPR:
-            String v1,v2;
-            Node strcmpExpr = cur.get(STRCMP_EXPR);
-            v1 = getValue(strcmpExpr.get(EXPRESSION)).valueToString();
-            v2 = getValue(strcmpExpr.get(EXPRESSION, 1)).valueToString();
-            return new Value(v1.compareTo(v2));
-          case ANONYMOUS_FUNC:
-            Node anonymousFunc = cur.get(ANONYMOUS_FUNC);
-            return new Value(anonymousFunc);
-          case ROUND_EXPR:
-            Node roundExpr = cur.get(ROUND_EXPR);
-            Value idToRound = new Value((Terminal)roundExpr.get(ID).symbol());
-            Value valueToRound = fetch(idToRound, cur);
-            double roundedValue = valueToRound.valueToDouble();
-            int precision = getValue(roundExpr.get(ARITHM_EXPR)).valueToDouble().intValue();
-            double factor = 1;
-            while (precision > 0) {
-              factor *= 10;
-              precision--;
-            }
-            roundedValue = (double) Math.round(roundedValue * factor) / factor;
-            return new Value(roundedValue);
-          case ARRAY_EXPR:
-            return ((ArrayExpression)cur.getLeftMost()).execute();
-        }
-        throw new RuntimeException("Couldn't get value, "
-                + "undefined Node '" + cur.getLeftMost()+"' on line " + 
-                cur.getLine());
-      default:
-        return leftValue;
-    }
   }
 
   public void collect(List<Symbol> program) {

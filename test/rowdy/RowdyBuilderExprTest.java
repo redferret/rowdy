@@ -70,7 +70,7 @@ public class RowdyBuilderExprTest {
     
     testNodeLeftChild(factor, 
             new int[][]{{PAREN_EXPR},
-                        {ATOMIC}, {MINUS, FACTOR}, 
+                        {CAST_ATOMIC}, {MINUS, FACTOR}, 
                         {OPENPAREN, EXPRESSION, CLOSEDPAREN}});
     Node factorLeft = factorTail.getLeftMost();
     testNodeLeftChild(factorLeft, 
