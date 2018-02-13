@@ -44,8 +44,8 @@ public class RowdyNodeFactory implements NodeFactory {
         return new ArrayExpression(symbol, line);
       case ROUND_EXPR:
         return new RoundExpr(symbol, line);
-      case CAST_ATOMIC:
-        return new CastAtomic(symbol, line);
+      case EXPRESSIONS:
+        return new Expressions(symbol, line);
       default:
         return new RowdyNode(symbol, line);
     }

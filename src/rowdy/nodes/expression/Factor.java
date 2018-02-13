@@ -5,12 +5,11 @@ import growdy.Symbol;
 import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.lang.RowdyGrammarConstants.CAST_ATOMIC;
+import static rowdy.lang.RowdyGrammarConstants.ATOMIC;
 import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_MINUS;
 import static rowdy.lang.RowdyGrammarConstants.PAREN_EXPR;
-import rowdy.nodes.CastAtomic;
 
 
 /**
@@ -36,8 +35,8 @@ public class Factor extends RowdyNode {
         }
         double rightVal = factor.execute(leftValue).valueToDouble();
         return new Value(leftVal - rightVal, false);
-      case CAST_ATOMIC:
-        return ((CastAtomic)child).execute(leftValue);
+      case ATOMIC:
+        return ((Atomic)child).execute(leftValue);
       case PAREN_EXPR:
         Expression expr = (Expression) child.get(EXPRESSION);
         return expr.execute(leftValue);

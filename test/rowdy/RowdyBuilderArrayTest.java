@@ -16,26 +16,23 @@ public class RowdyBuilderArrayTest {
   
   @Test
   public void testEmptyLinearArray() {
-    String testCode = "a = array()";
-    Node stmt = getTestStatement(testCode, ASSIGN_STMT);
-    Node expr = getFromAndTestNotNull(stmt, EXPRESSION);
-    Node arrayExpr = getFromAndTestNotNull(expr, ARRAY_EXPR);
+    String testCode = "array()";
+    Node stmt = getTestStatement(testCode, ARRAY_EXPR);
     
-    getAndTestSymbol(arrayExpr, ARRAY, "array");
-    testContainsSymbols(arrayExpr, 
+    getAndTestSymbol(stmt, ARRAY, "array");
+    testContainsSymbols(stmt, 
             new int[]{ARRAY, OPENPAREN, EXPRESSION, ARRAY_BODY, CLOSEDPAREN});
   }
   
   @Test
   public void testLinearArray() {
-    String testCode = "a = array(a, b, 7)";
+    String testCode = "array(a, b, 7)";
     
-    Node stmt = getTestStatement(testCode, ASSIGN_STMT);
+    Node stmt = getTestStatement(testCode, ARRAY_EXPR);
     Node expr = getFromAndTestNotNull(stmt, EXPRESSION);
-    Node arrayExpr = getFromAndTestNotNull(expr, ARRAY_EXPR);
     
     final int[] arraySymbols = new int[]{COMMA, EXPRESSION, ARRAY_LINEAR_BODY};
-    Node arrayBody = getFromAndTestNotNull(arrayExpr, ARRAY_BODY);
+    Node arrayBody = getFromAndTestNotNull(stmt, ARRAY_BODY);
     Node arrayLinearBody = arrayBody.get(ARRAY_LINEAR_BODY);
     testContainsSymbols(arrayLinearBody, arraySymbols);
     testContainsSymbols(arrayLinearBody, arraySymbols);
@@ -43,12 +40,10 @@ public class RowdyBuilderArrayTest {
   
   @Test
   public void testKeyValueArray() {
-    String testCode = "a = array(a:0, b:1, c:3)";
+    String testCode = "array(a:0, b:1, c:3)";
     
-    Node stmt = getTestStatement(testCode, ASSIGN_STMT);
-    Node expr = getFromAndTestNotNull(stmt, EXPRESSION);
-    Node arrayExpr = getFromAndTestNotNull(expr, ARRAY_EXPR); 
-    Node arrayBody = getFromAndTestNotNull(arrayExpr, ARRAY_BODY);
+    Node stmt = getTestStatement(testCode, ARRAY_EXPR);
+    Node arrayBody = getFromAndTestNotNull(stmt, ARRAY_BODY);
     Node keyValueBody = getFromAndTestNotNull(arrayBody,ARRAY_KEY_VALUE_BODY );
     testContainsSymbols(keyValueBody, 
             new int[]{COLON, EXPRESSION, ARRAY_KEY_VALUE_BODY_TAIL});

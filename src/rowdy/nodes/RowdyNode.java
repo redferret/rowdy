@@ -36,6 +36,6 @@ public class RowdyNode extends Node {
    * @throws ConstantReassignmentException 
    */
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    return leftValue;
+    return runner.fetch(leftValue, this);
   }
 }
