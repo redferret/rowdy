@@ -554,18 +554,19 @@ public class RowdyInstance {
       return null;
     }
     if (value.getValue() instanceof Terminal) {
-      // Look in the functions first
-      Value foundValue = fetchInCallStack(value);
-      if (foundValue != null){
-        return foundValue;
-      }
-      String fetchIdName = ((Terminal) value.getValue()).getName();
-      Value val = globalSymbolTable.get(fetchIdName);
-      if (val == null) {
-        throw new RuntimeException("The ID '" + value + "' doesn't exist "
-                + "on line " + curSeq.getLine());
-      }
-      return new Value(val);
+      
+        // Look in the functions first
+        Value foundValue = fetchInCallStack(value);
+        if (foundValue != null){
+          return foundValue;
+        }
+        String fetchIdName = ((Terminal) value.getValue()).getName();
+        Value val = globalSymbolTable.get(fetchIdName);
+        if (val == null) {
+          throw new RuntimeException("The ID '" + value + "' doesn't exist "
+                  + "on line " + curSeq.getLine());
+        }
+        return new Value(val);
     } else {
       return value;
     }
