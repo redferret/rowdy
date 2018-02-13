@@ -4,12 +4,11 @@ package rowdy.nodes.expression;
 import growdy.Node;
 import growdy.Symbol;
 import java.util.ArrayList;
-import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_TERM;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
-import rowdy.nodes.RowdyNode;
 
 /**
  *
@@ -33,6 +32,6 @@ public class BoolTermTail extends RowdyNode {
     boolean bRight = boolTerm.execute(leftValue).valueToBoolean();
     BoolTermTail boolTermTail = (BoolTermTail) get(BOOL_TERM_TAIL);
     
-    return boolTermTail.execute(new Value(bLeft || bRight));
+    return boolTermTail.execute(new Value(bLeft || bRight, false));
   }
 }

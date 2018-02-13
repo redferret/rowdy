@@ -2,7 +2,6 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import growdy.Terminal;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
@@ -31,7 +30,7 @@ public class RoundExpr extends RowdyNode {
       precision--;
     }
     roundedValue = (double) Math.round(roundedValue * factor) / factor;
-    return new Value(roundedValue);
+    return new Value(roundedValue, false);
   }
   
 }

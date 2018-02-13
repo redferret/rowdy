@@ -30,9 +30,9 @@ public class TermTailTest extends TestCase {
    */
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "+ 100";
-    Value leftValue = new Value(100);
+    Value leftValue = new Value(100, false);
     TermTail instance = (TermTail) getTestStatement(testCode, TERM_TAIL);
-    Value expResult = new Value(200.0);
+    Value expResult = new Value(200.0, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

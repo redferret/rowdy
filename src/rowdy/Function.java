@@ -48,7 +48,7 @@ public class Function {
     }
     Value curValue;
     if (value == null) {
-      value = new Value(null);
+      value = new Value();
     }
     curValue = symbolTable.get(idName);
     if (curValue == null) {

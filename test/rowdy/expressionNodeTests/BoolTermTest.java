@@ -32,7 +32,7 @@ public class BoolTermTest extends TestCase {
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "(1 == 1) or (1 == 0)";
     BoolTerm instance = (BoolTerm) getTestStatement(testCode, BOOL_EXPR).get(BOOL_TERM);
-    Value expResult = new Value(true);
+    Value expResult = new Value(true, false);
     Value result = instance.execute();
     assertEquals(expResult, result);
   }

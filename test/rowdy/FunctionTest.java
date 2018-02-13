@@ -51,7 +51,7 @@ public class FunctionTest {
    */
   @Test
   public void testGetAndSetReturnValue() {
-    Value value = new Value("Return value");
+    Value value = new Value("Return value", false);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
     instance.setReturnValue(value);
     assertNotNull(instance.getReturnValue());
@@ -65,7 +65,7 @@ public class FunctionTest {
   @Test
   public void testAllocateString() throws ConstantReassignmentException {
     String idName = "someId";
-    Value value = new Value(0);
+    Value value = new Value(0, false);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
     instance.allocate(idName, value);
     Double expectedValue = 0d;
@@ -80,7 +80,7 @@ public class FunctionTest {
   @Test
   public void testAllocateValue() throws ConstantReassignmentException {
     Terminal cur = new Terminal("ID", 0, "A");
-    Value value = new Value(10);
+    Value value = new Value(10, false);
     Function instance = new Function("Function", new HashMap<>(), 100);
     instance.allocate(cur, value);
     Double expectedValue = 10d;
@@ -108,7 +108,7 @@ public class FunctionTest {
   @Test
   public void testUnset() throws ConstantReassignmentException {
     String idName = "someId";
-    Value value = new Value(0);
+    Value value = new Value(0, false);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
     instance.allocate(idName, value);
     instance.unset(idName);

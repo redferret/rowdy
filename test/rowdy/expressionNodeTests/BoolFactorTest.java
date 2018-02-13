@@ -31,7 +31,7 @@ public class BoolFactorTest extends TestCase {
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "1 + 1 > 0 + 1";
     BoolFactor instance = (BoolFactor) getTestStatement(testCode, BOOL_FACTOR);
-    Value expResult = new Value(true);
+    Value expResult = new Value(true, false);
     Value result = instance.execute();
     assertEquals(expResult, result);
   }

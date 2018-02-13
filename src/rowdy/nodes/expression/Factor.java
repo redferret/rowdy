@@ -35,7 +35,7 @@ public class Factor extends RowdyNode {
           leftVal = leftValue.valueToDouble();
         }
         double rightVal = factor.execute(leftValue).valueToDouble();
-        return new Value(leftVal - rightVal);
+        return new Value(leftVal - rightVal, false);
       case CAST_ATOMIC:
         return ((CastAtomic)child).execute(leftValue);
       case PAREN_EXPR:

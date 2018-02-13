@@ -31,6 +31,6 @@ public class BoolFactorTail extends RowdyNode {
     boolean bRight = boolFactor.execute(leftValue).valueToBoolean();
     BoolFactorTail boolFactorTail = (BoolFactorTail) get(BOOL_FACTOR_TAIL);
     
-    return boolFactorTail.execute(new Value(bLeft && bRight));
+    return boolFactorTail.execute(new Value(bLeft && bRight, false));
   }
 }

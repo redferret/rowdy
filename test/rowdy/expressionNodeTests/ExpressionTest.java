@@ -33,7 +33,7 @@ public class ExpressionTest extends TestCase {
     String testCode = "3 + 8 - 9 * 19 >= 100";
     Expression instance = (Expression) getTestStatement(testCode, EXPRESSION);
     trimEmptyChildren(instance);
-    Value expResult = new Value(false);
+    Value expResult = new Value(false, false);
     Value result = instance.execute();
     assertEquals(expResult, result);
   }

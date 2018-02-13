@@ -178,7 +178,7 @@ public class RowdyInstance {
         case FUNCTION:
           Value exitValue = executeFunc(currentTreeNode);
           if (exitValue == null){
-            exitValue = new Value(0);
+            exitValue = new Value(0, false);
           }
           System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
@@ -208,13 +208,13 @@ public class RowdyInstance {
             curFunction = callStack.peek();
             Value curValue = curFunction.getValue(idName);
             if (curValue == null) {
-              curFunction.allocate(idName, new Value(0));
+              curFunction.allocate(idName, new Value(0, false));
             } else {
               throw new RuntimeException("ID '" + idName + "' already in use "+
                       "on line " + currentTreeNode.getLine());
             }
           } else {
-            allocate(loopIdTerminal, new Value(0));
+            allocate(loopIdTerminal, new Value(0, false));
           }
           activeLoops.push(currentTreeNode);
           currentTreeNode.setSeqActive(true);
@@ -261,16 +261,15 @@ public class RowdyInstance {
           break;
         case READ_STMT:
           Scanner keys = new Scanner(System.in);
-          String inValue;
           Node firstID = currentTreeNode.get(ID);
           Terminal t = (Terminal) firstID.symbol();
-          allocate(t, new Value(keys.nextLine()));
+          allocate(t, new Value(keys.nextLine(), false));
           if (currentTreeNode.hasSymbols()) {
             Node paramsTail = currentTreeNode.get(PARAMS_TAIL);
             while (paramsTail.hasSymbols()) {
               currentTreeNode = paramsTail.get(ID);
               t = (Terminal) currentTreeNode.symbol();
-              allocate(t, new Value(keys.nextLine()));
+              allocate(t, new Value(keys.nextLine(), false));
               paramsTail = paramsTail.get(PARAMS_TAIL);
             }
           }
@@ -387,7 +386,7 @@ public class RowdyInstance {
       }
     }
     
-    if (funcVal.getValue() instanceof Node) {
+    if (funcVal.getValue() instanceof RowdyNode) {
       Node functionNode = (Node) funcVal.getValue();
       List<String> paramsList = new ArrayList<>();
       if (!parameterValues.isEmpty()) {
@@ -432,7 +431,7 @@ public class RowdyInstance {
         methodValues[i++] = val.getValue();
       }
       Object returnValue = nativeJava.execute(this, (Object[]) methodValues);
-      return returnValue == null ? new Value((Object) null) : new Value(returnValue);
+      return returnValue == null ? new Value() : new Value(returnValue, false);
     }
   }
 
@@ -512,7 +511,7 @@ public class RowdyInstance {
   }
 
   public Value getIdAsValue(Node id) {
-    return new Value((Terminal)id.symbol());
+    return new Value((Terminal)id.symbol(), false);
   }
   
   public boolean isset(Value value) {
@@ -545,7 +544,7 @@ public class RowdyInstance {
           throw new RuntimeException("The ID '" + value + "' doesn't exist "
                   + "on line " + curSeq.getLine());
         }
-        return new Value(val);
+        return new Value(val.getValue(), false);
     } else {
       return value;
     }

@@ -22,14 +22,6 @@ public class Value {
     this.value = value;
     this.isConstant = isConstant;
   }
-  
-  public Value(Value v){
-    this(v.getValue(), false);
-  }
-  
-  public Value(Object value) {
-    this(value, false);
-  }
 
   public void setAsConstant(boolean isConstant){
     this.isConstant = isConstant;

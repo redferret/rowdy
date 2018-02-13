@@ -2,14 +2,14 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyInstance;
+import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.TERM;
 import static rowdy.lang.RowdyGrammarConstants.TERM_MINUS;
 import static rowdy.lang.RowdyGrammarConstants.TERM_PLUS;
 import static rowdy.lang.RowdyGrammarConstants.TERM_TAIL;
-import rowdy.nodes.RowdyNode;
+
 
 /**
  *
@@ -33,9 +33,9 @@ public class TermTail extends RowdyNode {
     double right = term.execute(leftValue).valueToDouble();
     switch(child.symbol().id()) {
       case TERM_PLUS:
-        return termTail.execute(new Value(left + right));
+        return termTail.execute(new Value(left + right, false));
       case TERM_MINUS:
-        return termTail.execute(new Value(left - right));
+        return termTail.execute(new Value(left - right, false));
       default:
         return runner.fetch(leftValue, this);
     }

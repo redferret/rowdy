@@ -32,8 +32,8 @@ public class BoolTermTailTest extends TestCase {
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "or (1 == 0)";
     BoolTermTail instance = (BoolTermTail) getTestStatement(testCode, BOOL_TERM_TAIL);
-    Value expResult = new Value(true);
-    Value result = instance.execute(new Value(true));
+    Value expResult = new Value(true, false);
+    Value result = instance.execute(new Value(true, false));
     assertEquals(expResult, result);
   }
   

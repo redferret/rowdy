@@ -2,7 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.RowdyInstance;
+import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_EQUAL;
@@ -12,7 +12,6 @@ import static rowdy.lang.RowdyGrammarConstants.ARITHM_GREATEREQUAL;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_LESS;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_LESSEQUAL;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_NOTEQUAL;
-import rowdy.nodes.RowdyNode;
 
 /**
  *
@@ -45,17 +44,17 @@ public class RelationOpt extends RowdyNode {
     }
     switch(child.symbol().id()) {
       case ARITHM_LESS:
-        return new Value(left < right);
+        return new Value(left < right, false);
       case ARITHM_LESSEQUAL:
-        return new Value(left <= right);
+        return new Value(left <= right, false);
       case ARITHM_EQUAL:
-        return new Value(left == right);
+        return new Value(left == right, false);
       case ARITHM_GREATEREQUAL:
-        return new Value(left >= right);
+        return new Value(left >= right, false);
       case ARITHM_GREATER:
-        return new Value(left > right);
+        return new Value(left > right, false);
       case ARITHM_NOTEQUAL:
-        return new Value(left != right);
+        return new Value(left != right, false);
       default:
         return runner.fetch(leftValue, this);
     }

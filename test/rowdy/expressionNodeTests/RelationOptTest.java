@@ -31,10 +31,10 @@ public class RelationOptTest extends TestCase {
    */
   public void testExecute() throws ConstantReassignmentException {
     String testCode = ">= 100";
-    Value leftValue = new Value(1000);
+    Value leftValue = new Value(1000, false);
     RelationOpt instance = (RelationOpt) getTestStatement(testCode, RELATION_OPTION);
     trimEmptyChildren(instance);
-    Value expResult = new Value(true);
+    Value expResult = new Value(true, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

@@ -29,10 +29,10 @@ public class BoolFactorTailTest extends TestCase {
    * Test of execute method, of class BoolFactorTail.
    */
   public void testExecute() throws ConstantReassignmentException {
-    Value leftValue = new Value(true);
+    Value leftValue = new Value(true, false);
     String testCode = "and 1 == 1";
     BoolFactorTail instance = (BoolFactorTail) getTestStatement(testCode, BOOL_FACTOR_TAIL);
-    Value expResult = new Value(true);
+    Value expResult = new Value(true, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

@@ -39,7 +39,7 @@ public class ArrayExpression extends RowdyNode {
         if (firstValue != null) {
           arrayList.add(firstValue.getValue());
         }
-        return new Value(arrayList);
+        return new Value(arrayList, false);
       }
 
       HashMap<String, Object> keypairArray = new HashMap<>();
@@ -59,7 +59,7 @@ public class ArrayExpression extends RowdyNode {
         bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
         arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
       }
-      return new Value(keypairArray);
+      return new Value(keypairArray, false);
 
     } else {
       List<Object> array = new ArrayList<>();
@@ -74,7 +74,7 @@ public class ArrayExpression extends RowdyNode {
           arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
         }
       }
-      return new Value(array);
+      return new Value(array, false);
     }
   }
 

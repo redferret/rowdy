@@ -39,11 +39,11 @@ public class Atomic extends RowdyNode {
     switch(atomicType.symbol().id()) {
       case ATOMIC_ID:
         child = (RowdyNode) atomicType.get(ID);
-        value = new Value(child.symbol());
+        value = new Value(child.symbol(), false);
         break;
       case ATOMIC_CONST:
         child = (RowdyNode) atomicType.get(CONSTANT);
-        value = new Value(((Terminal) child.symbol()).getName());
+        value = new Value(((Terminal) child.symbol()).getName(), false);
         break;
       case ATOMIC_FUNC_CALL:
         child = (RowdyNode) atomicType.get(FUNC_CALL);
