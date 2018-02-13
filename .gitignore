@@ -1,4 +1,6 @@
 /nbproject/private/
-/dist/
 /build/
 rowdy\.jar
+dist/lib/hamcrest-core-1\.3\.jar
+
+dist/lib/junit-4\.12\.jar
