@@ -10,3 +10,4 @@ native func forEach(list, callback)
 
 // native func strcmp(str1, str2)
 // native func slice(str1, from, to)
+// native func type(var)
