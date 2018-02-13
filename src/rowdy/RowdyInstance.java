@@ -131,7 +131,7 @@ public class RowdyInstance {
         case ASSIGN_STMT:
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           rightValue = getValue(currentTreeNode.get(EXPRESSION));
-          if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
+          if (currentTreeNode.get(CONST_OPT).get(CONST, false) != null) {
             rightValue.setAsConstant(true);
           }
           allocate(idTerminal, rightValue);
@@ -184,7 +184,7 @@ public class RowdyInstance {
           Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
           Expression assignExpr = (Expression) currentTreeNode.get(EXPRESSION);
           rightValue = assignExpr.execute();
-          if (currentTreeNode.get(CONST_OPT).get(CONST_DEF, false) != null) {
+          if (currentTreeNode.get(CONST_OPT).get(CONST, false) != null) {
             rightValue.setAsConstant(true);
           }
           allocate(idTerminal, rightValue);
