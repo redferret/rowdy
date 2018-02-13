@@ -18,7 +18,7 @@ public class Expression extends RowdyNode {
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    RowdyNode node = (RowdyNode) getLeftMost();
+    RowdyNode node = (RowdyNode) get(BOOL_EXPR, false);
     if (node == null) {
       return runner.fetch(leftValue, this);
     }

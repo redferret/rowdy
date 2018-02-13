@@ -7,6 +7,7 @@ import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.CONST;
+import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
 import static rowdy.lang.RowdyGrammarConstants.FUNC_CALL;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import rowdy.nodes.RowdyNode;
@@ -26,7 +27,7 @@ public class Atomic extends RowdyNode {
     switch(child.symbol().id()) {
       case ID:
         return new Value(child.symbol());
-      case CONST:
+      case CONSTANT:
         return new Value(((Terminal) child.symbol()).getName());
       case FUNC_CALL:
         return runner.executeFunc(child);
