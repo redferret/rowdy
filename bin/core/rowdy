@@ -1,9 +1,12 @@
 
 native func pow(a, b)
-native func println(string)
+native func println(str)
 native func Map()
 native func List()
 native func put(map, key, value)
 native func add(list, value)
 native func get(map, key)
 native func forEach(list, callback)
+
+// native func strcmp(str1, str2)
+// native func slice(str1, from, to)

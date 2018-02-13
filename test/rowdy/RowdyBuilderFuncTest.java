@@ -44,11 +44,9 @@ public class RowdyBuilderFuncTest {
   
   @Test
   public void testAnonymousFunction() {
-    String testCode = "f = func (a, b) {}";
+    String testCode = "func (a, b) {}";
     
-    Node stmt = getTestStatement(testCode, ASSIGN_STMT);
-    Node expr = getFromAndTestNotNull(stmt, EXPRESSION);
-    Node anonFunc = getFromAndTestNotNull(expr, ANONYMOUS_FUNC);
-    testContainsSymbols(anonFunc, new int[]{FUNC, FUNCTION_BODY});
+    Node stmt = getTestStatement(testCode, ANONYMOUS_FUNC);
+    testContainsSymbols(stmt, new int[]{FUNC, FUNCTION_BODY});
   }
 }

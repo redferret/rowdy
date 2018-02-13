@@ -4,7 +4,6 @@ package rowdy.expressionNodeTests;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.Atomic;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ATOMIC;

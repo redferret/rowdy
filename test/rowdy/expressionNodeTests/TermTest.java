@@ -31,7 +31,7 @@ public class TermTest extends TestCase {
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "1000";
     Term instance = (Term) getTestStatement(testCode, TERM);
-    Double expResult = new Value(1000).valueToDouble();
+    Double expResult = new Value(1000, false).valueToDouble();
     Double result = instance.execute().valueToDouble();
     assertEquals(expResult, result);
   }

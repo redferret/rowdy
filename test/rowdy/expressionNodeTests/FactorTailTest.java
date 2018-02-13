@@ -31,10 +31,10 @@ public class FactorTailTest extends TestCase {
    */
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "* 5";
-    Value leftValue = new Value(4);
+    Value leftValue = new Value(4, false);
     FactorTail instance = (FactorTail) getTestStatement(testCode, FACTOR_TAIL);
     trimEmptyChildren(instance);
-    Value expResult = new Value(20.0);
+    Value expResult = new Value(20.0, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

@@ -35,13 +35,13 @@ public class FactorTail extends RowdyNode {
     double right = factor.execute(leftValue).valueToDouble();
     switch(child.symbol().id()) {
       case FACTOR_TAIL_MUL:
-        return factorTail.execute(new Value(left * right));
+        return factorTail.execute(new Value(left * right, false));
       case FACTOR_TAIL_DIV:
-        return factorTail.execute(new Value(left / right));
+        return factorTail.execute(new Value(left / right, false));
       case FACTOR_TAIL_MOD:
-        return factorTail.execute(new Value(left % right));
+        return factorTail.execute(new Value(left % right, false));
       case FACTOR_TAIL_POW:
-        return factorTail.execute(new Value(Math.pow(left, right)));
+        return factorTail.execute(new Value(Math.pow(left, right), false));
       default:
         return leftValue;
     }

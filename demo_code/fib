@@ -19,7 +19,8 @@
 		squareAll = func(list) {
 			sqrs = $List()
 			$forEach(list, func(item){
-				$add(sqrs, item ^ 2)
+				v = item ^ 2
+				$add(sqrs, int v)
 			})
 			return sqrs
 		}

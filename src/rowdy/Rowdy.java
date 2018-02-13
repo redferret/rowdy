@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import static rowdy.lang.RowdyGrammarConstants.CONST;
+import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
@@ -100,13 +101,13 @@ public class Rowdy {
         for (int p = 1; p < args.length; p++) {
           String in = args[p];
           if (Character.isDigit(in.charAt(0))) {
-            programParameters.add(new Value(Double.parseDouble(args[p])));
+            programParameters.add(new Value(Double.parseDouble(args[p]), false));
           } else {
             String argStr = args[p];
             if (argStr.equals("true") || argStr.equals("false")) {
-              programParameters.add(new Value(Boolean.valueOf(argStr)));
+              programParameters.add(new Value(Boolean.valueOf(argStr), false));
             } else {
-              programParameters.add(new Value(args[p]));
+              programParameters.add(new Value(args[p], false));
             }
           }
         }
@@ -167,7 +168,7 @@ public class Rowdy {
       currentID = currentTreeNode.symbol().id();
       switch (currentID) {
         case IMPORTS:
-          Node imports = currentTreeNode.get(CONST, false);
+          Node imports = currentTreeNode.get(CONSTANT, false);
           if (imports != null) {
             String importPath = ((Terminal) imports.symbol()).getName().replaceAll("\\.", "/").replaceAll("\"", "");
             importPaths.add(importPath);
@@ -219,7 +220,7 @@ public class Rowdy {
 
   public void allocateNativeJavaHookin(String functionName, NativeJava nativeJavaHookin) {
     try {
-      rowdyProgram.allocateIfExists(new Terminal("id", ID, functionName), new Value(nativeJavaHookin));
+      rowdyProgram.allocateIfExists(new Terminal("id", ID, functionName), new Value(nativeJavaHookin, false));
     } catch (ConstantReassignmentException ex) {
       handleException(ex);
     }

@@ -31,7 +31,7 @@ public class ArithmExprTest extends TestCase {
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "5 + 9 - 8";
     ArithmExpr instance = (ArithmExpr) getTestStatement(testCode, ARITHM_EXPR);
-    Value expResult = new Value(6.0);
+    Value expResult = new Value(6.0, false);
     Value result = instance.execute();
     assertEquals(expResult, result);
   }

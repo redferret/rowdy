@@ -27,12 +27,12 @@ public class RowdyBuilderExprTest {
   
   @Test
   public void testExpression() {
-    testExpressionTree(testCode, ASSIGN_STMT);
+    testExpressionTree(testCode, EXPRESSION);
   }
   
   public void testExpressionTree(String testCode, int parentId) {
     Node stmt = getTestStatement(testCode, parentId);
-    Node expr = getAndTestSymbol(stmt, EXPRESSION, "expression").get(BOOL_EXPR);
+    Node expr = getAndTestSymbol(stmt, EXPRESSIONS, "expressions").get(BOOL_EXPR);
     
     Node boolTerm = getAndTestSymbol(expr, BOOL_TERM, "bool-term");
     Node boolTermTail = getAndTestSymbol(expr, BOOL_TERM_TAIL, "bool-term-tail");
@@ -104,22 +104,22 @@ public class RowdyBuilderExprTest {
   @Parameterized.Parameters
   public static List<Object[]> data() {
     List<Object[]> list = new ArrayList<>();
-    list.add(new Object[]{"e= a + b"});
-    list.add(new Object[]{"e= 5 * 6"});
-    list.add(new Object[]{"e= 5 / 6"});
-    list.add(new Object[]{"e= 5 % 6"});
-    list.add(new Object[]{"e= 5 ^ -6"});
-    list.add(new Object[]{"e= a *$a() + $b()"});
-    list.add(new Object[]{"e= a or b"});
-    list.add(new Object[]{"e= a < b"});
-    list.add(new Object[]{"e= a > b"});
-    list.add(new Object[]{"e= a <= b"});
-    list.add(new Object[]{"e= a >= b"});
-    list.add(new Object[]{"e= a == b"});
-    list.add(new Object[]{"e= a != ((a or b and c) != false)"});
-    list.add(new Object[]{"e= a or c and b"});
-    list.add(new Object[]{"e= $a() or b"});
-    list.add(new Object[]{"e= (a / (b))"});
+    list.add(new Object[]{"a + b"});
+    list.add(new Object[]{"5 * 6"});
+    list.add(new Object[]{"5 / 6"});
+    list.add(new Object[]{"5 % 6"});
+    list.add(new Object[]{"5 ^ -6"});
+    list.add(new Object[]{"a *$a() + $b()"});
+    list.add(new Object[]{"a or b"});
+    list.add(new Object[]{"a < b"});
+    list.add(new Object[]{"a > b"});
+    list.add(new Object[]{"a <= b"});
+    list.add(new Object[]{"a >= b"});
+    list.add(new Object[]{"a == b"});
+    list.add(new Object[]{"a != ((a or b and c) != false)"});
+    list.add(new Object[]{"a or c and b"});
+    list.add(new Object[]{"$a() or b"});
+    list.add(new Object[]{"(a / (b))"});
     return list;
   }
 }

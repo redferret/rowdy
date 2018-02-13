@@ -37,7 +37,7 @@ public class RowdyBuilderStmtTest {
     assignStmt = getTestStatement(testCode, ASSIGN_STMT);
     Node constOpt = getFromAndTestNotNull(assignStmt, CONST_OPT);
     assertFalse(constOpt.getAll().isEmpty());
-    getAndTestSymbol(constOpt, CONST_DEF, "const");
+    getAndTestSymbol(constOpt, CONST, "const");
     
   }
   
