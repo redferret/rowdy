@@ -34,9 +34,9 @@ public class Expressions extends RowdyNode {
         return resultBoolean;
       case CONCAT_EXPR:
         StringBuilder concatValue = new StringBuilder();
-        Expression concatExpr = (Expression) node.getLeftMost().get(EXPRESSION);
+        Expression concatExpr = (Expression) node.get(EXPRESSION);
         concatValue.append(concatExpr.execute(leftValue).valueToString());
-        Node atomTailNode = node.getLeftMost().get(EXPR_LIST);
+        Node atomTailNode = node.get(EXPR_LIST);
         while (atomTailNode.hasSymbols()) {
           concatExpr = (Expression) atomTailNode.get(EXPRESSION);
           concatValue.append(concatExpr.execute(leftValue).valueToString());

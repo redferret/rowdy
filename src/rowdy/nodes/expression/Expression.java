@@ -19,8 +19,10 @@ public class Expression extends RowdyNode {
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    Expressions exprs = (Expressions) get(EXPRESSIONS);
-    
+    Expressions exprs = (Expressions) get(EXPRESSIONS, false);
+    if (exprs == null) {
+      return runner.fetch(leftValue, this);
+    }
     RowdyNode castAs = (RowdyNode) get(CAST_AS);
     Value castValue = runner.fetch(exprs.execute(), this); 
     RowdyNode castOpt = (RowdyNode) castAs.get(CAST_OPT, false); 

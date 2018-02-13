@@ -1,45 +1,41 @@
 
+	import "core.rowdy"
+
 	func main() {
 		a1 = array(0, 1, 2, array("A","B", array(100, 500), 90),4,5)
 		print a1, "\n"
 		
-		$printAll(a1, 6)
+		$printAll(a1)
 		
 		a2 = array(1:2, 10:6, "KEY":55)
 		print a2, "\n"
-		print get(a2, "KEY"), "\n"
+		print $get(a2, "KEY"), "\n"
 		
 		functions = array(
-			func () {
-				print "First Function\n"
+			func (msg) {
+				print msg, " - First Function\n"
 			},
 			func () {
-				print "Second Function\n"
-			},
+				$println("Second Function")
+			}
 		)
-		$executeAll(functions, 2)
+		$executeAll(functions)
 		
-		print (concat get(array("first", "second"), 0), "\n")
+		$println($get(array("first", "second"), 0))
+		a = array(0,0,0,0,0,0,0,0,0)
+		$println(concat "Counting array A = ", a)
+		$println(concat "The size of array A is ", $size(a) as int, " - ", $size(a) == 9)
 	}
 	
-	func executeAll(functions, length) {
-		loop i: {
-			function = get(functions, i)
-			$function()
-			i = i + 1
-			if (i == length) {
-				break
-			}
-		}
+	func executeAll(functions) {
+		$forEach(functions, func(function) {
+			$function("Calling")
+		})
 	}
 	
-	func printAll(arr, length) {
-		loop a: {
-			print get(arr, a), ", "
-			a = a+1
-			if (a >= (length - 1)) {
-				break a
-			}
-		}
-		print get(arr, length - 1), "\n"
+	func printAll(arr) {
+		$forEach(arr, func(e) {
+			print e, ", "
+		})
+		print $get(arr, $size(arr) - 1 as int), "\n"
 	}
