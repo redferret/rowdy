@@ -286,7 +286,8 @@ public class RowdyInstance {
           break;
         case PRINT_STMT:
           StringBuilder printValue = new StringBuilder();
-          Value printVal = getValue(currentTreeNode.get(EXPRESSION));
+          Expression printValExpr = (Expression) currentTreeNode.get(EXPRESSION);
+          Value printVal = printValExpr.execute();
           if (printVal == null) {
             printValue.append("null");
           } else {
@@ -294,7 +295,8 @@ public class RowdyInstance {
           }
           Node atomTailNode = currentTreeNode.get(EXPR_LIST);
           while (atomTailNode.hasSymbols()) {
-            printVal = getValue(atomTailNode.get(EXPRESSION));
+            printValExpr = (Expression) atomTailNode.get(EXPRESSION);
+            printVal = printValExpr.execute();
             if (printVal == null) {
               printValue.append("null");
             } else {
