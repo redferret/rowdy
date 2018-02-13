@@ -21,7 +21,7 @@
 					qty = qty + 1
 					change = round change, 2
 				} else {
-					return qty
+					return qty as int
 				}
 			}
 		}
