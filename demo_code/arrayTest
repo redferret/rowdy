@@ -1,41 +1,69 @@
 
 	import "core.rowdy"
-
-	func main() {
-		a1 = array(0, 1, 2, array("A","B", array(100, 500), 90),4,5)
-		print a1, "\n"
+	
+	func main(max) {
+		if (isset max) == false {
+			max = 1000
+		}
+		y = 1
+		loop x: { if x >= max {break}
+			print x as int, "\n"
+			z = x + y
+			x = y
+			y = z
+		}
 		
-		$printAll(a1)
+		$println("Squaring the following list")
+		list = array(7, 5, 3, 8)
+		print list, "\n"
 		
-		a2 = array(1:2, 10:6, "KEY":55)
-		print a2, "\n"
-		print $get(a2, "KEY"), "\n"
+		squareAll = func(list) {
+			sqrs = $List()
+			$forEach(list, func(item){
+				$add(sqrs, item ^ 2 as int)
+			})
+			return sqrs
+		}
+		sqrs = $squareAll(list)
+		$println(sqrs)
 		
-		functions = array(
-			func (msg) {
-				print msg, " - First Function\n"
-			},
-			func () {
-				$println("Second Function")
+		$println("Squaring the following list, the even numbers only")
+		list = array(1, 2, 3, 4, 5, 6, 7, 8)
+		$println(list)
+		
+		squareEven = func(list) {
+			sqrs = $List()
+			$forEach(list, func(item){
+				if (item % 2 == 0) {
+					$add(sqrs, item ^ 2 as int)
+				} else {
+					$add(sqrs, item as int)
+				}
+			})
+			return sqrs
+		}
+		
+		sqrs = $squareEven(list)
+		$println(sqrs)
+		
+	}
+	
+	func squareEven2(list) {
+		sqrs = $List()
+		$forEach(list, func(item){
+			if (item % 2 == 0) {
+				$add(sqrs, item ^ 2 as int)
+			} else {
+				$add(sqrs, item as int)
 			}
-		)
-		$executeAll(functions)
-		
-		$println($get(array("first", "second"), 0))
-		a = array(0,0,0,0,0,0,0,0,0)
-		$println(concat "Counting array A = ", a)
-		$println(concat "The size of array A is ", $size(a) as int, " - ", $size(a) == 9)
-	}
-	
-	func executeAll(functions) {
-		$forEach(functions, func(function) {
-			$function("Calling")
 		})
+		return sqrs
 	}
-	
-	func printAll(arr) {
-		$forEach(arr, func(e) {
-			print e, ", "
+
+	func squareAll2(list) {
+		sqrs = $List()
+		$forEach(list, func(item){
+			$add(sqrs, item ^ 2 as int)
 		})
-		print $get(arr, $size(arr) - 1 as int), "\n"
+		return sqrs
 	}
