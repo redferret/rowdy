@@ -7,3 +7,4 @@ dist/lib/junit-4\.12\.jar
 /src/
 /test/
 /travis-ci/
+/bin/
