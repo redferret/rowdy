@@ -34,7 +34,33 @@ public class Atomic extends RowdyNode {
         break;
       case ATOMIC_CONST:
         child = (RowdyNode) atomicType.get(CONSTANT);
-        value = new Value(((Terminal) child.symbol()).getName(), false);
+        Terminal atomicTerminal = ((Terminal) child.symbol());
+        String val = atomicTerminal.getName();
+        int len = val.length();
+        Object newValue;
+        if (val.contains("\"")){
+          newValue = val.replaceAll("\"", "");
+        } else if (val.contains(".") || val.charAt(len-1) == 'd' || val.charAt(len-1) == 'D'){
+          try {
+            newValue = Double.parseDouble(val);
+          }catch (NumberFormatException e){
+            newValue = val;
+          }
+        } else if (val.charAt(len-1) == 'l' || val.charAt(len-1) == 'L') {
+          try {
+            String sub = val.substring(0, len-1);
+            newValue = Long.parseLong(sub);
+          }catch (NumberFormatException e){
+            newValue = val;
+          }
+        } else {
+          try {
+            newValue = Integer.parseInt(val);
+          } catch(NumberFormatException e){
+            newValue = val;
+          }
+        }
+        value = new Value(newValue, false);
         break;
       case ATOMIC_FUNC_CALL:
         child = (RowdyNode) atomicType.get(FUNC_CALL);

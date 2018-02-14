@@ -33,7 +33,7 @@
 		
 		squareEven = func(list) {
 			sqrs = $List()
-			$forEach(list, func(item){
+			$RforEach(list, func(item){
 				if (item % 2 == 0) {
 					$add(sqrs, item ^ 2 as int)
 				} else {
@@ -46,6 +46,13 @@
 		sqrs = $squareEven(list)
 		$println(sqrs)
 		
+	}
+	
+	func RforEach(list, f) {
+		loop x: { if x == $size(list){break}
+			$f($get(list, x as int))
+			x = x + 1
+		}
 	}
 	
 	func squareEven2(list) {
