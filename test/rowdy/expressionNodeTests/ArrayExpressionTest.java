@@ -1,13 +1,11 @@
  
 package rowdy.expressionNodeTests;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.ArrayExpression;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ARRAY_EXPR;
@@ -38,7 +36,7 @@ public class ArrayExpressionTest extends TestCase {
     List<Object> result = (List<Object>) instance.execute().getValue();
     
     for (int i = 0; i < 3; i++) {
-      assertEquals(((Integer)expResult.get(i)).toString(), (String)result.get(i));
+      assertEquals(((Integer)expResult.get(i)), result.get(i));
     }
   }
   
