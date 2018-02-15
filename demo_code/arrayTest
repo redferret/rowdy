@@ -27,13 +27,13 @@
 		sqrs = $squareAll(list)
 		$println(sqrs)
 		
-		$println("Squaring the following list, the even numbers only")
+		$println("Squaring the even numbers only")
 		list = array(1, 2, 3, 4, 5, 6, 7, 8)
 		$println(list)
 		
 		squareEven = func(list) {
 			sqrs = $List()
-			$RforEach(list, func(item){
+			$forEachOn(list, func(item){
 				if (item % 2 == 0) {
 					$add(sqrs, item ^ 2 as int)
 				} else {
@@ -46,13 +46,6 @@
 		sqrs = $squareEven(list)
 		$println(sqrs)
 		
-	}
-	
-	func RforEach(list, f) {
-		loop x: { if x == $size(list){break}
-			$f($get(list, x as int))
-			x = x + 1
-		}
 	}
 	
 	func squareEven2(list) {

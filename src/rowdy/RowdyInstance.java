@@ -429,6 +429,9 @@ public class RowdyInstance {
       Object[] methodValues = new Object[values.length];
       int i = 0;
       for (Value val : parameterValues) {
+        if (val == null){
+          val = new Value();
+        }
         methodValues[i++] = val.getValue();
       }
       Object returnValue = nativeJava.execute(this, (Object[]) methodValues);

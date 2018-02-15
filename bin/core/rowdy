@@ -5,7 +5,7 @@ native func Map()
 native func List()
 native func put(map, key, value)
 native func add(list, value)
-native func get(map, key)
+native func get(collection, index)
 native func forEach(list, callback)
 native func size(collection)
 native func strcmp(str1, str2)
@@ -15,3 +15,18 @@ native func sin(a)
 native func tan(a)
 native func rand()
 // native func type(var)
+
+
+// Non Native functions
+
+func forEachOn(list, f) {
+	loop x: {
+		elem = $get(list, x as int)
+		breakOut = $f($get(list, x as int))
+		x = x + 1
+		if x == $size(list) or breakOut {break}
+	}
+	if breakOut {
+		return elem
+	}
+}
