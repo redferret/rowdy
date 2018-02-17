@@ -70,6 +70,7 @@ public class Rowdy {
       try {
         growdy.buildFromSource(programFileName);
         rowdyProgram.initialize(growdy);
+        rowdyProgram.declareGlobals();
         loadImports(growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
@@ -78,7 +79,6 @@ public class Rowdy {
             handleException(ex);
           }
         });
-        rowdyProgram.declareGlobals();
         try {
           loadJarLibs("bin/");
         } catch (IOException | ClassNotFoundException | URISyntaxException | 
