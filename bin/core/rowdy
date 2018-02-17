@@ -22,7 +22,7 @@ native func rand()
 func forEachOn(list, f) {
 	loop x: {
 		elem = $get(list, x as int)
-		breakOut = $f($get(list, x as int))
+		breakOut = $f(elem)
 		x = x + 1
 		if x == $size(list) or breakOut {break}
 	}

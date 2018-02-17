@@ -1,8 +1,8 @@
 
 import "core.rowdy"
-
+// forEach is significantly faster then forEachOn
 func main() {
-	$println("Generating Random List of Numbers")
+	$println("Generating Random List of Numbers...")
 	list = $getRandomList(500000)
 	
 	getOdds = func(list) {
@@ -14,7 +14,7 @@ func main() {
 		})
 		return odds
 	}
-	$println("Getting Odd Numbers")
+	$println("Getting Odd Numbers...")
 	odds = $getOdds(list)
 	$println(concat "Size of odds list = ", $size(odds))
 }
