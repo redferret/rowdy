@@ -1,5 +1,5 @@
 
-package rowdy.expressionNodeTests;
+package rowdy.nodes.expressions;
 
 import junit.framework.TestCase;
 import rowdy.exceptions.ConstantReassignmentException;

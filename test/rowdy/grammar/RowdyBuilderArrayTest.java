@@ -1,10 +1,8 @@
 
-package rowdy;
+package rowdy.grammar;
 
 import growdy.Node;
-
 import org.junit.Test;
-import static org.junit.Assert.*;
 import static rowdy.testlang.lang.RowdyGrammarConstants.*;
 import static growdy.testUtils.TestUtils.*;
 import static rowdy.testutils.TestUtils.getTestStatement;

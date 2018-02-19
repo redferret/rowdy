@@ -1,5 +1,5 @@
 
-package rowdy;
+package rowdy.grammar;
 
 import growdy.Terminal;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import rowdy.Function;
+import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static org.junit.Assert.*;
 /**

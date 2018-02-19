@@ -1,5 +1,5 @@
 
-package rowdy;
+package rowdy.grammar;
 
 import org.junit.Test;
 import growdy.Node;
