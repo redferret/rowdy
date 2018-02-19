@@ -1,39 +1,39 @@
  
-package rowdy.expressionNodeTests;
+package rowdy.nodes.expressions;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.BoolTermTail;
+import rowdy.nodes.expression.BoolTerm;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_EXPR;
-import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
+import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_TERM;
 import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
  * @author Richard
  */
-public class BoolTermTailTest extends TestCase {
+public class BoolTermTest extends TestCase {
   
-  public BoolTermTailTest(String testName) {
+  public BoolTermTest(String testName) {
     super(testName);
   }
 
   public static Test suite() {
-    TestSuite suite = new TestSuite(BoolTermTailTest.class);
+    TestSuite suite = new TestSuite(BoolTermTest.class);
     return suite;
   }
 
   /**
-   * Test of execute method, of class BoolTermTail.
+   * Test of execute method, of class BoolTerm.
    */
   public void testExecute() throws ConstantReassignmentException {
-    String testCode = "or (1 == 0)";
-    BoolTermTail instance = (BoolTermTail) getTestStatement(testCode, BOOL_TERM_TAIL);
+    String testCode = "(1 == 1) or (1 == 0)";
+    BoolTerm instance = (BoolTerm) getTestStatement(testCode, BOOL_EXPR).get(BOOL_TERM);
     Value expResult = new Value(true, false);
-    Value result = instance.execute(new Value(true, false));
+    Value result = instance.execute();
     assertEquals(expResult, result);
   }
   

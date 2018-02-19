@@ -1,5 +1,5 @@
  
-package rowdy.expressionNodeTests;
+package rowdy.nodes.expressions;
 
 import java.util.Arrays;
 import java.util.List;

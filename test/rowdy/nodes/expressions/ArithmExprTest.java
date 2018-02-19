@@ -1,37 +1,37 @@
  
-package rowdy.expressionNodeTests;
+package rowdy.nodes.expressions;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.BoolFactor;
-import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_FACTOR;
+import rowdy.nodes.expression.ArithmExpr;
+import static rowdy.testlang.lang.RowdyGrammarConstants.ARITHM_EXPR;
 import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
  * @author Richard
  */
-public class BoolFactorTest extends TestCase {
+public class ArithmExprTest extends TestCase {
   
-  public BoolFactorTest(String testName) {
+  public ArithmExprTest(String testName) {
     super(testName);
   }
 
   public static Test suite() {
-    TestSuite suite = new TestSuite(BoolFactorTest.class);
+    TestSuite suite = new TestSuite(ArithmExprTest.class);
     return suite;
   }
 
   /**
-   * Test of execute method, of class BoolFactor.
+   * Test of execute method, of class ArithmExpr.
    */
   public void testExecute() throws ConstantReassignmentException {
-    String testCode = "1 + 1 > 0 + 1";
-    BoolFactor instance = (BoolFactor) getTestStatement(testCode, BOOL_FACTOR);
-    Value expResult = new Value(true, false);
+    String testCode = "5 + 9 - 8";
+    ArithmExpr instance = (ArithmExpr) getTestStatement(testCode, ARITHM_EXPR);
+    Value expResult = new Value(6.0, false);
     Value result = instance.execute();
     assertEquals(expResult, result);
   }
