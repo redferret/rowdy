@@ -19,7 +19,7 @@ public class FactorMinus extends RowdyNode {
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
     Factor factor = (Factor) get(FACTOR);
-    leftValue = runner.fetch(leftValue, this);
+    leftValue = instance.fetch(leftValue, this);
     double leftVal = leftValue.valueToDouble();
     double rightVal = factor.execute(leftValue).valueToDouble();
     return factor.execute(new Value(leftVal - rightVal, false));

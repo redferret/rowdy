@@ -24,11 +24,11 @@ public class TermTail extends RowdyNode {
   public Value execute(Value leftValue) throws ConstantReassignmentException {
     RowdyNode child = (RowdyNode) getLeftMost();
     if (child == null) {
-      return runner.fetch(leftValue, child);
+      return instance.fetch(leftValue, child);
     }
     Term term = (Term) child.get(TERM);
     TermTail termTail = (TermTail) child.get(TERM_TAIL);
-    leftValue = runner.fetch(leftValue, child);
+    leftValue = instance.fetch(leftValue, child);
     double left = leftValue.valueToDouble();
     double right = term.execute(leftValue).valueToDouble();
     switch(child.symbol().id()) {
@@ -37,7 +37,7 @@ public class TermTail extends RowdyNode {
       case TERM_MINUS:
         return termTail.execute(new Value(left - right, false));
       default:
-        return runner.fetch(leftValue, this);
+        return instance.fetch(leftValue, this);
     }
     
   }

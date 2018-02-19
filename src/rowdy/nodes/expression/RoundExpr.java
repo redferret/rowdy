@@ -20,7 +20,7 @@ public class RoundExpr extends RowdyNode {
 
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    Value valueToRound = runner.fetch(runner.getIdAsValue(get(ID)), this);
+    Value valueToRound = instance.fetch(instance.getIdAsValue(get(ID)), this);
     double roundedValue = valueToRound.valueToDouble();
     ArithmExpr arithmExpr = (ArithmExpr) get(ARITHM_EXPR);
     int precision = arithmExpr.execute().valueToDouble().intValue();

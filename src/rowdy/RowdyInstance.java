@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
+import rowdy.nodes.statement.AssignStatement;
 
 
 
@@ -183,13 +184,8 @@ public class RowdyInstance {
           }
           System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
-          Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
-          Expression assignExpr = (Expression) currentTreeNode.get(EXPRESSION);
-          rightValue = assignExpr.execute();
-          if (currentTreeNode.get(CONST_OPT).get(CONST, false) != null) {
-            rightValue.setAsConstant(true);
-          }
-          allocate(idTerminal, rightValue);
+          AssignStatement assignStmt = (AssignStatement) currentTreeNode;
+          assignStmt.execute(null);
           break;
         case IF_STMT:
           Expression ifExpr = (Expression) currentTreeNode.get(EXPRESSION);

@@ -64,7 +64,7 @@ public class Atomic extends RowdyNode {
         break;
       case ATOMIC_FUNC_CALL:
         child = (RowdyNode) atomicType.get(FUNC_CALL);
-        value = runner.executeFunc(child);
+        value = instance.executeFunc(child);
         break;
     }
     return value;

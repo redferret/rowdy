@@ -28,7 +28,7 @@ public class Factor extends RowdyNode {
     switch(child.symbol().id()) {
       case FACTOR_MINUS:
         Factor factor = (Factor) child.get(FACTOR);
-        leftValue = runner.fetch(leftValue, child);
+        leftValue = instance.fetch(leftValue, child);
         double leftVal = 0;
         if (leftValue != null) {
           leftVal = leftValue.valueToDouble();
