@@ -5,10 +5,10 @@ func main() {
 	
 	total = (36 * $rand()) as int
 	
-	prompt = func(msg1, msg2) {
-		$println(concat msg1, total)
-		if (total == 0){
-			$println(msg2)
+	prompt = func(informMessage, winMessage) {
+		$println(concat informMessage, total as int)
+		if (total <= 0){
+			$println(winMessage)
 			return true
 		} else {
 			return false

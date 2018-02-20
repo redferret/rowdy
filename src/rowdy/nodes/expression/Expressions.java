@@ -29,8 +29,8 @@ public class Expressions extends RowdyNode {
       case ARRAY_EXPR:
         return ((ArrayExpression)node).execute();
       case ISSET_EXPR:
-        Value idTerm = runner.getIdAsValue(node.get(ID));
-        Value resultBoolean = new Value(runner.isset(idTerm), false);
+        Value idTerm = instance.getIdAsValue(node.get(ID));
+        Value resultBoolean = new Value(instance.isset(idTerm), false);
         return resultBoolean;
       case CONCAT_EXPR:
         StringBuilder concatValue = new StringBuilder();
@@ -46,7 +46,7 @@ public class Expressions extends RowdyNode {
       case ANONYMOUS_FUNC:
         return new Value(node, false);
       case ROUND_EXPR:
-        Value valueToRound = runner.fetch(runner.getIdAsValue(node.get(ID)), node);
+        Value valueToRound = instance.fetch(instance.getIdAsValue(node.get(ID)), node);
         double roundedValue = valueToRound.valueToDouble();
         ArithmExpr arithmExpr = (ArithmExpr) node.get(ARITHM_EXPR);
         int precision = arithmExpr.execute().valueToDouble().intValue();
@@ -58,7 +58,7 @@ public class Expressions extends RowdyNode {
         roundedValue = (double) Math.round(roundedValue * factor) / factor;
         return new Value(roundedValue, false);
       default:
-        return runner.fetch(leftValue, this);
+        return instance.fetch(leftValue, this);
     }
   }
 }

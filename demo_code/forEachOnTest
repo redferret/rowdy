@@ -1,0 +1,30 @@
+
+import "core.rowdy"
+// forEach is significantly faster then forEachOn
+func main() {
+	$println("Generating Random List of Numbers...")
+	list = $getRandomList(500000)
+	
+	getOdds = func(list) {
+		odds = $List()
+		$forEach(list, func(elem) {
+			if elem % 2 != 0 {
+				$add(odds, elem)
+			}
+		})
+		return odds
+	}
+	$println("Getting Odd Numbers...")
+	odds = $getOdds(list)
+	$println(concat "Size of odds list = ", $size(odds))
+}
+
+func getRandomList(count) {
+	rands = $List()
+	loop x: {
+		$add(rands, ($rand() * 100) as int)
+		if (x > count) {break}
+		x = x + 1
+	}
+	return rands
+}

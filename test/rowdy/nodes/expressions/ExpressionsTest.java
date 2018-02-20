@@ -1,8 +1,9 @@
 
-package rowdy.nodes.expression;
+package rowdy.nodes.expressions;
 
 import junit.framework.TestCase;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.expression.Expressions;
 import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSIONS;
 import static rowdy.testutils.TestUtils.getTestStatement;
 

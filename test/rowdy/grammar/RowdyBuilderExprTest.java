@@ -1,8 +1,7 @@
 
-package rowdy;
+package rowdy.grammar;
 
 import growdy.Node;
-import static growdy.testUtils.TestUtils.getAndTestSymbol;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -11,7 +10,7 @@ import org.junit.runners.Parameterized;
 import static org.junit.Assert.*;
 import static rowdy.testlang.lang.RowdyGrammarConstants.*;
 import static rowdy.testutils.TestUtils.getTestStatement;
-
+import static growdy.testUtils.TestUtils.getAndTestSymbol;
 /**
  * Allows to test all forms of an expression tree.
  * @author Richard

@@ -26,11 +26,11 @@ public class FactorTail extends RowdyNode {
   public Value execute(Value leftValue) throws ConstantReassignmentException {
     RowdyNode child = (RowdyNode) getLeftMost();
     if (child == null) {
-      return runner.fetch(leftValue, this);
+      return instance.fetch(leftValue, this);
     }
     Factor factor = (Factor) child.get(FACTOR);
     FactorTail factorTail = (FactorTail) child.get(FACTOR_TAIL);
-    leftValue = runner.fetch(leftValue, factor);
+    leftValue = instance.fetch(leftValue, factor);
     double left = leftValue.valueToDouble();
     double right = factor.execute(leftValue).valueToDouble();
     switch(child.symbol().id()) {

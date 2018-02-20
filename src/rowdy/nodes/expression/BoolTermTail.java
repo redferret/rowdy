@@ -24,9 +24,9 @@ public class BoolTermTail extends RowdyNode {
   public Value execute(Value leftValue) throws ConstantReassignmentException {
     ArrayList<Node> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
-      return runner.fetch(leftValue, this);
+      return instance.fetch(leftValue, this);
     }
-    leftValue = runner.fetch(leftValue, this);
+    leftValue = instance.fetch(leftValue, this);
     boolean bLeft = leftValue.valueToBoolean();
     BoolTerm boolTerm = (BoolTerm) get(BOOL_TERM);
     boolean bRight = boolTerm.execute(leftValue).valueToBoolean();

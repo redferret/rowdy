@@ -14,7 +14,7 @@ import rowdy.exceptions.ConstantReassignmentException;
  */
 public class RowdyNode extends Node {
   
-  protected static RowdyInstance runner;
+  protected static RowdyInstance instance;
   
   public RowdyNode(Symbol def, int lineNumber) {
     super(def, lineNumber);
@@ -25,7 +25,7 @@ public class RowdyNode extends Node {
   }
   
   public static void initRunner(RowdyInstance runner) {
-    RowdyNode.runner = runner;
+    RowdyNode.instance = runner;
   }
   
   /**
@@ -36,6 +36,6 @@ public class RowdyNode extends Node {
    * @throws ConstantReassignmentException 
    */
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    return runner.fetch(leftValue, this);
+    return instance.fetch(leftValue, this);
   }
 }

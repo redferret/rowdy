@@ -5,6 +5,7 @@ import growdy.Node;
 import growdy.Symbol;
 import growdy.NodeFactory;
 import rowdy.nodes.expression.*;
+import rowdy.nodes.statement.*;
 import static rowdy.lang.RowdyGrammarConstants.*;
 
 /**
@@ -46,6 +47,20 @@ public class RowdyNodeFactory implements NodeFactory {
         return new RoundExpr(symbol, line);
       case EXPRESSIONS:
         return new Expressions(symbol, line);
+      case ASSIGN_STMT:
+        return new AssignStatement(symbol, line);
+      case IF_STMT:
+        return new IfStatement(symbol, line);
+      case BREAK_STMT:
+        return new BreakStatement(symbol, line);
+      case READ_STMT:
+        return new ReadStatement(symbol, line);
+      case RETURN_STMT:
+        return new ReturnStatement(symbol, line);
+      case PRINT_STMT:
+        return new PrintStatement(symbol, line);
+      case LOOP_STMT:
+        return new LoopStatement(symbol, line);
       default:
         return new RowdyNode(symbol, line);
     }

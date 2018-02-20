@@ -1,5 +1,5 @@
 
-package rowdy.expressionNodeTests;
+package rowdy.nodes.expressions;
 
 import growdy.Terminal;
 import junit.framework.Test;

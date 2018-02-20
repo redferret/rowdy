@@ -26,10 +26,10 @@ public class RelationOpt extends RowdyNode {
   public Value execute(Value leftValue) throws ConstantReassignmentException {
     RowdyNode child = (RowdyNode) getLeftMost();
     if (child == null) {
-      return runner.fetch(leftValue, this);
+      return instance.fetch(leftValue, this);
     }
     ArithmExpr arithmExpr = (ArithmExpr) child.get(ARITHM_EXPR);
-    leftValue = runner.fetch(leftValue, this);
+    leftValue = instance.fetch(leftValue, this);
     Value rightValue = arithmExpr.execute(leftValue);
     double left, right;
     if (leftValue.getValue() instanceof Boolean) {
@@ -56,7 +56,7 @@ public class RelationOpt extends RowdyNode {
       case ARITHM_NOTEQUAL:
         return new Value(left != right, false);
       default:
-        return runner.fetch(leftValue, this);
+        return instance.fetch(leftValue, this);
     }
   }
 }

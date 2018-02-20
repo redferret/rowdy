@@ -1037,10 +1037,6 @@ is divided into following sections:
                 =================
             -->
     <target depends="init,compile" description="Run a main class." name="run">
-        <classpath>
-          <path refid="classpath.test" />
-          <pathelement location="${test.build.dir}"/>
-        </classpath>
         <j2seproject1:java>
             <customize>
                 <arg line="${application.args}"/>
