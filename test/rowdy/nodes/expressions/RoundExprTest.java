@@ -34,7 +34,7 @@ public class RoundExprTest extends TestCase {
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "round a, 1";
     RoundExpr instance = (RoundExpr) getTestStatement(testCode, ROUND_EXPR);
-    rowdyInstance.allocate((Terminal) instance.get(ID).symbol(), new Value(123.87, false));
+    rowdyInstance.allocate((Terminal) instance.get(ID).symbol(), new Value(123.87, false), 0);
     Value expResult = new Value(123.9, false);
     Value result = instance.execute();
     assertEquals(expResult, result);

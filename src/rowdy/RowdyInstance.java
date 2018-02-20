@@ -206,11 +206,6 @@ public class RowdyInstance {
       }
     }
   }
-
-  public void allocateToCurrentFunction(Terminal idTerminal, Value value) throws ConstantReassignmentException {
-    Function currentFunction = callStack.peek();
-    currentFunction.allocate(idTerminal, value);
-  }
   
   public Value executeFunc(Node cur) throws ConstantReassignmentException {
     String funcName = ((Terminal) cur.get(ID).symbol()).getName();
@@ -294,7 +289,7 @@ public class RowdyInstance {
       // call stack and free it's memory then return
       // it's value.
       function = callStack.pop();
-      function.free();
+      function.getSymbolTable().free();
       return function.getReturnValue();
     } else {
       NativeJava nativeJava = (NativeJava) funcVal.getValue();
@@ -328,7 +323,7 @@ public class RowdyInstance {
    * @param value The Value being allocated or changed
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void allocate(Terminal idTerminal, Value value) throws ConstantReassignmentException {
+  public void allocate(Terminal idTerminal, Value value, int line) throws ConstantReassignmentException {
     Value exists = globalSymbolTable.get(idTerminal.getName());
     if (exists != null) {
       setAsGlobal(idTerminal, value);
@@ -343,9 +338,9 @@ public class RowdyInstance {
           while(!callStack.isEmpty()) {
             Function currentFunction = callStack.pop();
             searchStack.push(currentFunction);
-            Value v = currentFunction.getValue(idTerminal.getName());
+            Value v = currentFunction.getSymbolTable().getValue(idTerminal.getName());
             if (v != null) {
-              currentFunction.allocate(idTerminal, value);
+              currentFunction.getSymbolTable().allocate(idTerminal, value, line);
               found = true;
               break;
             }
@@ -355,7 +350,7 @@ public class RowdyInstance {
           }
           if (!found){
             Function currentFunction = callStack.peek();
-            currentFunction.allocate(idTerminal, value);
+            currentFunction.getSymbolTable().allocate(idTerminal, value, line);
           }
         } catch (EmptyStackException e) {}
       }
@@ -421,7 +416,7 @@ public class RowdyInstance {
           throw new RuntimeException("The ID '" + value + "' doesn't exist "
                   + "on line " + curSeq.getLine());
         }
-        return new Value(val.getValue(), false);
+        return val;
     } else {
       return value;
     }
@@ -434,7 +429,7 @@ public class RowdyInstance {
     while(!callStack.isEmpty()) {
       Function currentFunction = callStack.pop();
       searchStack.push(currentFunction);
-      valueFromFunction = currentFunction.getValue(value);
+      valueFromFunction = currentFunction.getSymbolTable().getValue(value);
       if (valueFromFunction != null) {
         valueFound = true;
         break;
