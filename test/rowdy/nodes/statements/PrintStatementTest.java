@@ -1,12 +1,18 @@
 
 package rowdy.nodes.statements;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.statement.PrintStatement;
+import static rowdy.testlang.lang.RowdyGrammarConstants.PRINT_STMT;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -26,15 +32,18 @@ public class PrintStatementTest extends TestCase {
   /**
    * Test of execute method, of class PrintStatement.
    */
-  public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    PrintStatement instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+  public void testExecute() throws ConstantReassignmentException, UnsupportedEncodingException {
+    String testCode = "print \"Hello World!\", (2 * 2) as int";
+
+    PrintStatement instance = (PrintStatement) getTestStatement(testCode, PRINT_STMT);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    
+    try (PrintStream printStream = new PrintStream(baos, true, "utf-8")) {
+      instance.execute(new Value(printStream, false));
+      String result = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+      String expected = "Hello World!4";
+      assertEquals(expected, result);
+    }
   }
   
 }

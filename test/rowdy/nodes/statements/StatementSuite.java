@@ -23,7 +23,6 @@ public class StatementSuite extends TestCase {
     suite.addTest(AssignStatementTest.suite());
     suite.addTest(LoopStatementTest.suite());
     suite.addTest(BreakStatementTest.suite());
-    suite.addTest(FunctionCallTest.suite());
     suite.addTest(ReadStatementTest.suite());
     return suite;
   }

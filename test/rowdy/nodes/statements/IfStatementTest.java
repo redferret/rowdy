@@ -7,7 +7,11 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.statement.IfStatement;
-
+import static rowdy.testlang.lang.RowdyGrammarConstants.IF_STMT;
+import static rowdy.testutils.TestUtils.getTestStatement;
+import static junit.framework.TestCase.assertTrue;
+import static rowdy.testutils.TestUtils.fetch;
+import static rowdy.testutils.TestUtils.isset;
 /**
  *
  * @author Richard
@@ -27,14 +31,19 @@ public class IfStatementTest extends TestCase {
    * Test of execute method, of class IfStatement.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    IfStatement instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    String testCode = "if 0 == 0 {a = 1 as int} else {a = 0 as int}";
+    
+    IfStatement instance = (IfStatement) getTestStatement(testCode, IF_STMT);
+    
+    Value seqControlWrapper = new Value(null, false);
+    instance.execute(seqControlWrapper);
+    
+    assertTrue("The ID 'a' doesn't exist", isset("a"));
+    
+    Value varResult = fetch("a");
+    Integer actual = (Integer) varResult.getValue();
+    Integer expected = 1;
+    assertEquals("ID 'a' not set correctly", expected, actual);
   }
   
 }

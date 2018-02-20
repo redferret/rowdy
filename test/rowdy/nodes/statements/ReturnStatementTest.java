@@ -1,12 +1,18 @@
 
 package rowdy.nodes.statements;
 
+import growdy.Node;
+import java.util.HashMap;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.statement.ReturnStatement;
+import static rowdy.testlang.lang.RowdyGrammarConstants.RETURN_STMT;
+import static rowdy.testutils.TestUtils.getTestStatement;
+import static rowdy.testutils.TestUtils.rowdyInstance;
 
 /**
  *
@@ -27,14 +33,23 @@ public class ReturnStatementTest extends TestCase {
    * Test of execute method, of class ReturnStatement.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    ReturnStatement instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    String testCode = "return (1 + 1) as int";
+    ReturnStatement returnStmt = (ReturnStatement) getTestStatement(testCode, RETURN_STMT);
+    
+    Function testFunction = new Function("Test", new HashMap<>(), 0);
+    rowdyInstance.callStack.push(testFunction);
+    Node seqControl = new Node(null, 0);
+    seqControl.setSeqActive(true);
+    Value seqControlWrapper = new Value(seqControl, false);
+    
+    returnStmt.execute(seqControlWrapper);
+    Boolean actual = seqControl.isSeqActive();
+    assertFalse("Sequence Control is still active", actual);
+    
+    Value functionReturnVal = testFunction.getReturnValue();
+    Integer result = (Integer) functionReturnVal.getValue();
+    Integer expected = 2;
+    assertEquals("Return value not set", expected, result);
   }
   
 }

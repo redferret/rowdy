@@ -8,6 +8,7 @@ import growdy.Terminal;
 import rowdy.exceptions.MainNotFoundException;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.*;
+import rowdy.nodes.statement.*;
 import rowdy.nodes.RowdyNode;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
@@ -16,8 +17,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
-import rowdy.nodes.statement.AssignStatement;
-
 
 
 /**
@@ -31,15 +30,15 @@ public class RowdyInstance {
   /**
    * Stores the name of each identifier or function
    */
-  private final HashMap<String, Value> globalSymbolTable;
+  public final HashMap<String, Value> globalSymbolTable;
   /**
    * Keeps track of the level of loops the program is in.
    */
-  private final Stack<Node> activeLoops;
+  public final Stack<Node> activeLoops;
   /**
    * Keeps track of the functions currently being called.
    */
-  private final Stack<Function> callStack;
+  public final Stack<Function> callStack;
   /**
    * Reference to the main function
   */
@@ -124,20 +123,13 @@ public class RowdyInstance {
     Node currentTreeNode;
     ArrayList<Node> children = parent.getAll();
     int currentID;
-    Value rightValue;
     
     for (int i = 0; i < children.size(); i++) {
       currentTreeNode = children.get(i);
       currentID = currentTreeNode.symbol().id();
       switch (currentID) {
         case ASSIGN_STMT:
-          Terminal idTerminal = (Terminal) currentTreeNode.get(ID).symbol();
-          Expression assignExpr = (Expression)currentTreeNode.get(EXPRESSION);
-          rightValue = assignExpr.execute();
-          if (currentTreeNode.get(CONST_OPT).get(CONST, false) != null) {
-            rightValue.setAsConstant(true);
-          }
-          allocate(idTerminal, rightValue);
+          ((AssignStatement) currentTreeNode).execute(null);
           break;
         case FUNCTION:
           Node nativeOpt = currentTreeNode.get(NATIVE_FUNC_OPT);
@@ -172,7 +164,6 @@ public class RowdyInstance {
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
     ArrayList<Node> children = parent.getAll();
-    Value rightValue;
     for (int i = 0, curID; i < children.size(); i++) {
       currentTreeNode = children.get(i);
       curID = currentTreeNode.symbol().id();
@@ -184,139 +175,28 @@ public class RowdyInstance {
           }
           System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
-          AssignStatement assignStmt = (AssignStatement) currentTreeNode;
-          assignStmt.execute(null);
+          ((AssignStatement) currentTreeNode).execute(null);
           break;
         case IF_STMT:
-          Expression ifExpr = (Expression) currentTreeNode.get(EXPRESSION);
-          Value ifExprValue = ifExpr.execute();
-          if (ifExprValue.valueToBoolean()) {
-            Node ifStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
-            executeStmt(ifStmtList, seqControl);
-          } else {
-            executeStmt(currentTreeNode.get(ELSE_PART), seqControl);
-          }
+          ((IfStatement) currentTreeNode).execute(new Value(seqControl, false));
           break;
         case LOOP_STMT:
-          Terminal loopIdTerminal = (Terminal) currentTreeNode.get(ID).symbol();
-          String idName = (loopIdTerminal).getName();
-          Function curFunction = null;
-          if (!callStack.isEmpty()){
-            curFunction = callStack.peek();
-            Value curValue = curFunction.getValue(idName);
-            if (curValue == null) {
-              curFunction.allocate(idName, new Value(0, false));
-            } else {
-              throw new RuntimeException("ID '" + idName + "' already in use "+
-                      "on line " + currentTreeNode.getLine());
-            }
-          } else {
-            allocate(loopIdTerminal, new Value(0, false));
-          }
-          activeLoops.push(currentTreeNode);
-          currentTreeNode.setSeqActive(true);
-          boolean done = false;
-          Node loopStmtList = currentTreeNode.get(STMT_BLOCK).get(STMT_LIST);
-          while (!done) {
-            executeStmt(loopStmtList, currentTreeNode);
-            done = !currentTreeNode.isSeqActive();
-          }
-          if (curFunction != null){
-            curFunction.unset(idName);
-          }
+          ((LoopStatement) currentTreeNode).execute(null);
           break;
         case BREAK_STMT:
-          if (!currentTreeNode.get(ID_OPTION).hasSymbols()) {
-            if (activeLoops.isEmpty()) {
-              throw new RuntimeException("No loop to break. Line " 
-                      + currentTreeNode.getLine());
-            }
-            Node idOption = activeLoops.peek();
-            idName = ((Terminal) idOption.get(ID).symbol()).getName();
-          } else {
-            idName = ((Terminal) currentTreeNode.get(ID_OPTION).get(ID).symbol()).getName();
-          }
-          curFunction = null;
-          if (!callStack.isEmpty()) {
-            curFunction = callStack.peek();
-            if (curFunction.getValue(idName) == null) {
-              throw new RuntimeException("The ID '" + idName + "' doesn't exist."
-                      + " Line " + currentTreeNode.getLine());
-            }
-          }
-          for (;;) {
-            Node lp = activeLoops.pop();
-            lp.setSeqActive(false);
-            String tempBinding = ((Terminal) lp.get(ID).symbol()).getName();
-            if (curFunction != null){
-              curFunction.unset(tempBinding);
-            }
-            if (idName.equals(tempBinding)) {
-              break;
-            }
-          }
+          ((BreakStatement) currentTreeNode).execute(null);
           break;
         case READ_STMT:
-          Scanner keys = new Scanner(System.in);
-          Node firstID = currentTreeNode.get(ID);
-          Terminal t = (Terminal) firstID.symbol();
-          allocate(t, new Value(keys.nextLine(), false));
-          if (currentTreeNode.hasSymbols()) {
-            Node paramsTail = currentTreeNode.get(PARAMS_TAIL);
-            while (paramsTail.hasSymbols()) {
-              currentTreeNode = paramsTail.get(ID);
-              t = (Terminal) currentTreeNode.symbol();
-              allocate(t, new Value(keys.nextLine(), false));
-              paramsTail = paramsTail.get(PARAMS_TAIL);
-            }
-          }
+          ((ReadStatement) currentTreeNode).execute(new Value(System.in, false));
           break;
         case FUNC_CALL:
           executeFunc(currentTreeNode);
           break;
         case RETURN_STMT:
-          Function functionReturning = callStack.peek();
-          seqControl.setSeqActive(false);
-          Expression retrunExpr = (Expression)currentTreeNode.get(EXPRESSION);
-          Value toSet = retrunExpr.execute();
-          functionReturning.setReturnValue(toSet);
+          ((ReturnStatement) currentTreeNode).execute(new Value(seqControl, false));
           break;
         case PRINT_STMT:
-          StringBuilder printValue = new StringBuilder();
-          Expression printValExpr = (Expression) currentTreeNode.get(EXPRESSION);
-          Value printVal = printValExpr.execute();
-          if (printVal == null) {
-            printValue.append("null");
-          } else {
-            printValue.append(printVal.valueToString());
-          }
-          Node atomTailNode = currentTreeNode.get(EXPR_LIST);
-          while (atomTailNode.hasSymbols()) {
-            printValExpr = (Expression) atomTailNode.get(EXPRESSION);
-            printVal = printValExpr.execute();
-            if (printVal == null) {
-              printValue.append("null");
-            } else {
-              printValue.append(printVal.valueToString());
-            }
-            atomTailNode = atomTailNode.get(EXPR_LIST);
-          }
-          char c;
-          StringBuilder toPrint = new StringBuilder();
-          if (printValue.toString().contains("\\n")){
-            for (int l = 0; l < printValue.length(); l++) {
-              c = printValue.charAt(l);
-              if ((c == '\\') && (printValue.charAt(++l) == 'n')) {
-                System.out.println(toPrint);
-                toPrint = new StringBuilder();
-              } else {
-                toPrint.append(c);
-              }
-            }
-            System.out.print(toPrint);
-          } else {
-            System.out.print(printValue);
-          }
+          ((PrintStatement) currentTreeNode).execute(new Value(System.out, false));
           break;
         default:
           if (seqControl != null) {

@@ -55,8 +55,6 @@ public class RowdyNodeFactory implements NodeFactory {
         return new BreakStatement(symbol, line);
       case READ_STMT:
         return new ReadStatement(symbol, line);
-      case FUNC_CALL:
-        return new FunctionCall(symbol, line);
       case RETURN_STMT:
         return new ReturnStatement(symbol, line);
       case PRINT_STMT:

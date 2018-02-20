@@ -7,6 +7,9 @@ import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.statement.LoopStatement;
+import static rowdy.testlang.lang.RowdyGrammarConstants.LOOP_STMT;
+import static rowdy.testutils.TestUtils.fetch;
+import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
  *
@@ -27,14 +30,14 @@ public class LoopStatementTest extends TestCase {
    * Test of execute method, of class LoopStatement.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    LoopStatement instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    String testCode = "loop x: {a = x as int break}";
+    LoopStatement instance = (LoopStatement) getTestStatement(testCode, LOOP_STMT);
+    
+    instance.execute();
+    Value aVal = fetch("a");
+    Integer result = (Integer) aVal.getValue();
+    Integer expected = 0;
+    assertEquals(expected, result);
   }
   
 }

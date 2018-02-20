@@ -4,9 +4,12 @@ package rowdy.nodes.statements;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.statement.AssignStatement;
+import static rowdy.testlang.lang.RowdyGrammarConstants.ASSIGN_STMT;
+import static rowdy.testutils.TestUtils.fetch;
+import static rowdy.testutils.TestUtils.getTestStatement;
+import static rowdy.testutils.TestUtils.isset;
 
 /**
  *
@@ -27,14 +30,14 @@ public class AssignStatementTest extends TestCase {
    * Test of execute method, of class AssignStatement.
    */
   public void testExecute() throws ConstantReassignmentException {
-    System.out.println("execute");
-    Value leftValue = null;
-    AssignStatement instance = null;
-    Value expResult = null;
-    Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    String testCode = "a = 10 as int";
+    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+    instance.execute();
+    Boolean result = isset("a");
+    assertTrue("The ID 'a' doesn't exist", result);
+    Integer expected = 10;
+    Integer actual = (Integer) fetch("a").getValue();
+    assertEquals(expected, actual);
   }
   
 }
