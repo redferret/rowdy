@@ -39,18 +39,18 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
  * @author Richard DeSilvey
  */
 public class Rowdy {
-  private final RowdyInstance rowdyProgram;
+  private final RowdyInstance rowdyInstance;
   private final GRowdy growdy;
   private final String[] args;
   private String programFileName;
   private boolean verbose;
   
   public Rowdy(String[] args) {
-    rowdyProgram = new RowdyInstance();
+    rowdyInstance = new RowdyInstance();
     this.args = args;
     GRBuilder grBuilder = getBuilder();
     RowdyNodeFactory factory = new RowdyNodeFactory();
-    RowdyNode.initRunner(rowdyProgram);
+    RowdyNode.initRunner(rowdyInstance);
     growdy = GRowdy.getInstance(grBuilder, factory);
     programFileName = "";
     if (args.length > 1) {
@@ -69,12 +69,12 @@ public class Rowdy {
       List<Node> programTrees = new ArrayList<>();
       try {
         growdy.buildFromSource(programFileName);
-        rowdyProgram.initialize(growdy);
-        rowdyProgram.declareGlobals();
+        rowdyInstance.initialize(growdy);
+        rowdyInstance.declareGlobals();
         loadImports(growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
-            rowdyProgram.declareGlobals(tree);
+            rowdyInstance.declareGlobals(tree);
           } catch (ConstantReassignmentException ex) {
             handleException(ex);
           }
@@ -109,7 +109,7 @@ public class Rowdy {
             }
           }
         }
-        rowdyProgram.execute(programParameters);
+        rowdyInstance.execute(programParameters);
       } catch (NumberFormatException | MainNotFoundException
               | ConstantReassignmentException e) {
         handleException(e);
@@ -141,14 +141,14 @@ public class Rowdy {
         }
         try {
           growdy.buildFromString(program.toString(), STMT_LIST);
-          rowdyProgram.initialize(growdy);
+          rowdyInstance.initialize(growdy);
         } catch (ParseException | SyntaxException | AmbiguousGrammarException e) {
           handleException(e);
           continue;
         }
 
         try {
-          rowdyProgram.executeLine();
+          rowdyInstance.executeLine();
         } catch (Exception | ConstantReassignmentException e) {
           handleException(e);
         }
@@ -211,16 +211,12 @@ public class Rowdy {
     for (Method method : c.getMethods()) {
       if (method.isAnnotationPresent(JavaHookin.class)) {
         NativeJava hookin = (NativeJava) method.invoke(null);
-        allocateNativeJavaHookin(method.getName(), hookin);
+        try {
+          rowdyInstance.allocateIfExists(method.getName(), new Value(hookin, true));
+        } catch (ConstantReassignmentException ex) {
+          handleException(ex);
+        }
       }
-    }
-  }
-
-  public void allocateNativeJavaHookin(String functionName, NativeJava nativeJavaHookin) {
-    try {
-      rowdyProgram.allocateIfExists(new Terminal("id", ID, functionName), new Value(nativeJavaHookin, false));
-    } catch (ConstantReassignmentException ex) {
-      handleException(ex);
     }
   }
   
@@ -273,7 +269,7 @@ public class Rowdy {
 
   public void handleException(Throwable e) {
     System.out.println(e.getClass().getCanonicalName() + ": " + e.getLocalizedMessage());
-    rowdyProgram.dumpCallStack();
+    rowdyInstance.dumpCallStack();
     if (verbose) {
       e.printStackTrace();
     }

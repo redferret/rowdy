@@ -312,10 +312,10 @@ public class RowdyInstance {
     }
   }
 
-  public void allocateIfExists(Terminal idTerminal, Value value) throws ConstantReassignmentException {
-    Value exists = globalSymbolTable.get(idTerminal.getName());
+  public void allocateIfExists(String idName, Value value) throws ConstantReassignmentException {
+    Value exists = globalSymbolTable.get(idName);
     if (exists != null) {
-      globalSymbolTable.replace(idTerminal.getName(), value);
+      globalSymbolTable.replace(idName, value);
     }
   }
   

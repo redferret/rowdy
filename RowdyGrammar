@@ -50,73 +50,90 @@ ISSET			=> "isset";
 ROUND			=> "round";
 LCURLY			=> "{";
 RCURLY			=> "}";
-THIS			=> "this";
 ARRAY			=> "array";
 CONST			=> "const";
 GLOBAL			=> "global";
 NATIVE			=> "native";
 IMPORT			=> "import";
 
-<SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % -> $ { }";
+SUPER			=> "super";
+THIS			=> "this";
+PUBLIC			=> "public";
+PRIVATE			=> "private";
+IS				=> "is";
+TEMP			=> "temp";
+NEW				=> "new";
+DOT				=> ".";
+AT				=> "@";
+
+<SPECIAL> => ". ( ) ; + - * / != = >= <= < > : == , ^ % $ { } @";
 
 <BEGIN>
 
-// ********************** Program Start **************************
+// ********************************************* Program Start *************************************************
 
 PROGRAM(FUNC NATIVE IMPORT)					 	=> IMPORTS DEFINITION;
 IMPORTS(IMPORT)  								=> IMPORT CONSTANT IMPORTS;
 DEFINITION(FUNC NATIVE)							=> FUNCTION DEFINITION;
 
-// ********************** Statements *****************************
+// ********************************************* Statements ****************************************************
 STMT_BLOCK(LCURLY)								=> LCURLY STMT_LIST RCURLY;
-STMT_LIST(	ID IF ELSE LOOP
+STMT_LIST(	ID IF ELSE LOOP SUPER
 			BREAK PRINT READ CONST
 			RETURN CALL IMPORT)					=> STATEMENT STMT_LIST;
 			
 STATEMENT(	ID IF LOOP IMPORT THIS
 			BREAK PRINT READ CONST
-			CONCAT RETURN CALL
+			CONCAT RETURN CALL SUPER
 			ROUND)								=> 	IF_STMT* | LOOP_STMT* | ASSIGN_STMT* | BREAK_STMT* |
 													PRINT_STMT* | READ_STMT* | FUNC_CALL* | RETURN_STMT* |
-													IMPORT_SINGLE*;
-IMPORT_SINGLE(IMPORT)		=> IMPORT CONSTANT;
-IF_STMT(IF)					=> IF EXPRESSION STMT_BLOCK ELSE_PART;
-ELSE_PART(ELSE)				=> ELSE STMT_BLOCK;
-LOOP_STMT(LOOP)				=> LOOP ID COLON STMT_BLOCK;	
-	
-// TODO: Change CONST_OPT to ID_MODIFIER when the ticket is made
+													IMPORT_SINGLE* | SUPER_CONSTRUCTOR*;
+
+SUPER_CONSTRUCTOR(SUPER)						=> SUPER FUNC_BODY_EXPR;
+IMPORT_SINGLE(IMPORT)							=> IMPORT CONSTANT;
+IF_STMT(IF)										=> IF EXPRESSION STMT_BLOCK ELSE_PART;
+ELSE_PART(ELSE)									=> ELSE STMT_BLOCK;
+LOOP_STMT(LOOP)									=> LOOP ID COLON STMT_BLOCK;	
 ASSIGN_STMT(ID CONST THIS
-			GLOBAL)	 		=> CONST_OPT ID BECOMES EXPRESSION;
+			GLOBAL)	 							=> CONST_OPT ID BECOMES EXPRESSION;
 
 ID_MODIFIER(CONST THIS
-	GLOBAL)					=> CONST_OPT* | GLOBAL_DEF* | THIS_REF*;
-GLOBAL_DEF(GLOBAL)			=> GLOBAL;
-THIS_REF(THIS)				=> THIS;
-CONST_OPT(CONST)			=> CONST;
+	GLOBAL)										=> CONST_OPT* | GLOBAL_DEF* | THIS_REF*;
+GLOBAL_DEF(GLOBAL)								=> GLOBAL;
+THIS_REF(THIS)									=> THIS;
+CONST_OPT(CONST)								=> CONST;
 
-BREAK_STMT(BREAK)			=> BREAK ID_OPTION;
-ID_OPTION(ID)				=> ID;
-PRINT_STMT(PRINT)			=> PRINT EXPRESSION EXPR_LIST;
-READ_STMT(READ)				=> READ ID PARAMS_TAIL;
-RETURN_STMT(RETURN)			=> RETURN EXPRESSION;
+BREAK_STMT(BREAK)								=> BREAK ID_OPTION;
+ID_OPTION(ID)									=> ID;
+PRINT_STMT(PRINT)								=> PRINT EXPRESSION EXPR_LIST;
+READ_STMT(READ)									=> READ ID PARAMS_TAIL;
+RETURN_STMT(RETURN)								=> RETURN EXPRESSION;
 
-// ********************** Function **************************
+// ********************************************* Function *************************************************
 NATIVE_FUNC_OPT(NATIVE)		=> NATIVE;
+TEMP_FUNC_OPT(TEMP)			=> TEMP;
+FUNC_MOD_OPTS(NATIVE TEMP)	=> NATIVE_FUNC_OPT* | TEMP_FUNC_OPT*;
 
-// Replace part of this with FUNC_BODY_EXPR when #32 is being worked on
-FUNC_CALL(CALL)				=> CALL ID OPENPAREN EXPRESSION EXPR_LIST CLOSEDPAREN;
-
-// For the future relating to ticket #32 - Remove this comment when this ticket is closed
+THIS_REF(THIS)				=> THIS DOT;
+FUNC_CALL(CALL)				=> CALL THIS_REF ID_FUNC_REF;
 FUNC_BODY_EXPR(OPENPAREN)	=> OPENPAREN EXPRESSION EXPR_LIST CLOSEDPAREN;
 
-FUNCTION_BODY(OPENPAREN)	=> OPENPAREN PARAMETERS CLOSEDPAREN STMT_BLOCK;
-FUNCTION(FUNC NATIVE)		=> NATIVE_FUNC_OPT FUNC ID FUNCTION_BODY;
+FUNCTION_BODY(OPENPAREN)	=> OPENPAREN PARAMETERS CLOSEDPAREN INHERIT_OPT STMT_BLOCK;
+INHERIT_OPT(COLON)			=> COLON ID;
+FUNCTION(FUNC NATIVE TEMP)	=> FUNC_MOD_OPTS FUNC ID FUNCTION_BODY;
 ANONYMOUS_FUNC(FUNC)		=> FUNC FUNCTION_BODY;
 
-PARAMETERS(ID)				=> ID PARAMS_TAIL;
-PARAMS_TAIL(COMMA)			=> COMMA ID PARAMS_TAIL;
+PARAMETERS(ID)				=> ID IS_OPTION PARAMS_TAIL;
+PARAMS_TAIL(COMMA)			=> COMMA ID IS_OPTION PARAMS_TAIL;
 
-// ********************** Arrays ****************************
+ID_FUNC_REF(ID) 					=> ID FUNC_BODY_EXPR;
+IS_OPTION(IS) 						=> IS ACCESS_MODIFIER
+OBJ_ACCESS(AT)					 	=> AT ID DOT ID_FUNC_REF;
+ACCESS_MODIFIER(PRIVATE PUBLIC) 	=> PRIVATE_ACCESS* | PUBLIC_ACCESS*
+PRIVATE_ACCESS(PRIVATE) 			=> PRIVATE
+PUBLIC_ACCESS(PUBLIC) 				=> PUBLIC
+
+// ********************************************* Arrays ***************************************************
 
 ARRAY_EXPR(ARRAY)					=> ARRAY OPENPAREN EXPRESSION ARRAY_BODY CLOSEDPAREN;
 ARRAY_BODY(COMMA COLON)				=> ARRAY_LINEAR_BODY* | ARRAY_KEY_VALUE_BODY*;
@@ -125,17 +142,17 @@ ARRAY_KEY_VALUE_BODY(COLON)			=> COLON EXPRESSION ARRAY_KEY_VALUE_BODY_TAIL;
 ARRAY_KEY_VALUE_BODY_TAIL(COMMA)	=> COMMA EXPRESSION ARRAY_KEY_VALUE_BODY;
 
 
-// ********************** Expressions ***********************
+// ********************************************* Expressions **********************************************
 
 EXPRESSION(	ID MINUS OPENPAREN CONSTANT AS
-			CONCAT CALL FUNC ISSET ARRAY ROUND)	=>  EXPRESSIONS CAST_AS;
+			CONCAT CALL FUNC ISSET ARRAY ROUND AT)	=>  EXPRESSIONS CAST_AS;
 												
 EXPRESSIONS(ID MINUS OPENPAREN CONSTANT ISSET
-			CONCAT CALL FUNC ARRAY ROUND)		=>  BOOL_EXPR* | CONCAT_EXPR* | 
-													ANONYMOUS_FUNC* | ISSET_EXPR* |
-													ROUND_EXPR* | ARRAY_EXPR*;
+			CONCAT CALL FUNC ARRAY ROUND AT)		=>  BOOL_EXPR* | CONCAT_EXPR* | 
+														ANONYMOUS_FUNC* | ISSET_EXPR* |
+														ROUND_EXPR* | ARRAY_EXPR* | OBJ_ACCESS*;
 
-CAST_AS(AS)										=> AS CAST_OPT;
+CAST_AS(AS)											=> AS CAST_OPT;
 CAST_OPT(CAST_STR CAST_INT CAST_DBL 
 	CAST_BINT CAST_BOL CAST_BYT 
 	CAST_SHRT CAST_LNG)							=> CAST_STR_OPT* | CAST_BINT_OPT* | CAST_INT_OPT* | CAST_BOL_OPT* | 
@@ -196,5 +213,6 @@ ATOMIC(ID CONSTANT CALL)				=> ATOMIC_ID* | ATOMIC_CONST* | ATOMIC_FUNC_CALL*;
 ATOMIC_ID(ID)							=> ID;
 ATOMIC_CONST(CONSTANT)					=> CONSTANT;
 ATOMIC_FUNC_CALL(CALL)					=> FUNC_CALL;
+NEW_OBJ(NEW)							=> NEW ID_FUNC_REF;
 
 
