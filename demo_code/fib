@@ -5,24 +5,17 @@
 		if (isset max) == false {
 			max = 1000
 		}
+		$println($fibby(max))
+	}
+
+	func fibby(max) {
+		fibs = $List()
 		y = 1
 		loop x: { if x >= max {break}
-			print x, "\n"
+			$add(fibs, x as int)
 			z = x + y
 			x = y
 			y = z
 		}
-		
-		list = array(7, 5, 3, 8)
-		print list, "\n"
-		
-		squareAll = func(list) {
-			sqrs = $List()
-			$forEach(list, func(item){
-				$add(sqrs, item ^ 2 as int)
-			})
-			return sqrs
-		}
-		sqrs = $squareAll(list)
-		$println(sqrs)
+		return fibs
 	}
