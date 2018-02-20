@@ -160,12 +160,12 @@ public class RowdyInstance {
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
   public void executeStmt(Node parent, Node seqControl) throws ConstantReassignmentException {
-    Node currentTreeNode;
+    RowdyNode currentTreeNode;
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
     ArrayList<Node> children = parent.getAll();
     for (int i = 0, curID; i < children.size(); i++) {
-      currentTreeNode = children.get(i);
+      currentTreeNode = (RowdyNode) children.get(i);
       curID = currentTreeNode.symbol().id();
       switch (curID) {
         case FUNCTION:
@@ -175,17 +175,14 @@ public class RowdyInstance {
           }
           System.exit(exitValue.valueToDouble().intValue());
         case ASSIGN_STMT:
-          ((AssignStatement) currentTreeNode).execute(null);
+        case LOOP_STMT:
+        case BREAK_STMT:
+          currentTreeNode.execute(null);
           break;
         case IF_STMT:
           ((IfStatement) currentTreeNode).execute(new Value(seqControl, false));
           break;
-        case LOOP_STMT:
-          ((LoopStatement) currentTreeNode).execute(null);
-          break;
-        case BREAK_STMT:
-          ((BreakStatement) currentTreeNode).execute(null);
-          break;
+        
         case READ_STMT:
           ((ReadStatement) currentTreeNode).execute(new Value(System.in, false));
           break;
