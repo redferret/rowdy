@@ -208,13 +208,15 @@ public class RowdyInstance {
   }
   
   public Value executeFunc(Node cur) throws ConstantReassignmentException {
-    String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+    RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
+    String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getName();
     List<Value> parameterValues = new ArrayList<>();
-    Node expr = cur.get(EXPRESSION, false);// This might be 'main'
+    RowdyNode funcBodyExpr = (RowdyNode) idFuncRef.get(FUNC_BODY_EXPR);
+    Node expr = funcBodyExpr.get(EXPRESSION, false);// This might be 'main'
     if (expr != null && expr.hasSymbols()) {
-      Expression paramValue = (Expression)cur.get(EXPRESSION);
+      Expression paramValue = (Expression)funcBodyExpr.get(EXPRESSION);
       parameterValues.add(paramValue.execute());
-      Node atomTailNode = cur.get(EXPR_LIST);
+      Node atomTailNode = funcBodyExpr.get(EXPR_LIST);
       while (atomTailNode.hasSymbols()) {
         paramValue = (Expression)atomTailNode.get(EXPRESSION);
         parameterValues.add(paramValue.execute());
@@ -227,25 +229,24 @@ public class RowdyInstance {
   }
   
   /**
-   * When a function is called, and not allocated, the method will collect the
-   * actual parameters being passed into the function (if any) and then allocate
-   * them in the function's symbol table, then the function's stmt-list is
-   * executed. If a return is called sequence control drops through the
-   * function's stmt-list and returns the function's return value here, null is
-   * always returned if no value is explicitly returned or if no value is
-   * returned but the return stmt is still called.
+   * Lot's happening here, when a function is executed with the given
+   * parameter values these values are mapped respectively to the formal
+   * parameters (if any). The function is pushed onto the call stack and
+   * it's statement list is executed. After this function executes this
+   * method will return it's return value.
    *
-   * @param cur The function being called
-   * @param parameterValues
+   * @param cur The function being executed
+   * @param parameterValues The parameters passed to this function
    * @return The function's return value
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
   public Value executeFunc(Node cur, List<Value> parameterValues) throws ConstantReassignmentException {
     // 1. Collect parameters
+    RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
+    String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getName();
     Value funcVal;
-    String funcName = ((Terminal) cur.get(ID).symbol()).getName();
     
-    funcVal = fetch(getIdAsValue(cur.get(ID)), cur);
+    funcVal = fetch(getIdAsValue(idFuncRef.get(ID)), cur);
     if (funcVal == null) {
       if (globalSymbolTable.get(funcName) == null) {
         throw new RuntimeException("Function '" + funcName + "' not defined on "
@@ -321,6 +322,7 @@ public class RowdyInstance {
    *
    * @param idTerminal The variable to allocate or change
    * @param value The Value being allocated or changed
+   * @param line The line number that allocation takes place
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
   public void allocate(Terminal idTerminal, Value value, int line) throws ConstantReassignmentException {
