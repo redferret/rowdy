@@ -69,9 +69,9 @@ public class FunctionTest {
     String idName = "someId";
     Value value = new Value(0, false);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
-    instance.allocate(idName, value);
+    instance.getSymbolTable().allocate(idName, value, 0);
     Double expectedValue = 0d;
-    Double actualValue = instance.getValue(idName).valueToDouble();
+    Double actualValue = instance.getSymbolTable().getValue(idName).valueToDouble();
     assertEquals(expectedValue, actualValue);
   }
 
@@ -84,9 +84,9 @@ public class FunctionTest {
     Terminal cur = new Terminal("ID", 0, "A");
     Value value = new Value(10, false);
     Function instance = new Function("Function", new HashMap<>(), 100);
-    instance.allocate(cur, value);
+    instance.getSymbolTable().allocate(cur, value, 0);
     Double expectedValue = 10d;
-    Double actualValue = instance.getValue("A").valueToDouble();
+    Double actualValue = instance.getSymbolTable().getValue("A").valueToDouble();
     assertEquals(expectedValue, actualValue);
   }
   
@@ -99,8 +99,8 @@ public class FunctionTest {
     Terminal cur = new Terminal("ID", 0, "A");
     Value value = new Value(10, true);
     Function instance = new Function("Function", new HashMap<>(), 100);
-    instance.allocate(cur, value);
-    instance.allocate(cur, value);
+    instance.getSymbolTable().allocate(cur, value, 0);
+    instance.getSymbolTable().allocate(cur, value, 0);
   }
 
   /**
@@ -112,9 +112,9 @@ public class FunctionTest {
     String idName = "someId";
     Value value = new Value(0, false);
     Function instance = new Function("Test Function", new HashMap<>(), 0);
-    instance.allocate(idName, value);
-    instance.unset(idName);
-    assertNull(instance.getValue(idName));
+    instance.getSymbolTable().allocate(idName, value, 0);
+    instance.getSymbolTable().unset(idName);
+    assertNull(instance.getSymbolTable().getValue(idName));
   }
 
   /**

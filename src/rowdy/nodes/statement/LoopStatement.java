@@ -7,10 +7,10 @@ import growdy.Terminal;
 import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.STMT_BLOCK;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
-import rowdy.nodes.RowdyNode;
 
 /**
  *
@@ -28,15 +28,15 @@ public class LoopStatement extends RowdyNode {
     Function curFunction = null;
     if (!instance.callStack.isEmpty()) {
       curFunction = instance.callStack.peek();
-      Value curValue = curFunction.getValue(idName);
+      Value curValue = curFunction.getSymbolTable().getValue(idName);
       if (curValue == null) {
-        curFunction.allocate(idName, new Value(0, false));
+        curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine());
       } else {
         throw new RuntimeException("ID '" + idName + "' already in use "
                 + "on line " + getLine());
       }
     } else {
-      instance.allocate(loopIdTerminal, new Value(0, false));
+      instance.allocate(loopIdTerminal, new Value(0, false), this.getLine());
     }
     instance.activeLoops.push(this);
     setSeqActive(true);
@@ -47,7 +47,7 @@ public class LoopStatement extends RowdyNode {
       done = !isSeqActive();
     }
     if (curFunction != null) {
-      curFunction.unset(idName);
+      curFunction.getSymbolTable().unset(idName);
     }
     return null;
   }

@@ -31,11 +31,12 @@ public class RowdyBuilderStmtTest {
     
     getAndTestSymbol(assignStmt, ID, "id");
     getAndTestSymbol(assignStmt, BECOMES, "=");
-    testContainsSymbols(assignStmt, new int[]{CONST_OPT, ID, BECOMES, EXPRESSION});
+    testContainsSymbols(assignStmt, new int[]{ID_MODIFIER, GLOBAL_DEF, ID, BECOMES, EXPRESSION});
     
     testCode = "const a = 100";
     assignStmt = getTestStatement(testCode, ASSIGN_STMT);
-    Node constOpt = getFromAndTestNotNull(assignStmt, CONST_OPT);
+    Node idModer = getFromAndTestNotNull(assignStmt, ID_MODIFIER);
+    Node constOpt = getFromAndTestNotNull(idModer, CONST_OPT);
     assertFalse(constOpt.getAll().isEmpty());
     getAndTestSymbol(constOpt, CONST, "const");
     
@@ -105,15 +106,15 @@ public class RowdyBuilderStmtTest {
   public void testFunctionCallStatement() {
     String testCode = "$function()";
     Node functionCall = getTestStatement(testCode, FUNC_CALL);
-    
+    // CALL THIS_REF ID_FUNC_REF
     getAndTestSymbol(functionCall, CALL, "$");
-    Node id = getFromAndTestNotNull(functionCall, ID);
+    Node idFuncRef = getFromAndTestNotNull(functionCall, ID_FUNC_REF);
+    Node id = getFromAndTestNotNull(idFuncRef, ID);
     testForTerminal(id, "function");
-    getAndTestSymbol(functionCall, OPENPAREN, "(");
-    getAndTestSymbol(functionCall, CLOSEDPAREN, ")");
+    Node funcBodyExpr = getFromAndTestNotNull(idFuncRef, FUNC_BODY_EXPR);
     
-    testContainsSymbols(functionCall, 
-            new int[]{CALL, ID, OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
+    testContainsSymbols(funcBodyExpr, 
+            new int[]{OPENPAREN, EXPRESSION, EXPR_LIST, CLOSEDPAREN});
     
     testCode = "$function(0, \"Hello\", apples)";
     getTestStatement(testCode, FUNC_CALL);
