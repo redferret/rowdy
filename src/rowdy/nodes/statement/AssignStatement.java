@@ -13,6 +13,7 @@ import static rowdy.lang.RowdyGrammarConstants.CONST_OPT;
 import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.GLOBAL_DEF;
 import static rowdy.lang.RowdyGrammarConstants.ID;
+import static rowdy.lang.RowdyGrammarConstants.ID_ACCESS;
 import static rowdy.lang.RowdyGrammarConstants.ID_MODIFIER;
 import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
 
@@ -34,14 +35,19 @@ public class AssignStatement extends RowdyNode {
     if (rightValue.isConstant()) {
       rightValue.setAsConstant(false);
     }
-    
-    RowdyNode globalMod = (RowdyNode) get(GLOBAL_DEF);
     RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER);
-    if (idModifier.getLeftMost() != null) {
+    if (idModifier.hasSymbols()) {
       switch (idModifier.getLeftMost().symbol().id()) {
         case CONST_OPT:
           rightValue.setAsConstant(true);
           break;
+        
+      }
+    }
+    
+    RowdyNode idAccess = (RowdyNode) get(ID_ACCESS);
+    if (idAccess.hasSymbols()) {
+      switch(idAccess.getLeftMost().symbol().id()) {
         case THIS_REF:
           Function curFunction = instance.callStack.peek();
           SymbolTable table;
@@ -52,13 +58,12 @@ public class AssignStatement extends RowdyNode {
           }
           table.allocate(idTerminal, rightValue, getLine());
           return null;
+        case GLOBAL_DEF:
+          instance.setAsGlobal(idTerminal, rightValue);
+          return null;
       }
     }
-    if (globalMod.hasSymbols()) {
-      instance.setAsGlobal(idTerminal, rightValue);
-    } else {
-      instance.allocate(idTerminal, rightValue, getLine());
-    }
+    instance.allocate(idTerminal, rightValue, getLine());
     return null;
   }
   

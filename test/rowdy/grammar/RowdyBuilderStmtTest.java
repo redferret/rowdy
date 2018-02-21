@@ -31,7 +31,7 @@ public class RowdyBuilderStmtTest {
     
     getAndTestSymbol(assignStmt, ID, "id");
     getAndTestSymbol(assignStmt, BECOMES, "=");
-    testContainsSymbols(assignStmt, new int[]{ID_MODIFIER, GLOBAL_DEF, ID, BECOMES, EXPRESSION});
+    testContainsSymbols(assignStmt, new int[]{ID_MODIFIER, ID_ACCESS, ID, BECOMES, EXPRESSION});
     
     testCode = "const a = 100";
     assignStmt = getTestStatement(testCode, ASSIGN_STMT);

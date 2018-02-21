@@ -16,7 +16,7 @@ public class Function {
   private Value funcReturnValue;
   private final String name;
   private final int lineCalledOn;
-  private SymbolTable symbolTable;
+  private final SymbolTable symbolTable;
   private RowdyObject parent;
 
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {

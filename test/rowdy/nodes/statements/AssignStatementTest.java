@@ -56,10 +56,21 @@ public class AssignStatementTest extends TestCase {
   }
   
   public void testGlobalConstModifier() throws Throwable {
-    String testCode = "global const b = 10";
+    String testCode = "const global b = 10";
     AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
     instance.execute();
     Value value = rowdyInstance.globalSymbolTable.get("b");
+    assertNotNull(value);
+    assertTrue(value.isConstant());
+  }
+  
+  public void testThisConstModifier() throws Throwable {
+    String testCode = "const this.B = 10";
+    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+    Function function = new Function("Test", new HashMap<>(), 0);
+    rowdyInstance.callStack.push(function);
+    instance.execute();
+    Value value = function.getSymbolTable().getValue("B");
     assertNotNull(value);
     assertTrue(value.isConstant());
   }
