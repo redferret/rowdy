@@ -36,6 +36,10 @@ public class Atomic extends RowdyNode {
         Node thisRef = atomicType.get(THIS_REF);
         if (thisRef.hasSymbols()) {
           value = instance.callStack.peek().getSymbolTable().getValue(searchValue);
+          if (value == null) {
+            throw new RuntimeException("The ID '" + searchValue + "' doesn't exist "
+                  + "on line " + getLine());
+          }
         } else {
           value = instance.fetch(searchValue, this);
         }

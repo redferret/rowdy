@@ -1,7 +1,5 @@
 package rowdy;
 
-import growdy.Terminal;
-import rowdy.exceptions.ConstantReassignmentException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -17,6 +15,7 @@ public class Function {
   private final String name;
   private final int lineCalledOn;
   private final SymbolTable symbolTable;
+  private boolean isAnonymous;
   private RowdyObject parent;
 
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
@@ -25,6 +24,15 @@ public class Function {
     funcReturnValue = null;
     this.lineCalledOn = lineCalledOn;
     parent = null;
+    isAnonymous = false;
+  }
+  
+  public void setAsAnonymous() {
+    isAnonymous = true;
+  }
+  
+  public boolean isAnonymous(){
+    return this.isAnonymous;
   }
   
   public boolean isIsMemberFunction() {

@@ -47,6 +47,6 @@ public class RowdyBuilderFuncTest {
     String testCode = "func (a, b) {}";
     
     Node stmt = getTestStatement(testCode, ANONYMOUS_FUNC);
-    testContainsSymbols(stmt, new int[]{FUNC, FUNCTION_BODY});
+    testContainsSymbols(stmt, new int[]{TEMP_FUNC_OPT, FUNC, FUNCTION_BODY});
   }
 }

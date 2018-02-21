@@ -132,11 +132,10 @@ public class RowdyInstance {
           ((AssignStatement) cur).execute(null);
           break;
         case FUNCTION:
-          Node modOpts = cur.get(FUNC_MOD_OPTS);
+          Node modOpts = cur.get(NATIVE_FUNC_OPT);
           
           String functionName = ((Terminal) cur.get(ID).symbol()).getName();
           if (modOpts.hasSymbols()) {
-            Node nativeOpt = modOpts.get(NATIVE_FUNC_OPT);
             setAsGlobal(functionName, new Value());
           } else {
             if (functionName.equals("main")) {
@@ -245,6 +244,9 @@ public class RowdyInstance {
     Value funcVal = fetch(getIdAsValue(idFuncRef.get(ID)), cur);
     
     if (funcVal.getValue() instanceof RowdyNode) {
+      
+      
+      
       return executeFunc(funcName, funcVal, parameterValues);
     } else {
       NativeJava nativeJava = (NativeJava) funcVal.getValue();
@@ -264,40 +266,43 @@ public class RowdyInstance {
   
   public Value executeFunc(String funcName, Value funcVal, List<Value> parameterValues) throws ConstantReassignmentException {
     Node functionNode = (Node) funcVal.getValue();
-      List<String> paramsList = new ArrayList<>();
-      if (!parameterValues.isEmpty()) {
-        Node functionBody = functionNode.get(FUNCTION_BODY);
-        Node paramsNode = functionBody.get(PARAMETERS);
-        if (paramsNode.hasSymbols()) {
-          paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
-          Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
-          while (paramsTailNode.hasSymbols()) {
-            paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
-            paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
-          }
+    List<String> paramsList = new ArrayList<>();
+    if (!parameterValues.isEmpty()) {
+      Node functionBody = functionNode.get(FUNCTION_BODY);
+      Node paramsNode = functionBody.get(PARAMETERS);
+      if (paramsNode.hasSymbols()) {
+        paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
+        Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
+        while (paramsTailNode.hasSymbols()) {
+          paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
+          paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
         }
       }
-      // 2. Copy actual parameters to formal parameters
-      HashMap<String, Value> params = new HashMap<>();
-      String paramName;
-      for (int p = 0; p < paramsList.size(); p++) {
-        paramName = paramsList.get(p);
-        params.put(paramName, parameterValues.get(p));
-      }
-      // 3. Push the function onto the call stack
-      Function function = new Function(funcName, params, functionNode.getLine());
-      callStack.push(function);
-      // 4. Get and execute the stmt-list
-      Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-      Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
-      seqControl.setSeqActive(true);
-      executeStmt(stmtList, seqControl);
-      // When finished, remove the function from the
-      // call stack and free it's memory then return
-      // it's value.
-      function = callStack.pop();
-      function.getSymbolTable().free();
-      return function.getReturnValue();
+    }
+    // 2. Copy actual parameters to formal parameters
+    HashMap<String, Value> params = new HashMap<>();
+    String paramName;
+    for (int p = 0; p < paramsList.size(); p++) {
+      paramName = paramsList.get(p);
+      params.put(paramName, parameterValues.get(p));
+    }
+    // 3. Push the function onto the call stack
+    Function function = new Function(funcName, params, functionNode.getLine());
+    if (functionNode.symbol().id() == ANONYMOUS_FUNC) {
+      function.setAsAnonymous();
+    }
+    callStack.push(function);
+    // 4. Get and execute the stmt-list
+    Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
+    seqControl.setSeqActive(true);
+    executeStmt(stmtList, seqControl);
+    // When finished, remove the function from the
+    // call stack and free it's memory then return
+    // it's value.
+    function = callStack.pop();
+    function.getSymbolTable().free();
+    return function.getReturnValue();
   }
 
   public void allocateIfExists(String idName, Value value) throws ConstantReassignmentException {
@@ -427,6 +432,10 @@ public class RowdyInstance {
       if (valueFromFunction != null) {
         valueFound = true;
         break;
+      } else {
+        if (!currentFunction.isAnonymous()) {
+          break;
+        }
       }
     }
     while(!searchStack.isEmpty()){
