@@ -28,7 +28,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
-import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 

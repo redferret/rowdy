@@ -9,10 +9,11 @@
 	}
 
 	func fibby(max) {
-		fibs = $List()
-		y = 1
+		this.fibs = $List()
+		this.z = 0
+		this.y = 1
 		loop x: { if x >= max {break}
-			$add(fibs, x as int)
+			$add(fibs, x as long)
 			z = x + y
 			x = y
 			y = z

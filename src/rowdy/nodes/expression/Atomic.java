@@ -1,6 +1,7 @@
 
 package rowdy.nodes.expression;
 
+import growdy.Node;
 import growdy.Symbol;
 import growdy.Terminal;
 import rowdy.nodes.RowdyNode;
@@ -12,6 +13,7 @@ import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
 import static rowdy.lang.RowdyGrammarConstants.FUNC_CALL;
 import static rowdy.lang.RowdyGrammarConstants.ID;
+import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
 
 /**
  *
@@ -30,7 +32,13 @@ public class Atomic extends RowdyNode {
     switch(atomicType.symbol().id()) {
       case ATOMIC_ID:
         child = (RowdyNode) atomicType.get(ID);
-        value = new Value(child.symbol(), false);
+        Value searchValue = new Value(child.symbol(), false);
+        Node thisRef = atomicType.get(THIS_REF);
+        if (thisRef.hasSymbols()) {
+          value = instance.callStack.peek().getSymbolTable().getValue(searchValue);
+        } else {
+          value = instance.fetch(searchValue, this);
+        }
         break;
       case ATOMIC_CONST:
         child = (RowdyNode) atomicType.get(CONSTANT);
