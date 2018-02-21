@@ -432,10 +432,8 @@ public class RowdyInstance {
       if (valueFromFunction != null) {
         valueFound = true;
         break;
-      } else {
-        if (!currentFunction.isAnonymous()) {
-          break;
-        }
+      } else if (!currentFunction.isAnonymous()) {
+        break;
       }
     }
     while(!searchStack.isEmpty()){
