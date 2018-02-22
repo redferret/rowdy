@@ -4,29 +4,22 @@ import "core.rowdy"
 	func main() {
 		
 		forLoop = func(M, f) {
-			$println(concat "before M=", M)
-			loop i: {if i >= M {this.x = i break} i=i+1
-				$println(concat "iter i=", i as int)
+			loop i: {if i >= M {break} i=i+1
 				$f()
 			}
-			$println(concat "after M=", M)
-			$println(concat "after i=", x)
 		}
 		
 		f1 = func(w, h) {
-			$println("f1 start loop")
 			$forLoop(w, func(){
 				$f2(h)
 			})
-			$println("f1 end loop")
 		}
 	
 		f2 = func(w) {
-			$println("f2 start loop")
 			$forLoop(w, func(){
 				print "."
 			})
-			$println("f2 end loop")
+			$println()
 		}
 	
 		$f1(10, 20)

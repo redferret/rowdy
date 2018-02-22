@@ -189,7 +189,7 @@ public class RowdyInstance {
           ((ReadStatement) cur).execute(new Value(System.in, false));
           break;
         case FUNC_CALL:
-          executeFunc(cur.copy());
+          executeFunc(cur);
           break;
         case RETURN_STMT:
           ((ReturnStatement) cur).execute(new Value(seqControl, false));
@@ -274,13 +274,13 @@ public class RowdyInstance {
    * are mapped out and pushed onto the call stack. This does not execute
    * native code.
    * @param funcName The name of the function to execute
-   * @param funcVal The code of the function (doesn't contain the name)
+   * @param funcVal The code of the function wrapped inside a Value
    * @param parameterValues The parameters to execute with
    * @return The value the function returns
    * @throws ConstantReassignmentException 
    */
   public Value executeFunc(String funcName, Value funcVal, List<Value> parameterValues) throws ConstantReassignmentException {
-    RowdyNode functionNode = (RowdyNode) funcVal.getValue();
+    RowdyNode functionNode = ((RowdyNode) funcVal.getValue()).copy();
     List<String> paramsList = new ArrayList<>();
     if (!parameterValues.isEmpty()) {
       Node functionBody = functionNode.get(FUNCTION_BODY);

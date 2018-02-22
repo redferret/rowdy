@@ -38,6 +38,7 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
  * @author Richard DeSilvey
  */
 public class Rowdy {
+  public static final RowdyNodeFactory nodeFactory = new RowdyNodeFactory();
   private final RowdyInstance rowdyInstance;
   private final GRowdy growdy;
   private final String[] args;
@@ -48,9 +49,8 @@ public class Rowdy {
     rowdyInstance = new RowdyInstance();
     this.args = args;
     GRBuilder grBuilder = getBuilder();
-    RowdyNodeFactory factory = new RowdyNodeFactory();
     RowdyNode.initRunner(rowdyInstance);
-    growdy = GRowdy.getInstance(grBuilder, factory);
+    growdy = GRowdy.getInstance(grBuilder, nodeFactory);
     programFileName = "";
     if (args.length > 1) {
       verbose = args[args.length - 1].equalsIgnoreCase("-verbose");

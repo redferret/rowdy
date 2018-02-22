@@ -30,9 +30,9 @@
 		}
 		
 		body = func(w, h) {
-			loop i: {if i >= h {break} i=i+1
+			$forLoop(h, func() {
 				$center(w)
-			}
+			})
 		}
 		
 		drawRect = func(w, h) {

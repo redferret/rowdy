@@ -5,6 +5,7 @@ import growdy.Node;
 import growdy.NonTerminal;
 import growdy.Symbol;
 import growdy.Terminal;
+import rowdy.Rowdy;
 import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -39,7 +40,7 @@ public class RowdyNode extends Node<RowdyNode> {
       cSymbol = ((NonTerminal)symbol).copy();
     }
     
-    RowdyNode copy = new RowdyNode(cSymbol, this.getLine());
+    RowdyNode copy = (RowdyNode) Rowdy.nodeFactory.getNode(cSymbol, this.line);
     copy.seqActive = this.seqActive;
     copy.trimmable = this.trimmable;
     copy.children = copyChildren();
