@@ -10,25 +10,15 @@
 			return 1
 		}
 	
-		change = amt - price
+		global change = amt - price
 		change = round change, 2
 		
 		chg = change
-		getChange = func(denom) {
-			loop qty: {
-				if (change >= denom) {
-					change = change - denom
-					qty = qty + 1
-					change = round change, 2
-				} else {
-					return qty as int
-				}
-			}
-		}
+		
 		twenties	= $getChange(20)
-		tens 		= $getChange(10)
+		tens 			= $getChange(10)
 		fives 		= $getChange(5)
-		ones	 	= $getChange(1)
+		ones	 		= $getChange(1)
 		quarters 	= $getChange(0.25)
 		dimes 		= $getChange(0.1)
 		nickels 	= $getChange(0.05)
@@ -47,4 +37,16 @@
 		"Dimes:		", dimes, 		"\n",
 		"Nickels:	", nickels, 	"\n",
 		"Pennies:	", pennies, 	"\n\n"
+	}
+	
+	func getChange(denom) {
+		loop qty: {
+			if (change >= denom) {
+				change = change - denom
+				qty = qty + 1
+				change = round change, 2
+			} else {
+				return qty as int
+			}
+		}
 	}

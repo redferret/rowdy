@@ -1,0 +1,47 @@
+
+	import "core.rowdy"
+	
+	func main(w, h) {
+		
+		if w > 40 or h > 40 {
+			$println("Max Dimensions: w <= 40, h <= 40")
+			return 1
+		}
+		
+		forLoop = func(M, f) {
+			loop i: {if i >= M {break} i=i+1
+				$f()
+			}
+		}
+		
+		cap = func(w) {
+			print "-"
+			$forLoop(w, func() {
+				print "---"
+			})
+			$println("-")
+		}
+		center = func(w) {
+			print "|"
+			$forLoop(w, func() {
+				print "   "
+			})
+			print "|\n"
+		}
+		
+		body = func(w, h) {
+			// Can't nest the call of forLoop within itself unless marked as dynamic
+			loop i: {if i >= h {break} i=i+1
+				$center(w)
+			}
+		}
+		
+		drawRect = func(w, h) {
+			$cap(w)
+			$body(w, h)
+			$cap(w)
+			$println(concat "The area is ", (w * h) as int)
+		}
+		
+		$drawRect(w, h)
+	}

@@ -6,6 +6,8 @@ import growdy.GRowdy;
 import growdy.Node;
 import growdy.Terminal;
 import growdy.exceptions.AmbiguousGrammarException;
+import growdy.exceptions.ParseException;
+import growdy.exceptions.SyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -16,8 +18,6 @@ import rowdy.nodes.RowdyNode;
 import rowdy.nodes.RowdyNodeFactory;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.exceptions.MainNotFoundException;
-import growdy.exceptions.ParseException;
-import growdy.exceptions.SyntaxException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -206,15 +206,10 @@ public class Rowdy {
 
   public void loadNativeJava(Class c) throws IllegalAccessException, 
           IllegalArgumentException, InvocationTargetException {
-    
     for (Method method : c.getMethods()) {
       if (method.isAnnotationPresent(JavaHookin.class)) {
         NativeJava hookin = (NativeJava) method.invoke(null);
-        try {
-          rowdyInstance.allocateIfExists(method.getName(), new Value(hookin, true));
-        } catch (ConstantReassignmentException ex) {
-          handleException(ex);
-        }
+        rowdyInstance.allocateIfExists(method.getName(), new Value(hookin, true));
       }
     }
   }

@@ -16,17 +16,3 @@ native func tan(a)
 native func rand()
 // native func type(var)
 
-
-// Non Native functions
-
-func forEachOn(list, f) {
-	loop x: {
-		elem = $get(list, x as int)
-		breakOut = $f(elem)
-		x = x + 1
-		if x == $size(list) or breakOut {break}
-	}
-	if breakOut {
-		return elem
-	}
-}

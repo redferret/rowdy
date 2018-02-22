@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
 
@@ -210,27 +209,34 @@ public class RowdyInstance {
     }
   }
   
+  /**
+   * Function calls with parameters are sent to this method.
+   * @param cur
+   * @return
+   * @throws ConstantReassignmentException 
+   */
   public Value executeFunc(Node cur) throws ConstantReassignmentException {
+    
     RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
     List<Value> parameterValues = new ArrayList<>();
+    
     RowdyNode funcBodyExpr = (RowdyNode) idFuncRef.get(FUNC_BODY_EXPR);
     Expression paramValue = (Expression)funcBodyExpr.get(EXPRESSION);
     parameterValues.add(paramValue.execute());
     Node atomTailNode = funcBodyExpr.get(EXPR_LIST);
+    
     while (atomTailNode.hasSymbols()) {
       paramValue = (Expression)atomTailNode.get(EXPRESSION);
       parameterValues.add(paramValue.execute());
       atomTailNode = atomTailNode.get(EXPR_LIST);
     }
+    
     return executeFunc(cur, parameterValues);
   }
   
   /**
-   * Lot's happening here, when a function is executed with the given
-   * parameter values these values are mapped respectively to the formal
-   * parameters (if any). The function is pushed onto the call stack and
-   * it's statement list is executed. After this function executes this
-   * method will return it's return value.
+   * Determines if the function is native or not and executes it's code
+   * with the given parameter values
    *
    * @param cur The function being executed
    * @param parameterValues The parameters passed to this function
@@ -245,9 +251,8 @@ public class RowdyInstance {
     
     if (funcVal.getValue() instanceof RowdyNode) {
       
-      
-      
       return executeFunc(funcName, funcVal, parameterValues);
+      
     } else {
       NativeJava nativeJava = (NativeJava) funcVal.getValue();
       Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
@@ -264,6 +269,16 @@ public class RowdyInstance {
     }
   }
   
+  /**
+   * Executes the function, the name and it's code along with the parameters
+   * are mapped out and pushed onto the call stack. This does not execute
+   * native code.
+   * @param funcName The name of the function to execute
+   * @param funcVal The code of the function (doesn't contain the name)
+   * @param parameterValues The parameters to execute with
+   * @return The value the function returns
+   * @throws ConstantReassignmentException 
+   */
   public Value executeFunc(String funcName, Value funcVal, List<Value> parameterValues) throws ConstantReassignmentException {
     Node functionNode = (Node) funcVal.getValue();
     List<String> paramsList = new ArrayList<>();
@@ -289,7 +304,7 @@ public class RowdyInstance {
     // 3. Push the function onto the call stack
     Function function = new Function(funcName, params, functionNode.getLine());
     if (functionNode.symbol().id() == ANONYMOUS_FUNC) {
-      function.setAsAnonymous();
+      function.setAsDynamic();
     }
     callStack.push(function);
     // 4. Get and execute the stmt-list
@@ -305,7 +320,7 @@ public class RowdyInstance {
     return function.getReturnValue();
   }
 
-  public void allocateIfExists(String idName, Value value) throws ConstantReassignmentException {
+  public void allocateIfExists(String idName, Value value) {
     Value exists = globalSymbolTable.get(idName);
     if (exists != null) {
       globalSymbolTable.replace(idName, value);
@@ -341,6 +356,8 @@ public class RowdyInstance {
             if (v != null) {
               currentFunction.getSymbolTable().allocate(idTerminal, value, line);
               found = true;
+              break;
+            } else if (!currentFunction.isDynamic()) {
               break;
             }
           }
@@ -432,7 +449,7 @@ public class RowdyInstance {
       if (valueFromFunction != null) {
         valueFound = true;
         break;
-      } else if (!currentFunction.isAnonymous()) {
+      } else if (!currentFunction.isDynamic()) {
         break;
       }
     }

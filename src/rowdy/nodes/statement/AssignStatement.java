@@ -51,7 +51,7 @@ public class AssignStatement extends RowdyNode {
         case THIS_REF:
           Function curFunction = instance.callStack.peek();
           SymbolTable table;
-          if (curFunction.isIsMemberFunction()) {
+          if (curFunction.isMemberFunction()) {
             table = curFunction.getParent().getSymbolTable();
           } else {
             table = curFunction.getSymbolTable();

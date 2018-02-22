@@ -15,7 +15,7 @@ public class Function {
   private final String name;
   private final int lineCalledOn;
   private final SymbolTable symbolTable;
-  private boolean isAnonymous;
+  private boolean isDynamic;
   private RowdyObject parent;
 
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
@@ -24,18 +24,18 @@ public class Function {
     funcReturnValue = null;
     this.lineCalledOn = lineCalledOn;
     parent = null;
-    isAnonymous = false;
+    isDynamic = false;
   }
   
-  public void setAsAnonymous() {
-    isAnonymous = true;
+  public void setAsDynamic() {
+    isDynamic = true;
   }
   
-  public boolean isAnonymous(){
-    return this.isAnonymous;
+  public boolean isDynamic(){
+    return this.isDynamic;
   }
   
-  public boolean isIsMemberFunction() {
+  public boolean isMemberFunction() {
     return parent != null;
   }
 
