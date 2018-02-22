@@ -2,7 +2,9 @@
 package rowdy.nodes;
 
 import growdy.Node;
+import growdy.NonTerminal;
 import growdy.Symbol;
+import growdy.Terminal;
 import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -12,7 +14,7 @@ import rowdy.exceptions.ConstantReassignmentException;
  *
  * @author Richard
  */
-public class RowdyNode extends Node {
+public class RowdyNode extends Node<RowdyNode> {
   
   protected static RowdyInstance instance;
   
@@ -26,6 +28,23 @@ public class RowdyNode extends Node {
   
   public static void initRunner(RowdyInstance runner) {
     RowdyNode.instance = runner;
+  }
+  
+  @Override
+  public RowdyNode copy() {
+    Symbol cSymbol = null;
+    if (this.symbol instanceof Terminal) {
+      cSymbol = ((Terminal)symbol).copy();
+    } else if (this.symbol instanceof NonTerminal) {
+      cSymbol = ((NonTerminal)symbol).copy();
+    }
+    
+    RowdyNode copy = new RowdyNode(cSymbol, this.getLine());
+    copy.seqActive = this.seqActive;
+    copy.trimmable = this.trimmable;
+    copy.children = copyChildren();
+    
+    return copy;
   }
   
   /**

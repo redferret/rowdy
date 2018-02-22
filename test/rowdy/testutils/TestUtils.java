@@ -33,7 +33,7 @@ public class TestUtils {
   }
   
   public static void trimEmptyChildren(RowdyNode root) {
-    List<Node> children = root.getAll();
+    List<RowdyNode> children = root.getAll();
     for (int i = 0; i < children.size(); i++) {
       Symbol symbol = children.get(i).symbol();
       if (symbol instanceof NonTerminal){

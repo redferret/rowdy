@@ -25,7 +25,7 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  */
 public class RowdyInstance {
 
-  private Node root;
+  private RowdyNode root;
   /**
    * Stores the name of each identifier or function
    */
@@ -33,7 +33,7 @@ public class RowdyInstance {
   /**
    * Keeps track of the level of loops the program is in.
    */
-  public final Stack<Node> activeLoops;
+  public final Stack<RowdyNode> activeLoops;
   /**
    * Keeps track of the functions currently being called.
    */
@@ -41,7 +41,7 @@ public class RowdyInstance {
   /**
    * Reference to the main function
   */
-  private Node main;
+  private RowdyNode main;
   
   private List<Value> programParamValues;
   
@@ -57,7 +57,7 @@ public class RowdyInstance {
   }
   
   public void initialize(GRowdy builder) {
-    this.root = builder.getProgram();
+    this.root = (RowdyNode) builder.getProgram();
   }
   
   /**
@@ -118,9 +118,9 @@ public class RowdyInstance {
    * @param parent
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void declareGlobals(Node parent) throws ConstantReassignmentException {
-    Node cur;
-    ArrayList<Node> children = parent.getAll();
+  public void declareGlobals(RowdyNode parent) throws ConstantReassignmentException {
+    RowdyNode cur;
+    ArrayList<RowdyNode> children = parent.getAll();
     int currentID;
     
     for (int i = 0; i < children.size(); i++) {
@@ -159,13 +159,13 @@ public class RowdyInstance {
    * the original caller.
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void executeStmt(Node parent, Node seqControl) throws ConstantReassignmentException {
+  public void executeStmt(RowdyNode parent, RowdyNode seqControl) throws ConstantReassignmentException {
     RowdyNode cur;
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
-    ArrayList<Node> children = parent.getAll();
+    ArrayList<RowdyNode> children = parent.getAll();
     for (int i = 0, curID; i < children.size(); i++) {
-      cur = (RowdyNode) children.get(i);
+      cur = children.get(i);
       curID = cur.symbol().id();
       switch (curID) {
         case FUNCTION:
@@ -189,7 +189,7 @@ public class RowdyInstance {
           ((ReadStatement) cur).execute(new Value(System.in, false));
           break;
         case FUNC_CALL:
-          executeFunc(cur);
+          executeFunc(cur.copy());
           break;
         case RETURN_STMT:
           ((ReturnStatement) cur).execute(new Value(seqControl, false));
@@ -215,9 +215,9 @@ public class RowdyInstance {
    * @return
    * @throws ConstantReassignmentException 
    */
-  public Value executeFunc(Node cur) throws ConstantReassignmentException {
+  public Value executeFunc(RowdyNode cur) throws ConstantReassignmentException {
     
-    RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
+    RowdyNode idFuncRef = cur.get(ID_FUNC_REF);
     List<Value> parameterValues = new ArrayList<>();
     
     RowdyNode funcBodyExpr = (RowdyNode) idFuncRef.get(FUNC_BODY_EXPR);
@@ -280,7 +280,7 @@ public class RowdyInstance {
    * @throws ConstantReassignmentException 
    */
   public Value executeFunc(String funcName, Value funcVal, List<Value> parameterValues) throws ConstantReassignmentException {
-    Node functionNode = (Node) funcVal.getValue();
+    RowdyNode functionNode = (RowdyNode) funcVal.getValue();
     List<String> paramsList = new ArrayList<>();
     if (!parameterValues.isEmpty()) {
       Node functionBody = functionNode.get(FUNCTION_BODY);
@@ -308,8 +308,8 @@ public class RowdyInstance {
     }
     callStack.push(function);
     // 4. Get and execute the stmt-list
-    Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-    Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
+    RowdyNode funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+    RowdyNode stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new RowdyNode(null, 0);
     seqControl.setSeqActive(true);
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the

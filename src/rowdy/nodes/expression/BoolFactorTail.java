@@ -21,7 +21,7 @@ public class BoolFactorTail extends RowdyNode {
   }
   @Override
   public Value execute(Value leftValue) throws ConstantReassignmentException {
-    ArrayList<Node> boolChildren = getAll();
+    ArrayList<RowdyNode> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
       return instance.fetch(leftValue, this);
     }

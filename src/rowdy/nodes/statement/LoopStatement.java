@@ -41,7 +41,7 @@ public class LoopStatement extends RowdyNode {
     instance.activeLoops.push(this);
     setSeqActive(true);
     boolean done = false;
-    Node loopStmtList = get(STMT_BLOCK).get(STMT_LIST);
+    RowdyNode loopStmtList = get(STMT_BLOCK).get(STMT_LIST);
     while (!done) {
       instance.executeStmt(loopStmtList, this);
       done = !isSeqActive();

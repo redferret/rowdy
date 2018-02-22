@@ -65,7 +65,7 @@ public class Rowdy {
   
   public void run() {
     if (!programFileName.isEmpty()) {
-      List<Node> programTrees = new ArrayList<>();
+      List<RowdyNode> programTrees = new ArrayList<>();
       try {
         growdy.buildFromSource(programFileName);
         rowdyInstance.initialize(growdy);
@@ -175,13 +175,13 @@ public class Rowdy {
     return importPaths;
   }
   
-  public void loadImports(Node program, List<Node> programTrees) {
+  public void loadImports(Node program, List<RowdyNode> programTrees) {
     List<String> localImports = getImports(program);
     localImports.forEach(imprt -> {
       String importPath = "bin/" + imprt;
       try {
         growdy.buildFromSource(importPath);
-        Node subProgram = growdy.getProgram();
+        RowdyNode subProgram = (RowdyNode) growdy.getProgram();
         programTrees.add(subProgram);
         loadImports(subProgram, programTrees);
       } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {

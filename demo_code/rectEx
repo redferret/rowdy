@@ -30,7 +30,6 @@
 		}
 		
 		body = func(w, h) {
-			// Can't nest the call of forLoop within itself unless marked as dynamic
 			loop i: {if i >= h {break} i=i+1
 				$center(w)
 			}

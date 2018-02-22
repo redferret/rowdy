@@ -24,11 +24,11 @@ public class IfStatement extends RowdyNode {
 
   @Override
   public Value execute(Value seqControlWrapper) throws ConstantReassignmentException {
-    Node seqControl = (Node) seqControlWrapper.getValue();
+    RowdyNode seqControl = (RowdyNode) seqControlWrapper.getValue();
     Expression ifExpr = (Expression) get(EXPRESSION);
     Value ifExprValue = ifExpr.execute();
     if (ifExprValue.valueToBoolean()) {
-      Node ifStmtList = get(STMT_BLOCK).get(STMT_LIST);
+      RowdyNode ifStmtList = get(STMT_BLOCK).get(STMT_LIST);
       instance.executeStmt(ifStmtList, seqControl);
     } else {
       instance.executeStmt(get(ELSE_PART), seqControl);
