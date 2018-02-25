@@ -25,7 +25,7 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  */
 public class RowdyInstance {
 
-  private RowdyNode root;
+  private BaseRowdyNode root;
   /**
    * Stores the name of each identifier or function
    */
@@ -33,7 +33,7 @@ public class RowdyInstance {
   /**
    * Keeps track of the level of loops the program is in.
    */
-  public final Stack<RowdyNode> activeLoops;
+  public final Stack<BaseRowdyNode> activeLoops;
   /**
    * Keeps track of the functions currently being called.
    */
@@ -41,10 +41,9 @@ public class RowdyInstance {
   /**
    * Reference to the main function
   */
-  private RowdyNode main;
-  
+  private BaseRowdyNode main;
+  private final List<String> runningList;
   private List<Value> programParamValues;
-  
   private boolean firstTimeInitialization;
 
   public RowdyInstance() {
@@ -54,10 +53,59 @@ public class RowdyInstance {
     activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
     firstTimeInitialization = true;
+    runningList = new ArrayList<>(50);
   }
   
   public void initialize(GRowdy builder) {
-    this.root = (RowdyNode) builder.getProgram();
+    root = (RowdyNode) builder.getProgram();
+    compress(root);
+  }
+  
+  /**
+   * Optimization of a program tree, compresses the program eliminating 
+   * redundant nodes in a tree. Expressions are mostly parts of a program
+   * that need compression.
+   * @param program The program being compressed.
+   */
+  public void compress(BaseRowdyNode program) {
+    List<BaseRowdyNode> childrenNodes = program.getAll();
+    BaseRowdyNode curNode, toSet;
+    for (int i = 0; i < childrenNodes.size(); i++) {
+      curNode = childrenNodes.get(i);
+      compress(curNode);
+      if (curNode.isCompressable()) {
+        if (curNode.hasSymbols()) {
+          int usefulCount = countUsefulChildren(curNode);
+          if (usefulCount < 2) {
+            toSet = curNode.getLeftMost();
+            childrenNodes.remove(i);
+            childrenNodes.add(i, toSet);
+          }
+        } else {
+          childrenNodes.remove(i--);
+        }
+      }
+    }
+    BaseRowdyNode dup = program.getLeftMost();
+    if (dup != null && dup.symbol().id() == program.symbol().id()) {
+      int usefulCount = countUsefulChildren(program);
+      if (usefulCount < 2) {
+        program.setChildren(program.getLeftMost().getAll());
+      }
+    }
+  }
+  
+  private int countUsefulChildren(BaseRowdyNode root) {
+    int usefulCount = 0;
+    List<BaseRowdyNode> children = root.getAll();
+    BaseRowdyNode curNode;
+    for (int i = 0; i < children.size(); i++) {
+      curNode = children.get(i);
+      if (curNode.hasSymbols() || curNode.symbol() instanceof Terminal) {
+        usefulCount++;
+      }
+    }
+    return usefulCount;
   }
   
   /**
@@ -118,9 +166,9 @@ public class RowdyInstance {
    * @param parent
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void declareGlobals(RowdyNode parent) throws ConstantReassignmentException {
-    RowdyNode cur;
-    ArrayList<RowdyNode> children = parent.getAll();
+  public void declareGlobals(BaseRowdyNode parent) throws ConstantReassignmentException {
+    BaseRowdyNode cur;
+    ArrayList<BaseRowdyNode> children = parent.getAll();
     int currentID;
     
     for (int i = 0; i < children.size(); i++) {
@@ -159,11 +207,11 @@ public class RowdyInstance {
    * the original caller.
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void executeStmt(RowdyNode parent, RowdyNode seqControl) throws ConstantReassignmentException {
-    RowdyNode cur;
+  public void executeStmt(BaseRowdyNode parent, BaseRowdyNode seqControl) throws ConstantReassignmentException {
+    BaseRowdyNode cur;
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
-    ArrayList<RowdyNode> children = parent.getAll();
+    ArrayList<BaseRowdyNode> children = parent.getAll();
     for (int i = 0, curID; i < children.size(); i++) {
       cur = children.get(i);
       curID = cur.symbol().id();
@@ -215,9 +263,9 @@ public class RowdyInstance {
    * @return
    * @throws ConstantReassignmentException 
    */
-  public Value executeFunc(RowdyNode cur) throws ConstantReassignmentException {
+  public Value executeFunc(BaseRowdyNode cur) throws ConstantReassignmentException {
     
-    RowdyNode idFuncRef = cur.get(ID_FUNC_REF);
+    BaseRowdyNode idFuncRef = cur.get(ID_FUNC_REF);
     List<Value> parameterValues = new ArrayList<>();
     
     RowdyNode funcBodyExpr = (RowdyNode) idFuncRef.get(FUNC_BODY_EXPR);
@@ -280,7 +328,13 @@ public class RowdyInstance {
    * @throws ConstantReassignmentException 
    */
   public Value executeFunc(String funcName, Value funcVal, List<Value> parameterValues) throws ConstantReassignmentException {
-    RowdyNode functionNode = ((RowdyNode) funcVal.getValue()).copy();
+    BaseRowdyNode functionNode;
+    if (runningList.contains(funcName)) {
+      functionNode = ((BaseRowdyNode) funcVal.getValue()).copy();
+    } else {
+      functionNode = ((RowdyNode) funcVal.getValue());
+      runningList.add(funcName);
+    }
     List<String> paramsList = new ArrayList<>();
     if (!parameterValues.isEmpty()) {
       Node functionBody = functionNode.get(FUNCTION_BODY);
@@ -303,13 +357,13 @@ public class RowdyInstance {
     }
     // 3. Push the function onto the call stack
     Function function = new Function(funcName, params, functionNode.getLine());
-    if (functionNode.symbol().id() == ANONYMOUS_FUNC) {
+    if (functionNode.symbol().id() == ANONYMOUS_FUNC || functionNode.get(DYNAMIC_OPT).hasSymbols()) {
       function.setAsDynamic();
     }
     callStack.push(function);
     // 4. Get and execute the stmt-list
-    RowdyNode funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-    RowdyNode stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new RowdyNode(null, 0);
+    BaseRowdyNode funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+    BaseRowdyNode stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new RowdyNode(null, 0);
     seqControl.setSeqActive(true);
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
@@ -317,6 +371,7 @@ public class RowdyInstance {
     // it's value.
     function = callStack.pop();
     function.getSymbolTable().free();
+    runningList.remove(funcName);
     return function.getReturnValue();
   }
 

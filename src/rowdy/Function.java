@@ -64,6 +64,9 @@ public class Function {
   }
 
   public Value getReturnValue() {
+    if (funcReturnValue == null) {
+      return new Value(null, false);
+    }
     return funcReturnValue;
   }
 

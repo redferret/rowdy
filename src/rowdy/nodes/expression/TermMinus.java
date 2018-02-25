@@ -9,11 +9,12 @@ import rowdy.Value;
  *
  * @author Richard
  */
-public class FactorMinus extends BaseRowdyNode {
+public class TermMinus extends BaseRowdyNode{
 
-  public FactorMinus(Symbol def, int lineNumber) {
-    super(def, lineNumber);
+  public TermMinus(Symbol symbol, int lineNumber) {
+    super(symbol, lineNumber);
   }
+  
   @Override
   public Value execute(Value leftValue) {
     BaseRowdyNode factor = getLeftMost();
@@ -33,4 +34,5 @@ public class FactorMinus extends BaseRowdyNode {
       return new Value(left - right, false);
     }
   }
+  
 }

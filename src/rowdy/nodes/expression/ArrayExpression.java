@@ -5,9 +5,8 @@ import growdy.Symbol;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import rowdy.BaseRowdyNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_BODY;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_KEY_VALUE_BODY;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_KEY_VALUE_BODY_TAIL;
@@ -18,14 +17,14 @@ import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
  *
  * @author Richard
  */
-public class ArrayExpression extends RowdyNode {
+public class ArrayExpression extends BaseRowdyNode {
 
   public ArrayExpression(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
 
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
+  public Value execute(Value leftValue){
     Expression arrayExpression = (Expression) get(EXPRESSION);
     Value firstValue = arrayExpression.execute();
     Node arrayBody = get(ARRAY_BODY);

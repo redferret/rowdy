@@ -4,16 +4,20 @@ package rowdy.nodes.expression;
 import growdy.Symbol;
 import rowdy.BaseRowdyNode;
 import rowdy.Value;
+import static rowdy.lang.RowdyGrammarConstants.FACTOR;
+import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL;
+import rowdy.nodes.RowdyNode;
 
 /**
  *
  * @author Richard
  */
-public class FactorMinus extends BaseRowdyNode {
+public class FactorPow extends BaseRowdyNode {
 
-  public FactorMinus(Symbol def, int lineNumber) {
-    super(def, lineNumber);
+  public FactorPow(Symbol symbol, int lineNumber) {
+    super(symbol, lineNumber);
   }
+
   @Override
   public Value execute(Value leftValue) {
     BaseRowdyNode factor = getLeftMost();
@@ -28,9 +32,10 @@ public class FactorMinus extends BaseRowdyNode {
     double left = leftValue.valueToDouble();
     double right = factor.execute(leftValue).valueToDouble();
     if (factorTail != null) {
-      return factorTail.execute(new Value(left - right, false));
+      return factorTail.execute(new Value(Math.pow(left, right), false));
     } else {
-      return new Value(left - right, false);
+      return new Value(Math.pow(left, right), false);
     }
   }
+  
 }

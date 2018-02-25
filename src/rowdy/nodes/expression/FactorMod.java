@@ -9,11 +9,12 @@ import rowdy.Value;
  *
  * @author Richard
  */
-public class FactorMinus extends BaseRowdyNode {
-
-  public FactorMinus(Symbol def, int lineNumber) {
-    super(def, lineNumber);
+public class FactorMod extends BaseRowdyNode {
+  
+  public FactorMod(Symbol symbol, int lineNumber) {
+    super(symbol, lineNumber);
   }
+
   @Override
   public Value execute(Value leftValue) {
     BaseRowdyNode factor = getLeftMost();
@@ -28,9 +29,10 @@ public class FactorMinus extends BaseRowdyNode {
     double left = leftValue.valueToDouble();
     double right = factor.execute(leftValue).valueToDouble();
     if (factorTail != null) {
-      return factorTail.execute(new Value(left - right, false));
+      return factorTail.execute(new Value(left % right, false));
     } else {
-      return new Value(left - right, false);
+      return new Value(left % right, false);
     }
   }
+  
 }

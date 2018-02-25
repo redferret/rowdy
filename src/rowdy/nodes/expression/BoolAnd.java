@@ -1,12 +1,10 @@
 
 package rowdy.nodes.expression;
 
-import growdy.Node;
 import growdy.Symbol;
 import java.util.ArrayList;
+import rowdy.BaseRowdyNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
 
@@ -14,22 +12,22 @@ import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
  *
  * @author Richard
  */
-public class BoolFactorTail extends RowdyNode {
+public class BoolAnd extends BaseRowdyNode {
   
-  public BoolFactorTail(Symbol def, int lineNumber) {
+  public BoolAnd(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
-    ArrayList<RowdyNode> boolChildren = getAll();
+  public Value execute(Value leftValue) {
+    ArrayList<BaseRowdyNode> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
       return instance.fetch(leftValue, this);
     }
     leftValue = instance.fetch(leftValue, this);
     boolean bLeft = leftValue.valueToBoolean();
-    BoolFactor boolFactor = (BoolFactor) get(BOOL_FACTOR);
+    BaseRowdyNode boolFactor = get(BOOL_FACTOR);
     boolean bRight = boolFactor.execute(leftValue).valueToBoolean();
-    BoolFactorTail boolFactorTail = (BoolFactorTail) get(BOOL_FACTOR_TAIL);
+    BoolAnd boolFactorTail = (BoolAnd) get(BOOL_FACTOR_TAIL);
     
     return boolFactorTail.execute(new Value(bLeft && bRight, false));
   }

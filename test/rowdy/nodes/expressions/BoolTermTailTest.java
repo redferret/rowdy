@@ -6,7 +6,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.BoolTermTail;
+import rowdy.nodes.expression.BoolOr;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_EXPR;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
 import static rowdy.testutils.TestUtils.getTestStatement;
@@ -27,11 +27,11 @@ public class BoolTermTailTest extends TestCase {
   }
 
   /**
-   * Test of execute method, of class BoolTermTail.
+   * Test of execute method, of class BoolOr.
    */
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "or (1 == 0)";
-    BoolTermTail instance = (BoolTermTail) getTestStatement(testCode, BOOL_TERM_TAIL);
+    BoolOr instance = (BoolOr) getTestStatement(testCode, BOOL_TERM_TAIL);
     Value expResult = new Value(true, false);
     Value result = instance.execute(new Value(true, false));
     assertEquals(expResult, result);

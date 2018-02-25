@@ -1,0 +1,34 @@
+
+import "core.rowdy"
+
+func main(iterations) {
+	
+	if (isset iterations) == false {
+		$println("Please enter the number of iterations")
+		return 1
+	}
+	
+	prog1 = func() {
+		$forLoop(0, iterations, 1, func(x){
+			// Do nothing
+		})
+	}
+	
+	prog2 = func() {
+		$forLoop(0, iterations, 1, func(x){
+			this.j = x
+		})
+	}
+	
+	prog3 = func() {
+		loop x: {
+			this.j = x
+			x = x + 1
+			if x > iterations {break}
+		}
+	}
+	
+	$println(concat "It took ", $runtime(prog1), " ms to finish prog1")
+	$println(concat "It took ", $runtime(prog2), " ms to finish prog2")
+	$println(concat "It took ", $runtime(prog3), " ms to finish prog3")a
+}

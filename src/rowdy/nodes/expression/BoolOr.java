@@ -1,12 +1,10 @@
 
 package rowdy.nodes.expression;
 
-import growdy.Node;
 import growdy.Symbol;
 import java.util.ArrayList;
+import rowdy.BaseRowdyNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_TERM;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
 
@@ -14,23 +12,23 @@ import static rowdy.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
  *
  * @author Richard
  */
-public class BoolTermTail extends RowdyNode {
+public class BoolOr extends BaseRowdyNode {
   
-  public BoolTermTail(Symbol def, int lineNumber) {
+  public BoolOr(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
-    ArrayList<RowdyNode> boolChildren = getAll();
+  public Value execute(Value leftValue) {
+    ArrayList<BaseRowdyNode> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
       return instance.fetch(leftValue, this);
     }
     leftValue = instance.fetch(leftValue, this);
     boolean bLeft = leftValue.valueToBoolean();
-    BoolTerm boolTerm = (BoolTerm) get(BOOL_TERM);
+    BaseRowdyNode boolTerm = get(BOOL_TERM);
     boolean bRight = boolTerm.execute(leftValue).valueToBoolean();
-    BoolTermTail boolTermTail = (BoolTermTail) get(BOOL_TERM_TAIL);
+    BoolOr boolTermTail = (BoolOr) get(BOOL_TERM_TAIL);
     
     return boolTermTail.execute(new Value(bLeft || bRight, false));
   }

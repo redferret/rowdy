@@ -2,9 +2,8 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
+import rowdy.BaseRowdyNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 
@@ -12,17 +11,17 @@ import static rowdy.lang.RowdyGrammarConstants.ID;
  *
  * @author Richard
  */
-public class RoundExpr extends RowdyNode {
+public class RoundExpr extends BaseRowdyNode {
 
   public RoundExpr(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
 
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
+  public Value execute(Value leftValue) {
     Value valueToRound = instance.fetch(instance.getIdAsValue(get(ID)), this);
     double roundedValue = valueToRound.valueToDouble();
-    ArithmExpr arithmExpr = (ArithmExpr) get(ARITHM_EXPR);
+    BaseRowdyNode arithmExpr = get(ARITHM_EXPR);
     int precision = arithmExpr.execute().valueToDouble().intValue();
     double factor = 1;
     while (precision > 0) {

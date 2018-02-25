@@ -1,8 +1,10 @@
 
 package rowdy.nodes.expression;
 
+import growdy.Node;
 import growdy.Symbol;
 import java.math.BigInteger;
+import rowdy.BaseRowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
@@ -12,19 +14,19 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  *
  * @author Richard
  */
-public class Expression extends RowdyNode {
+public class Expression extends BaseRowdyNode {
 
   public Expression(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
-    Expressions exprs = (Expressions) get(EXPRESSIONS, false);
-    if (exprs == null) {
+  public Value execute(Value leftValue) {
+    BaseRowdyNode leftNode = getLeftMost();
+    if (leftNode == null) {
       return instance.fetch(leftValue, this);
     }
     RowdyNode castAs = (RowdyNode) get(CAST_AS);
-    Value castValue = instance.fetch(exprs.execute(), this); 
+    Value castValue = instance.fetch(leftNode.execute(), this); 
     RowdyNode castOpt = (RowdyNode) castAs.get(CAST_OPT, false); 
     if (castOpt != null) { 
       RowdyNode castType = (RowdyNode) castOpt.getLeftMost();
