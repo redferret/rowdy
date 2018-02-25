@@ -58,7 +58,6 @@ public class RowdyInstance {
   
   public void initialize(GRowdy builder) {
     root = (RowdyNode) builder.getProgram();
-    compress(root);
   }
   
   /**
@@ -101,7 +100,7 @@ public class RowdyInstance {
     BaseRowdyNode curNode;
     for (int i = 0; i < children.size(); i++) {
       curNode = children.get(i);
-      if (curNode.hasSymbols() || curNode.symbol() instanceof Terminal) {
+      if (curNode.hasSymbols()) {
         usefulCount++;
       }
     }
@@ -124,6 +123,7 @@ public class RowdyInstance {
 
   public void executeLine() throws ConstantReassignmentException {
     declareSystemConstants();
+    compress(root);
     executeStmt(root, null);
   }
   
@@ -146,6 +146,7 @@ public class RowdyInstance {
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
+    compress(main);
     executeStmt(main, null);
   }
   
@@ -268,13 +269,13 @@ public class RowdyInstance {
     BaseRowdyNode idFuncRef = cur.get(ID_FUNC_REF);
     List<Value> parameterValues = new ArrayList<>();
     
-    RowdyNode funcBodyExpr = (RowdyNode) idFuncRef.get(FUNC_BODY_EXPR);
-    Expression paramValue = (Expression)funcBodyExpr.get(EXPRESSION);
+    BaseRowdyNode funcBodyExpr = idFuncRef.get(FUNC_BODY_EXPR);
+    BaseRowdyNode paramValue = funcBodyExpr.get(EXPRESSION);
     parameterValues.add(paramValue.execute());
-    Node atomTailNode = funcBodyExpr.get(EXPR_LIST);
+    BaseRowdyNode atomTailNode = funcBodyExpr.get(EXPR_LIST);
     
     while (atomTailNode.hasSymbols()) {
-      paramValue = (Expression)atomTailNode.get(EXPRESSION);
+      paramValue = atomTailNode.get(EXPRESSION);
       parameterValues.add(paramValue.execute());
       atomTailNode = atomTailNode.get(EXPR_LIST);
     }
@@ -291,13 +292,13 @@ public class RowdyInstance {
    * @return The function's return value
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public Value executeFunc(Node cur, List<Value> parameterValues) throws ConstantReassignmentException {
+  public Value executeFunc(BaseRowdyNode cur, List<Value> parameterValues) throws ConstantReassignmentException {
     // 1. Collect parameters
-    RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
+    BaseRowdyNode idFuncRef = cur.get(ID_FUNC_REF);
     String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getName();
     Value funcVal = fetch(getIdAsValue(idFuncRef.get(ID)), cur);
     
-    if (funcVal.getValue() instanceof RowdyNode) {
+    if (funcVal.getValue() instanceof BaseRowdyNode) {
       
       return executeFunc(funcName, funcVal, parameterValues);
       
@@ -332,16 +333,16 @@ public class RowdyInstance {
     if (runningList.contains(funcName)) {
       functionNode = ((BaseRowdyNode) funcVal.getValue()).copy();
     } else {
-      functionNode = ((RowdyNode) funcVal.getValue());
+      functionNode = ((BaseRowdyNode) funcVal.getValue());
       runningList.add(funcName);
     }
     List<String> paramsList = new ArrayList<>();
     if (!parameterValues.isEmpty()) {
-      Node functionBody = functionNode.get(FUNCTION_BODY);
-      Node paramsNode = functionBody.get(PARAMETERS);
+      BaseRowdyNode functionBody = functionNode.get(FUNCTION_BODY);
+      BaseRowdyNode paramsNode = functionBody.get(PARAMETERS);
       if (paramsNode.hasSymbols()) {
         paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
-        Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
+        BaseRowdyNode paramsTailNode = paramsNode.get(PARAMS_TAIL);
         while (paramsTailNode.hasSymbols()) {
           paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
           paramsTailNode = paramsTailNode.get(PARAMS_TAIL);

@@ -20,7 +20,7 @@ public class RowdyInstanceTest extends TestCase {
   }
 
   public void testCompress() {
-    String testCode = "1 > 1";
+    String testCode = "(isset var) == false";
     BaseRowdyNode testProgram = getTestStatement(testCode, EXPRESSION);
     System.out.println(testProgram);
     rowdyInstance.compress(testProgram);

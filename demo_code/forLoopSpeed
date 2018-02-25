@@ -16,19 +16,19 @@ func main(iterations) {
 	
 	prog2 = func() {
 		$forLoop(0, iterations, 1, func(x){
-			this.j = x
+			this.j = x as int
 		})
 	}
 	
 	prog3 = func() {
 		loop x: {
-			this.j = x
-			x = x + 1
+			this.j = x as int
+			x = x + 1 as int
 			if x > iterations {break}
 		}
 	}
 	
 	$println(concat "It took ", $runtime(prog1), " ms to finish prog1")
 	$println(concat "It took ", $runtime(prog2), " ms to finish prog2")
-	$println(concat "It took ", $runtime(prog3), " ms to finish prog3")a
+	$println(concat "It took ", $runtime(prog3), " ms to finish prog3")
 }

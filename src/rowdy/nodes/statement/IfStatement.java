@@ -24,7 +24,7 @@ public class IfStatement extends BaseRowdyNode {
   @Override
   public Value execute(Value seqControlWrapper) {
     BaseRowdyNode seqControl = (BaseRowdyNode) seqControlWrapper.getValue();
-    Expression ifExpr = (Expression) get(EXPRESSION);
+    BaseRowdyNode ifExpr = get(EXPRESSION);
     Value ifExprValue = ifExpr.execute();
     try {
       if (ifExprValue.valueToBoolean()) {

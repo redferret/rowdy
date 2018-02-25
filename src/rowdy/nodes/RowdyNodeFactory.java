@@ -38,28 +38,70 @@ public class RowdyNodeFactory implements NodeFactory {
       case BOOL_FACTOR:
       case EXPRESSIONS:
         return new RowdyNode(symbol, line);
+      case ARITHM_GREATER:
+        RelGreater greater = new RelGreater(symbol, line);
+        greater.setAsNonCompressable();
+        return greater;
+      case ARITHM_GREATEREQUAL:
+        RelGreaterEqual greatereq = new RelGreaterEqual(symbol, line);
+        greatereq.setAsNonCompressable();
+        return greatereq;
+      case ARITHM_LESS:
+        RelLess less = new RelLess(symbol, line);
+        less.setAsNonCompressable();
+        return less;
+      case ARITHM_LESSEQUAL:
+        RelLessEqual lesseq = new RelLessEqual(symbol, line);
+        lesseq.setAsNonCompressable();
+        return lesseq;
+      case ARITHM_EQUAL:
+        RelEqual eq = new RelEqual(symbol, line);
+        eq.setAsNonCompressable();
+        return eq;
       case TERM_PLUS:
-        return new TermPlus(symbol, line);
+        TermPlus termPlus = new TermPlus(symbol, line);
+        termPlus.setAsNonCompressable();
+        return termPlus;
       case TERM_MINUS:
-        return new TermMinus(symbol, line);
+        TermMinus termMinus = new TermMinus(symbol, line);
+        termMinus.setAsNonCompressable();
+        return termMinus;
       case ARRAY_EXPR:
-        return new ArrayExpression(symbol, line);
+        ArrayExpression arrayExpr = new ArrayExpression(symbol, line);
+        arrayExpr.setAsNonCompressable();
+        return arrayExpr;
       case ROUND_EXPR:
-        return new RoundExpr(symbol, line);
+        RoundExpr roundExpr = new RoundExpr(symbol, line);
+        roundExpr.setAsNonCompressable();
+        return roundExpr;
       case ISSET_EXPR:
-        return new IssetExpr(symbol, line);
+        IssetExpr issetExpr = new IssetExpr(symbol, line);
+        issetExpr.setAsNonCompressable();
+        return issetExpr;
       case ANONYMOUS_FUNC:
-        return new AnonymousFunc(symbol, line);
+        AnonymousFunc afunc = new AnonymousFunc(symbol, line);
+        afunc.setAsNonCompressable();
+        return afunc;
       case CONCAT_EXPR:
-        return new ConcatExpr(symbol, line);
+        ConcatExpr concat = new ConcatExpr(symbol, line);
+        concat.setAsNonCompressable();
+        return concat;
       case FACTOR_TAIL_DIV:
-        return new FactorDiv(symbol, line);
+        FactorDiv div = new FactorDiv(symbol, line);
+        div.setAsNonCompressable();
+        return div;
       case FACTOR_TAIL_MUL:
-        return new FactorMul(symbol, line);
+        FactorMul mul = new FactorMul(symbol, line);
+        mul.setAsNonCompressable();
+        return mul;
       case FACTOR_TAIL_MOD:
-        return new FactorMod(symbol, line);
+        FactorMod mod = new FactorMod(symbol, line);
+        mod.setAsNonCompressable();
+        return mod;
       case FACTOR_TAIL_POW:
-        return new FactorPow(symbol, line);
+        FactorPow pow = new FactorPow(symbol, line);
+        pow.setAsNonCompressable();
+        return pow;
       case ATOMIC:
         Atomic atomic = new Atomic(symbol, line);
         atomic.setAsNonCompressable();
