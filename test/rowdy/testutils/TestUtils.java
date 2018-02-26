@@ -15,7 +15,7 @@ import rowdy.RowdyInstance;
 import rowdy.nodes.RowdyNode;
 import rowdy.nodes.RowdyNodeFactory;
 import static org.junit.Assert.fail;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import static rowdy.Rowdy.getBuilder;
 import rowdy.Value;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ID;
@@ -33,8 +33,8 @@ public class TestUtils {
     RowdyNode.initRunner(rowdyInstance);
   }
   
-  public static void trimEmptyChildren(BaseRowdyNode root) {
-    List<BaseRowdyNode> children = root.getAll();
+  public static void trimEmptyChildren(BaseNode root) {
+    List<BaseNode> children = root.getAll();
     for (int i = 0; i < children.size(); i++) {
       Symbol symbol = children.get(i).symbol();
       if (symbol instanceof NonTerminal){
@@ -53,7 +53,7 @@ public class TestUtils {
     return rowdyInstance.fetch(new Value(new Terminal("id", ID, idName), false), null);
   }
   
-  public static BaseRowdyNode getTestStatement(String sourceCode, int programNode) {
+  public static BaseNode getTestStatement(String sourceCode, int programNode) {
     GRBuilder grBuilder = getBuilder();
     RowdyNodeFactory factory = new RowdyNodeFactory();
     GRowdy growdy = GRowdy.getInstance(grBuilder, factory);
@@ -62,7 +62,7 @@ public class TestUtils {
     } catch (ParseException | SyntaxException | AmbiguousGrammarException ex) {
       fail("Unable to load or build grammar " + ex.getLocalizedMessage());
     }
-    return (BaseRowdyNode) growdy.getProgram();
+    return (BaseNode) growdy.getProgram();
   }
   
 }
