@@ -11,7 +11,7 @@ import rowdy.exceptions.ConstantReassignmentException;
  */
 public class SymbolTable {
   
-  private HashMap<String, Value> symbolTable;
+  private final HashMap<String, Value> symbolTable;
   
   public SymbolTable(HashMap<String, Value> symbolTable) {
     this.symbolTable = symbolTable;
@@ -52,7 +52,6 @@ public class SymbolTable {
    */
   public void free() {
     symbolTable.clear();
-    symbolTable = null;
   }
 
   public Value getValue(String idName) {

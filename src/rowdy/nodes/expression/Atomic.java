@@ -1,8 +1,12 @@
 
 package rowdy.nodes.expression;
 
+import growdy.Node;
 import growdy.Symbol;
 import growdy.Terminal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import rowdy.BaseNode;
 import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -12,28 +16,39 @@ import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
 import static rowdy.lang.RowdyGrammarConstants.FUNC_CALL;
 import static rowdy.lang.RowdyGrammarConstants.ID;
+import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
 
 /**
  *
  * @author Richard
  */
-public class Atomic extends RowdyNode {
+public class Atomic extends BaseNode {
 
   public Atomic(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
-    RowdyNode atomicType = (RowdyNode) getLeftMost();
-    RowdyNode child;
+  public Value execute(Value leftValue) {
+    BaseNode atomicType = getLeftMost();
+    BaseNode child;
     Value value = new Value();
     switch(atomicType.symbol().id()) {
       case ATOMIC_ID:
-        child = (RowdyNode) atomicType.get(ID);
-        value = new Value(child.symbol(), false);
+        child = atomicType.get(ID);
+        Value searchValue = new Value(child.symbol(), false);
+        Node thisRef = atomicType.get(THIS_REF);
+        if (thisRef.hasSymbols()) {
+          value = instance.callStack.peek().getSymbolTable().getValue(searchValue);
+          if (value == null) {
+            throw new RuntimeException("The ID '" + searchValue + "' doesn't exist "
+                  + "on line " + getLine());
+          }
+        } else {
+          value = instance.fetch(searchValue, this);
+        }
         break;
       case ATOMIC_CONST:
-        child = (RowdyNode) atomicType.get(CONSTANT);
+        child = atomicType.get(CONSTANT);
         Terminal atomicTerminal = ((Terminal) child.symbol());
         String val = atomicTerminal.getName();
         int len = val.length();
@@ -63,8 +78,14 @@ public class Atomic extends RowdyNode {
         value = new Value(newValue, false);
         break;
       case ATOMIC_FUNC_CALL:
-        child = (RowdyNode) atomicType.get(FUNC_CALL);
-        value = instance.executeFunc(child);
+        child = atomicType.get(FUNC_CALL);
+         {
+          try {
+            value = instance.executeFunc(child);
+          } catch (ConstantReassignmentException ex) {
+            Logger.getLogger(Atomic.class.getName()).log(Level.SEVERE, null, ex);
+          }
+        }
         break;
     }
     return value;

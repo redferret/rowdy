@@ -2,7 +2,9 @@
 package rowdy.nodes;
 
 import growdy.Node;
+import growdy.NonTerminal;
 import growdy.Symbol;
+import rowdy.BaseNode;
 import rowdy.RowdyInstance;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -12,16 +14,10 @@ import rowdy.exceptions.ConstantReassignmentException;
  *
  * @author Richard
  */
-public class RowdyNode extends Node {
-  
-  protected static RowdyInstance instance;
+public class RowdyNode extends BaseNode {
   
   public RowdyNode(Symbol def, int lineNumber) {
     super(def, lineNumber);
-  }
-  
-  public final Value execute() throws ConstantReassignmentException {
-    return execute(null);
   }
   
   public static void initRunner(RowdyInstance runner) {
@@ -30,12 +26,20 @@ public class RowdyNode extends Node {
   
   /**
    * Override this method to implement your logic
-   * @param cur
    * @param leftValue
    * @return
-   * @throws ConstantReassignmentException 
    */
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
-    return instance.fetch(leftValue, this);
+  @Override
+  public Value execute(Value leftValue) {
+    for (BaseNode node : children) {
+      if (node.symbol() instanceof NonTerminal) {
+        if (node instanceof RowdyNode) {
+          leftValue = ((RowdyNode) node).execute(leftValue);
+        } else {
+          leftValue = node.execute(leftValue);
+        }
+      }
+    }
+    return leftValue;
   }
 }

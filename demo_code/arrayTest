@@ -2,29 +2,20 @@
 	import "core.rowdy"
 	
 	func main(max) {
-		if (isset max) == false {
-			max = 1000
-		}
-		y = 1
-		loop x: { if x >= max {break}
-			print x as int, "\n"
-			z = x + y
-			x = y
-			y = z
-		}
 		
 		$println("Squaring the following list")
 		list = array(7, 5, 3, 8)
 		print list, "\n"
 		
 		squareAll = func(list) {
-			sqrs = $List()
+			this.sqrs = $List()
 			$forEach(list, func(item){
 				$add(sqrs, item ^ 2 as int)
 			})
 			return sqrs
 		}
-		sqrs = $squareAll(list)
+		$println($squareAll(list))
+		sqrs = $squareAll2(list)
 		$println(sqrs)
 		
 		$println("Squaring the even numbers only")
@@ -32,8 +23,8 @@
 		$println(list)
 		
 		squareEven = func(list) {
-			sqrs = $List()
-			$forEachOn(list, func(item){
+			this.sqrs = $List()
+			$forEach(list, func(item){
 				if (item % 2 == 0) {
 					$add(sqrs, item ^ 2 as int)
 				} else {
@@ -43,9 +34,9 @@
 			return sqrs
 		}
 		
-		sqrs = $squareEven(list)
+		$println($squareEven(list))
+		sqrs = $squareEven2(list)
 		$println(sqrs)
-		
 	}
 	
 	func squareEven2(list) {

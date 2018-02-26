@@ -2,26 +2,40 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.nodes.RowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.lang.RowdyGrammarConstants.FACTOR;
 
 /**
  *
  * @author Richard
  */
-public class FactorMinus extends RowdyNode {
+public class FactorMinus extends BaseNode {
 
   public FactorMinus(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) throws ConstantReassignmentException {
-    Factor factor = (Factor) get(FACTOR);
-    leftValue = instance.fetch(leftValue, this);
-    double leftVal = leftValue.valueToDouble();
-    double rightVal = factor.execute(leftValue).valueToDouble();
-    return factor.execute(new Value(leftVal - rightVal, false));
+  public Value execute(Value leftValue) {
+    BaseNode factor = getLeftMost();
+    if (factor == null) {
+      return instance.fetch(leftValue, this);
+    }
+    BaseNode factorTail = null;
+    if (children.size() > 2) {
+      factorTail = children.get(2);
+    }
+    leftValue = instance.fetch(leftValue, factor);
+    double left;
+    if (leftValue == null) {
+      left = 0;
+    } else {
+      left = leftValue.valueToDouble();
+    }
+    double right = factor.execute(leftValue).valueToDouble();
+    if (factorTail != null) {
+      return factorTail.execute(new Value(left - right, false));
+    } else {
+      return new Value(left - right, false);
+    }
   }
 }

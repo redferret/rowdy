@@ -1,0 +1,12 @@
+import "core.rowdy"
+func main() {
+	p = func() {
+		list = $List()
+		$forLoop(0, 1000, 1, func(i){
+			$forLoop(0, 1000, 1, func(j){
+				$add(list, i * j as int)
+			})
+		})
+	}
+	$println(concat "Finished in ", $runtime(p), " ms")
+}

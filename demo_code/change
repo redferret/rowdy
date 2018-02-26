@@ -3,8 +3,15 @@
 	// Demonstrates the 'round' function to help fix floating point errors
 	// and recursion.
 	
+	import "core.rowdy"
+	
 	func main (price, amt) {
-		
+		global price = price
+		global amt = amt
+		$println(concat "Finished in ", $runtime(prog), " ms")
+	}
+	
+	func prog () {
 		if ((isset price) and (isset amt)) == false {
 			print "Illegal or Missing Arguments\n"
 			return 1
@@ -14,21 +21,11 @@
 		change = round change, 2
 		
 		chg = change
-		getChange = func(denom) {
-			loop qty: {
-				if (change >= denom) {
-					change = change - denom
-					qty = qty + 1
-					change = round change, 2
-				} else {
-					return qty as int
-				}
-			}
-		}
+		
 		twenties	= $getChange(20)
-		tens 		= $getChange(10)
+		tens 			= $getChange(10)
 		fives 		= $getChange(5)
-		ones	 	= $getChange(1)
+		ones	 		= $getChange(1)
 		quarters 	= $getChange(0.25)
 		dimes 		= $getChange(0.1)
 		nickels 	= $getChange(0.05)
@@ -48,3 +45,16 @@
 		"Nickels:	", nickels, 	"\n",
 		"Pennies:	", pennies, 	"\n\n"
 	}
+	
+	dynamic func getChange(denom) {
+		loop qty: {
+			if (change >= denom) {
+				change = change - denom
+				qty = qty + 1
+				change = round change, 2
+			} else {
+				return qty as int
+			}
+		}
+	}
+	

@@ -7,14 +7,12 @@ import growdy.Symbol;
 import growdy.Terminal;
 import rowdy.exceptions.MainNotFoundException;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.*;
 import rowdy.nodes.statement.*;
 import rowdy.nodes.RowdyNode;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Stack;
 import static rowdy.lang.RowdyGrammarConstants.*;
 
@@ -26,7 +24,7 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  */
 public class RowdyInstance {
 
-  private Node root;
+  private BaseNode root;
   /**
    * Stores the name of each identifier or function
    */
@@ -34,7 +32,7 @@ public class RowdyInstance {
   /**
    * Keeps track of the level of loops the program is in.
    */
-  public final Stack<Node> activeLoops;
+  public final Stack<BaseNode> activeLoops;
   /**
    * Keeps track of the functions currently being called.
    */
@@ -42,10 +40,9 @@ public class RowdyInstance {
   /**
    * Reference to the main function
   */
-  private Node main;
-  
+  private BaseNode main;
+  private final List<String> runningList;
   private List<Value> programParamValues;
-  
   private boolean firstTimeInitialization;
 
   public RowdyInstance() {
@@ -55,10 +52,59 @@ public class RowdyInstance {
     activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
     firstTimeInitialization = true;
+    runningList = new ArrayList<>(50);
   }
   
   public void initialize(GRowdy builder) {
-    this.root = builder.getProgram();
+    root = (RowdyNode) builder.getProgram();
+  }
+  
+  /**
+   * Optimization of a program tree, compresses the program eliminating 
+   * redundant nodes in a tree. Expressions are mostly parts of a program
+   * that need compression.
+   * @param program The program being compressed.
+   */
+  public void compress(BaseNode program) {
+    List<BaseNode> childrenNodes = program.getAll();
+    BaseNode curNode;
+    BaseNode replacement;
+    for (int i = 0; i < childrenNodes.size(); i++) {
+      curNode = childrenNodes.get(i);
+      compress(curNode);
+      if (curNode.isCompressable()) {
+        if (curNode.hasSymbols()) {
+          int usefulCount = countUsefulChildren(curNode);
+          if (usefulCount < 2) {
+            replacement = curNode.getLeftMost();
+            childrenNodes.remove(i);
+            childrenNodes.add(i, replacement);
+          }
+        } else {
+          childrenNodes.remove(i--);
+        }
+      }
+    }
+    BaseNode possibleDup = program.getLeftMost();
+    if (possibleDup != null && possibleDup.symbol().id() == program.symbol().id()) {
+      int usefulCount = countUsefulChildren(program);
+      if (usefulCount < 2) {
+        program.setChildren(program.getLeftMost().getAll());
+      }
+    }
+  }
+  
+  private int countUsefulChildren(BaseNode root) {
+    int usefulCount = 0;
+    List<BaseNode> children = root.getAll();
+    BaseNode curNode;
+    for (int i = 0; i < children.size(); i++) {
+      curNode = children.get(i);
+      if (curNode.hasSymbols()) {
+        usefulCount++;
+      }
+    }
+    return usefulCount;
   }
   
   /**
@@ -77,6 +123,7 @@ public class RowdyInstance {
 
   public void executeLine() throws ConstantReassignmentException {
     declareSystemConstants();
+    compress(root);
     executeStmt(root, null);
   }
   
@@ -99,6 +146,7 @@ public class RowdyInstance {
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
+    compress(main);
     executeStmt(main, null);
   }
   
@@ -119,32 +167,33 @@ public class RowdyInstance {
    * @param parent
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void declareGlobals(Node parent) throws ConstantReassignmentException {
-    Node currentTreeNode;
-    ArrayList<Node> children = parent.getAll();
+  public void declareGlobals(BaseNode parent) throws ConstantReassignmentException {
+    BaseNode cur;
+    ArrayList<BaseNode> children = parent.getAll();
     int currentID;
     
     for (int i = 0; i < children.size(); i++) {
-      currentTreeNode = children.get(i);
-      currentID = currentTreeNode.symbol().id();
+      cur = children.get(i);
+      currentID = cur.symbol().id();
       switch (currentID) {
         case ASSIGN_STMT:
-          ((AssignStatement) currentTreeNode).execute(null);
+          ((AssignStatement) cur).execute(null);
           break;
         case FUNCTION:
-          Node nativeOpt = currentTreeNode.get(NATIVE_FUNC_OPT);
-          String functionName = ((Terminal) currentTreeNode.get(ID).symbol()).getName();
-          if (nativeOpt.hasSymbols()) {
+          Node modOpts = cur.get(NATIVE_FUNC_OPT);
+          
+          String functionName = ((Terminal) cur.get(ID).symbol()).getName();
+          if (modOpts.hasSymbols()) {
             setAsGlobal(functionName, new Value());
           } else {
             if (functionName.equals("main")) {
               main = parent;
             }
-            setAsGlobal(functionName, new Value(currentTreeNode, true));
+            setAsGlobal(functionName, new Value(cur, true));
           }
           break;
         default:
-          declareGlobals(currentTreeNode);
+          declareGlobals(cur);
       }
     }
   }
@@ -159,17 +208,19 @@ public class RowdyInstance {
    * the original caller.
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public void executeStmt(Node parent, Node seqControl) throws ConstantReassignmentException {
-    RowdyNode currentTreeNode;
+  public void executeStmt(BaseNode parent, BaseNode seqControl) throws ConstantReassignmentException {
+    BaseNode cur;
     if (parent == null) 
       throw new IllegalArgumentException("parent node is null");
-    ArrayList<Node> children = parent.getAll();
+    ArrayList<BaseNode> children = parent.getAll();
     for (int i = 0, curID; i < children.size(); i++) {
-      currentTreeNode = (RowdyNode) children.get(i);
-      curID = currentTreeNode.symbol().id();
+      cur = children.get(i);
+      curID = cur.symbol().id();
       switch (curID) {
         case FUNCTION:
-          Value exitValue = executeFunc(currentTreeNode);
+          String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+          Value funcVal = fetch(getIdAsValue(cur.get(ID)), cur);
+          Value exitValue = executeFunc(funcName, funcVal, programParamValues);
           if (exitValue == null){
             exitValue = new Value(0, false);
           }
@@ -177,121 +228,80 @@ public class RowdyInstance {
         case ASSIGN_STMT:
         case LOOP_STMT:
         case BREAK_STMT:
-          currentTreeNode.execute(null);
+          cur.execute(null);
           break;
         case IF_STMT:
-          ((IfStatement) currentTreeNode).execute(new Value(seqControl, false));
+          ((IfStatement) cur).execute(new Value(seqControl, false));
           break;
         
         case READ_STMT:
-          ((ReadStatement) currentTreeNode).execute(new Value(System.in, false));
+          ((ReadStatement) cur).execute(new Value(System.in, false));
           break;
         case FUNC_CALL:
-          executeFunc(currentTreeNode);
+          executeFunc(cur);
           break;
         case RETURN_STMT:
-          ((ReturnStatement) currentTreeNode).execute(new Value(seqControl, false));
+          ((ReturnStatement) cur).execute(new Value(seqControl, false));
           break;
         case PRINT_STMT:
-          ((PrintStatement) currentTreeNode).execute(new Value(System.out, false));
+          ((PrintStatement) cur).execute(new Value(System.out, false));
           break;
         default:
           if (seqControl != null) {
             if (seqControl.isSeqActive()) {
-              executeStmt(currentTreeNode, seqControl);
+              executeStmt(cur, seqControl);
             }
           } else {
-            executeStmt(currentTreeNode, null);
+            executeStmt(cur, null);
           }
       }
     }
   }
   
-  public Value executeFunc(Node cur) throws ConstantReassignmentException {
-    RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
-    String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getName();
+  /**
+   * Function calls with parameters are sent to this method.
+   * @param cur
+   * @return
+   * @throws ConstantReassignmentException 
+   */
+  public Value executeFunc(BaseNode cur) throws ConstantReassignmentException {
+    
+    BaseNode idFuncRef = cur.get(ID_FUNC_REF);
     List<Value> parameterValues = new ArrayList<>();
-    RowdyNode funcBodyExpr = (RowdyNode) idFuncRef.get(FUNC_BODY_EXPR);
-    Node expr = funcBodyExpr.get(EXPRESSION, false);// This might be 'main'
-    if (expr != null && expr.hasSymbols()) {
-      Expression paramValue = (Expression)funcBodyExpr.get(EXPRESSION);
+    
+    BaseNode funcBodyExpr = idFuncRef.get(FUNC_BODY_EXPR);
+    BaseNode paramValue = funcBodyExpr.get(EXPRESSION);
+    parameterValues.add(paramValue.execute());
+    BaseNode atomTailNode = funcBodyExpr.get(EXPR_LIST);
+    
+    while (atomTailNode.hasSymbols()) {
+      paramValue = atomTailNode.get(EXPRESSION);
       parameterValues.add(paramValue.execute());
-      Node atomTailNode = funcBodyExpr.get(EXPR_LIST);
-      while (atomTailNode.hasSymbols()) {
-        paramValue = (Expression)atomTailNode.get(EXPRESSION);
-        parameterValues.add(paramValue.execute());
-        atomTailNode = atomTailNode.get(EXPR_LIST);
-      }
-    } else if (funcName.equals("main")){
-      parameterValues = programParamValues;
+      atomTailNode = atomTailNode.get(EXPR_LIST);
     }
+    
     return executeFunc(cur, parameterValues);
   }
   
   /**
-   * Lot's happening here, when a function is executed with the given
-   * parameter values these values are mapped respectively to the formal
-   * parameters (if any). The function is pushed onto the call stack and
-   * it's statement list is executed. After this function executes this
-   * method will return it's return value.
+   * Determines if the function is native or not and executes it's code
+   * with the given parameter values
    *
    * @param cur The function being executed
    * @param parameterValues The parameters passed to this function
    * @return The function's return value
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
-  public Value executeFunc(Node cur, List<Value> parameterValues) throws ConstantReassignmentException {
+  public Value executeFunc(BaseNode cur, List<Value> parameterValues) throws ConstantReassignmentException {
     // 1. Collect parameters
-    RowdyNode idFuncRef = (RowdyNode) cur.get(ID_FUNC_REF);
+    BaseNode idFuncRef = cur.get(ID_FUNC_REF);
     String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getName();
-    Value funcVal;
+    Value funcVal = fetch(getIdAsValue(idFuncRef.get(ID)), cur);
     
-    funcVal = fetch(getIdAsValue(idFuncRef.get(ID)), cur);
-    if (funcVal == null) {
-      if (globalSymbolTable.get(funcName) == null) {
-        throw new RuntimeException("Function '" + funcName + "' not defined on "
-                + "line " + cur.getLine());
-      } else {
-        funcVal = globalSymbolTable.get(funcName);
-      }
-    }
-    
-    if (funcVal.getValue() instanceof RowdyNode) {
-      Node functionNode = (Node) funcVal.getValue();
-      List<String> paramsList = new ArrayList<>();
-      if (!parameterValues.isEmpty()) {
-        Node functionBody = functionNode.get(FUNCTION_BODY);
-        Node paramsNode = functionBody.get(PARAMETERS);
-        if (paramsNode.hasSymbols()) {
-          paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
-          Node paramsTailNode = paramsNode.get(PARAMS_TAIL);
-          while (paramsTailNode.hasSymbols()) {
-            paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
-            paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
-          }
-        }
-      }
-      // 2. Copy actual parameters to formal parameters
-      HashMap<String, Value> params = new HashMap<>();
-      String paramName;
-      for (int p = 0; p < paramsList.size(); p++) {
-        paramName = paramsList.get(p);
-        params.put(paramName, parameterValues.get(p));
-      }
-      // 3. Push the function onto the call stack
-      Function function = new Function(funcName, params, cur.getLine());
-      callStack.push(function);
-      // 4. Get and execute the stmt-list
-      Node funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
-      Node stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new Node(null, 0);
-      seqControl.setSeqActive(true);
-      executeStmt(stmtList, seqControl);
-      // When finished, remove the function from the
-      // call stack and free it's memory then return
-      // it's value.
-      function = callStack.pop();
-      function.getSymbolTable().free();
-      return function.getReturnValue();
+    if (funcVal.getValue() instanceof BaseNode) {
+      
+      return executeFunc(funcName, funcVal, parameterValues);
+      
     } else {
       NativeJava nativeJava = (NativeJava) funcVal.getValue();
       Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
@@ -307,8 +317,66 @@ public class RowdyInstance {
       return returnValue == null ? new Value() : new Value(returnValue, false);
     }
   }
+  
+  /**
+   * Executes the function, the name and it's code along with the parameters
+   * are mapped out and pushed onto the call stack. This does not execute
+   * native code.
+   * @param funcName The name of the function to execute
+   * @param funcVal The code of the function wrapped inside a Value
+   * @param parameterValues The parameters to execute with
+   * @return The value the function returns
+   * @throws ConstantReassignmentException 
+   */
+  public Value executeFunc(String funcName, Value funcVal, List<Value> parameterValues) throws ConstantReassignmentException {
+    BaseNode functionNode;
+    if (runningList.contains(funcName)) {
+      functionNode = ((BaseNode) funcVal.getValue()).copy();
+    } else {
+      functionNode = ((BaseNode) funcVal.getValue());
+      runningList.add(funcName);
+    }
+    List<String> paramsList = new ArrayList<>();
+    if (!parameterValues.isEmpty()) {
+      BaseNode functionBody = functionNode.get(FUNCTION_BODY);
+      BaseNode paramsNode = functionBody.get(PARAMETERS);
+      if (paramsNode.hasSymbols()) {
+        paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
+        BaseNode paramsTailNode = paramsNode.get(PARAMS_TAIL);
+        while (paramsTailNode.hasSymbols()) {
+          paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
+          paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+        }
+      }
+    }
+    // 2. Copy actual parameters to formal parameters
+    HashMap<String, Value> params = new HashMap<>();
+    String paramName;
+    for (int p = 0; p < paramsList.size(); p++) {
+      paramName = paramsList.get(p);
+      params.put(paramName, parameterValues.get(p));
+    }
+    // 3. Push the function onto the call stack
+    Function function = new Function(funcName, params, functionNode.getLine());
+    if (functionNode.symbol().id() == ANONYMOUS_FUNC || functionNode.get(DYNAMIC_OPT).hasSymbols()) {
+      function.setAsDynamic();
+    }
+    callStack.push(function);
+    // 4. Get and execute the stmt-list
+    BaseNode funcStmtBlock = functionNode.get(FUNCTION_BODY).get(STMT_BLOCK);
+    BaseNode stmtList = funcStmtBlock.get(STMT_LIST), seqControl = new RowdyNode(null, 0);
+    seqControl.setSeqActive(true);
+    executeStmt(stmtList, seqControl);
+    // When finished, remove the function from the
+    // call stack and free it's memory then return
+    // it's value.
+    function = callStack.pop();
+    function.getSymbolTable().free();
+    runningList.remove(funcName);
+    return function.getReturnValue();
+  }
 
-  public void allocateIfExists(String idName, Value value) throws ConstantReassignmentException {
+  public void allocateIfExists(String idName, Value value) {
     Value exists = globalSymbolTable.get(idName);
     if (exists != null) {
       globalSymbolTable.replace(idName, value);
@@ -326,36 +394,37 @@ public class RowdyInstance {
    * @throws rowdy.exceptions.ConstantReassignmentException
    */
   public void allocate(Terminal idTerminal, Value value, int line) throws ConstantReassignmentException {
-    Value exists = globalSymbolTable.get(idTerminal.getName());
-    if (exists != null) {
+    if (callStack.isEmpty()) {
       setAsGlobal(idTerminal, value);
     } else {
-      
-      if (callStack.isEmpty()) {
-        setAsGlobal(idTerminal, value);
-      } else {
-        try {
-          Stack<Function> searchStack = new Stack<>();
-          boolean found = false;
-          while(!callStack.isEmpty()) {
-            Function currentFunction = callStack.pop();
-            searchStack.push(currentFunction);
-            Value v = currentFunction.getSymbolTable().getValue(idTerminal.getName());
-            if (v != null) {
-              currentFunction.getSymbolTable().allocate(idTerminal, value, line);
-              found = true;
-              break;
-            }
+      try {
+        Stack<Function> searchStack = new Stack<>();
+        boolean found = false;
+        while(!callStack.isEmpty()) {
+          Function currentFunction = callStack.pop();
+          searchStack.push(currentFunction);
+          Value v = currentFunction.getSymbolTable().getValue(idTerminal.getName());
+          if (v != null) {
+            currentFunction.getSymbolTable().allocate(idTerminal, value, line);
+            found = true;
+            break;
+          } else if (!currentFunction.isDynamic()) {
+            break;
           }
-          while(!searchStack.isEmpty()){
-            callStack.push(searchStack.pop());
-          }
-          if (!found){
+        }
+        while(!searchStack.isEmpty()){
+          callStack.push(searchStack.pop());
+        }
+        if (!found){
+          Value exists = globalSymbolTable.get(idTerminal.getName());
+          if (exists == null) {
             Function currentFunction = callStack.peek();
             currentFunction.getSymbolTable().allocate(idTerminal, value, line);
+          } else {
+            setAsGlobal(idTerminal, value);
           }
-        } catch (EmptyStackException e) {}
-      }
+        }
+      } catch (EmptyStackException e) {}
     }
   }
 
@@ -434,6 +503,8 @@ public class RowdyInstance {
       valueFromFunction = currentFunction.getSymbolTable().getValue(value);
       if (valueFromFunction != null) {
         valueFound = true;
+        break;
+      } else if (!currentFunction.isDynamic()) {
         break;
       }
     }

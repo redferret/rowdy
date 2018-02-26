@@ -1,0 +1,48 @@
+
+import "core.rowdy"
+
+func main(iterations) {
+	if (isset iterations) == false {
+		$println("Please enter the number of iterations")
+		return 1
+	}
+	this.l1 = 0
+	this.l2 = 0
+	this.l3 = 0
+	this.caseRuns = 30
+	case = func() {
+		this.prog1 = func() {
+			$forLoop(0, iterations, 1, func(x){
+				// Do nothing
+			})
+		}
+		
+		this.prog2 = func() {
+			$forLoop(0, iterations, 1, func(x){
+				this.j = x as int
+			})
+		}
+		
+		this.prog3 = func() {
+			loop x: {
+				this.j = x as int
+				x = x + 1 as int
+				if x > iterations {break}
+			}
+		}
+		l1 = (l1 + $runtime(prog1)) as int
+		l2 = (l2 + $runtime(prog2)) as int
+		l3 = (l3 + $runtime(prog3)) as int
+		print "."
+	}
+	testProg = func() {
+		$forLoop(0, caseRuns, 1, func(){
+			$case()
+		})
+	}
+	$println(concat "Testing took ", $runtime(testProg), " ms to finish")
+	$println()
+	$println(concat "Average for prog1: ", (l1 / caseRuns) as int)
+	$println(concat "Average for prog2: ", (l2 / caseRuns) as int)
+	$println(concat "Average for prog3: ", (l3 / caseRuns) as int)
+}
