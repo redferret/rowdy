@@ -2,7 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.ID;
@@ -11,7 +11,7 @@ import static rowdy.lang.RowdyGrammarConstants.ID;
  *
  * @author Richard
  */
-public class RoundExpr extends BaseRowdyNode {
+public class RoundExpr extends BaseNode {
 
   public RoundExpr(Symbol def, int lineNumber) {
     super(def, lineNumber);
@@ -21,7 +21,7 @@ public class RoundExpr extends BaseRowdyNode {
   public Value execute(Value leftValue) {
     Value valueToRound = instance.fetch(instance.getIdAsValue(get(ID)), this);
     double roundedValue = valueToRound.valueToDouble();
-    BaseRowdyNode arithmExpr = get(ARITHM_EXPR);
+    BaseNode arithmExpr = getAll().get(3);
     int precision = arithmExpr.execute().valueToDouble().intValue();
     double factor = 1;
     while (precision > 0) {

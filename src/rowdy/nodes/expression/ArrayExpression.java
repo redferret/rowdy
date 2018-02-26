@@ -5,7 +5,7 @@ import growdy.Symbol;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_BODY;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_KEY_VALUE_BODY;
@@ -17,7 +17,7 @@ import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
  *
  * @author Richard
  */
-public class ArrayExpression extends BaseRowdyNode {
+public class ArrayExpression extends BaseNode {
 
   public ArrayExpression(Symbol def, int lineNumber) {
     super(def, lineNumber);

@@ -4,7 +4,7 @@ package rowdy.nodes.expression;
 import growdy.Node;
 import growdy.Symbol;
 import java.math.BigInteger;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
@@ -14,14 +14,14 @@ import static rowdy.lang.RowdyGrammarConstants.*;
  *
  * @author Richard
  */
-public class Expression extends BaseRowdyNode {
+public class Expression extends BaseNode {
 
   public Expression(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) {
-    BaseRowdyNode leftNode = getLeftMost();
+    BaseNode leftNode = getLeftMost();
     if (leftNode == null) {
       return instance.fetch(leftValue, this);
     }

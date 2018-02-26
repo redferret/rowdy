@@ -5,7 +5,7 @@ import growdy.Symbol;
 import growdy.Terminal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
@@ -24,7 +24,7 @@ import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
  *
  * @author Richard
  */
-public class AssignStatement extends BaseRowdyNode {
+public class AssignStatement extends BaseNode {
   
   public AssignStatement(Symbol def, int lineNumber) {
     super(def, lineNumber);
@@ -33,7 +33,7 @@ public class AssignStatement extends BaseRowdyNode {
   public Value execute(Value leftValue) {
     try {
       Terminal idTerminal = (Terminal) get(ID).symbol();
-      BaseRowdyNode assignExpr = get(EXPRESSION);
+      BaseNode assignExpr = get(EXPRESSION);
       Value rightValue = assignExpr.execute();
       
       if (rightValue.isConstant()) {

@@ -2,7 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 
@@ -10,7 +10,7 @@ import static rowdy.lang.RowdyGrammarConstants.ID;
  *
  * @author Richard
  */
-public class IssetExpr extends BaseRowdyNode {
+public class IssetExpr extends BaseNode {
 
   public IssetExpr(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);

@@ -3,7 +3,7 @@ package rowdy.nodes.statement;
 
 import growdy.Symbol;
 import growdy.Terminal;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -15,7 +15,7 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
  *
  * @author Richard
  */
-public class LoopStatement extends BaseRowdyNode {
+public class LoopStatement extends BaseNode {
   
   public LoopStatement(Symbol def, int lineNumber) {
     super(def, lineNumber);
@@ -41,7 +41,7 @@ public class LoopStatement extends BaseRowdyNode {
       instance.activeLoops.push(this);
       setSeqActive(true);
       boolean done = false;
-      BaseRowdyNode loopStmtList = get(STMT_BLOCK).get(STMT_LIST);
+      BaseNode loopStmtList = get(STMT_BLOCK).get(STMT_LIST);
       while (!done) {
         instance.executeStmt(loopStmtList, this);
         done = !isSeqActive();

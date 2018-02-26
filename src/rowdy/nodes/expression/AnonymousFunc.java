@@ -2,14 +2,14 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 
 /**
  *
  * @author Richard
  */
-public class AnonymousFunc extends BaseRowdyNode {
+public class AnonymousFunc extends BaseNode {
 
   public AnonymousFunc(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);

@@ -2,14 +2,14 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 
 /**
  *
  * @author Richard
  */
-public class TermMinus extends BaseRowdyNode{
+public class TermMinus extends BaseNode{
 
   public TermMinus(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);
@@ -17,11 +17,11 @@ public class TermMinus extends BaseRowdyNode{
   
   @Override
   public Value execute(Value leftValue) {
-    BaseRowdyNode factor = getLeftMost();
+    BaseNode factor = getLeftMost();
     if (factor == null) {
       return instance.fetch(leftValue, this);
     }
-    BaseRowdyNode factorTail = null;
+    BaseNode factorTail = null;
     if (children.size() > 2) {
       factorTail = children.get(2);
     }

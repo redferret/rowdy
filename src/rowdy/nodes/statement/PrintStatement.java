@@ -4,7 +4,7 @@ package rowdy.nodes.statement;
 import growdy.Node;
 import growdy.Symbol;
 import java.io.PrintStream;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
@@ -16,7 +16,7 @@ import rowdy.nodes.expression.Expression;
  *
  * @author Richard
  */
-public class PrintStatement extends BaseRowdyNode {
+public class PrintStatement extends BaseNode {
   
   public PrintStatement(Symbol def, int lineNumber) {
     super(def, lineNumber);
@@ -25,14 +25,14 @@ public class PrintStatement extends BaseRowdyNode {
   public Value execute(Value printStreamWrapper) {
     PrintStream stream = (PrintStream) printStreamWrapper.getValue();
     StringBuilder printValue = new StringBuilder();
-    BaseRowdyNode printValExpr = get(EXPRESSION);
+    BaseNode printValExpr = get(EXPRESSION);
     Value printVal = printValExpr.execute();
     if (printVal == null) {
       printValue.append("null");
     } else {
       printValue.append(printVal.valueToString());
     }
-    BaseRowdyNode atomTailNode = get(EXPR_LIST);
+    BaseNode atomTailNode = get(EXPR_LIST);
     while (atomTailNode.hasSymbols()) {
       printValExpr = atomTailNode.get(EXPRESSION);
       printVal = printValExpr.execute();

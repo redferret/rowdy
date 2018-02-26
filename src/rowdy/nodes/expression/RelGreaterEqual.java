@@ -2,21 +2,21 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 
 /**
  *
  * @author Richard
  */
-public class RelGreaterEqual extends BaseRowdyNode  {
+public class RelGreaterEqual extends BaseNode  {
 
   public RelGreaterEqual(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) {
-    BaseRowdyNode arithmExpr = getLeftMost();
+    BaseNode arithmExpr = getLeftMost();
     if (arithmExpr == null) {
       return instance.fetch(leftValue, this);
     }

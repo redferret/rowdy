@@ -2,7 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL;
@@ -12,7 +12,7 @@ import rowdy.nodes.RowdyNode;
  *
  * @author Richard
  */
-public class FactorPow extends BaseRowdyNode {
+public class FactorPow extends BaseNode {
 
   public FactorPow(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);
@@ -20,11 +20,11 @@ public class FactorPow extends BaseRowdyNode {
 
   @Override
   public Value execute(Value leftValue) {
-    BaseRowdyNode factor = getLeftMost();
+    BaseNode factor = getLeftMost();
     if (factor == null) {
       return instance.fetch(leftValue, this);
     }
-    BaseRowdyNode factorTail = null;
+    BaseNode factorTail = null;
     if (children.size() > 2) {
       factorTail = children.get(2);
     }

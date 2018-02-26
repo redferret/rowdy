@@ -6,7 +6,7 @@ import growdy.Symbol;
 import growdy.Terminal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -22,15 +22,15 @@ import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
  *
  * @author Richard
  */
-public class Atomic extends BaseRowdyNode {
+public class Atomic extends BaseNode {
 
   public Atomic(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
   @Override
   public Value execute(Value leftValue) {
-    BaseRowdyNode atomicType = getLeftMost();
-    BaseRowdyNode child;
+    BaseNode atomicType = getLeftMost();
+    BaseNode child;
     Value value = new Value();
     switch(atomicType.symbol().id()) {
       case ATOMIC_ID:

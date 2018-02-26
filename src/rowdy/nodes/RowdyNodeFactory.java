@@ -4,7 +4,7 @@ package rowdy.nodes;
 import growdy.Node;
 import growdy.Symbol;
 import growdy.NodeFactory;
-import rowdy.BaseRowdyNode;
+import rowdy.BaseNode;
 import rowdy.nodes.expression.*;
 import rowdy.nodes.statement.*;
 import static rowdy.lang.RowdyGrammarConstants.*;
@@ -16,7 +16,7 @@ import static rowdy.lang.RowdyGrammarConstants.*;
 public class RowdyNodeFactory implements NodeFactory {
   
   @Override
-  public BaseRowdyNode getNode(Symbol symbol, int line) {
+  public BaseNode getNode(Symbol symbol, int line) {
     switch(symbol.id()) {
       case EXPRESSION:
         Expression expr = new Expression(symbol, line);

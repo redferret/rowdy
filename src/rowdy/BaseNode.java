@@ -11,12 +11,12 @@ import rowdy.nodes.RowdyNode;
  *
  * @author Richard
  */
-public abstract class BaseRowdyNode extends Node<BaseRowdyNode, Value>{
+public abstract class BaseNode extends Node<BaseNode, Value>{
 
   protected static RowdyInstance instance;
   protected boolean isCompressable;
   
-  public BaseRowdyNode(Symbol symbol, int lineNumber) {
+  public BaseNode(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);
     isCompressable = symbol instanceof NonTerminal;
   }
@@ -34,7 +34,7 @@ public abstract class BaseRowdyNode extends Node<BaseRowdyNode, Value>{
   }
   
   @Override
-  public BaseRowdyNode copy() {
+  public BaseNode copy() {
     Symbol cSymbol = null;
     if (this.symbol instanceof Terminal) {
       cSymbol = ((Terminal)symbol).copy();
@@ -42,7 +42,7 @@ public abstract class BaseRowdyNode extends Node<BaseRowdyNode, Value>{
       cSymbol = ((NonTerminal)symbol).copy();
     }
     
-    BaseRowdyNode copy = Rowdy.nodeFactory.getNode(cSymbol, this.line);
+    BaseNode copy = Rowdy.nodeFactory.getNode(cSymbol, this.line);
     copy.setSeqActive(this.seqActive);
     copy.setTrimmable(this.trimmable);
     copy.setChildren(copyChildren());

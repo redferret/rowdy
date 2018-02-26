@@ -27,8 +27,12 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
+import static rowdy.lang.RowdyGrammarConstants.IMPORT;
 import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
+import static rowdy.lang.RowdyGrammarConstants.PROGRAM;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -65,12 +69,12 @@ public class Rowdy {
   
   public void run() {
     if (!programFileName.isEmpty()) {
-      List<BaseRowdyNode> programTrees = new ArrayList<>();
+      List<BaseNode> programTrees = new ArrayList<>();
       try {
         growdy.buildFromSource(programFileName);
         rowdyInstance.initialize(growdy);
         rowdyInstance.declareGlobals();
-        loadImports(growdy.getProgram(), programTrees);
+        loadImports((BaseNode) growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
             rowdyInstance.declareGlobals(tree);
@@ -114,6 +118,12 @@ public class Rowdy {
         handleException(e);
       }
     } else {
+      try {
+        growdy.buildFromSource("bin/core/rowdy");
+        rowdyInstance.declareGlobals((BaseNode) growdy.getProgram());
+        loadJarLibs("bin/");
+      } catch (Throwable ex) {}
+      
       Scanner keys = new Scanner(System.in);
       String line;
       do {
@@ -126,7 +136,6 @@ public class Rowdy {
           if (line.contains("\\\\")) {
             line = line.replace("\\\\", "\n");
             program.append(line);
-            line = "";
           } else {
             program.append(line);
             break;
@@ -134,30 +143,24 @@ public class Rowdy {
         }
         if (program.toString().isEmpty()) {
           continue;
-        }
-        if (program.toString().equalsIgnoreCase("exit")) {
+        }else if (program.toString().equalsIgnoreCase("exit")) {
           break;
         }
         try {
           growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyInstance.initialize(growdy);
-        } catch (ParseException | SyntaxException | AmbiguousGrammarException e) {
-          handleException(e);
-          continue;
-        }
-
-        try {
           rowdyInstance.executeLine();
-        } catch (Exception | ConstantReassignmentException e) {
+        } catch (ParseException | SyntaxException | AmbiguousGrammarException | 
+                ConstantReassignmentException e) {
           handleException(e);
         }
       } while (true);
     }
   }
   
-  public List<String> getImports(Node root) {
-    Node currentTreeNode;
-    ArrayList<Node> children = root.getAll();
+  public List<String> getImports(BaseNode root) {
+    BaseNode currentTreeNode;
+    ArrayList<BaseNode> children = root.getAll();
     int currentID;
     List<String> importPaths = new ArrayList<>();
     for (int i = 0; i < children.size(); i++) {
@@ -175,13 +178,13 @@ public class Rowdy {
     return importPaths;
   }
   
-  public void loadImports(Node program, List<BaseRowdyNode> programTrees) {
+  public void loadImports(BaseNode program, List<BaseNode> programTrees) {
     List<String> localImports = getImports(program);
     localImports.forEach(imprt -> {
       String importPath = "bin/" + imprt;
       try {
         growdy.buildFromSource(importPath);
-        BaseRowdyNode subProgram = (BaseRowdyNode) growdy.getProgram();
+        BaseNode subProgram = (BaseNode) growdy.getProgram();
         programTrees.add(subProgram);
         loadImports(subProgram, programTrees);
       } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
@@ -243,7 +246,6 @@ public class Rowdy {
           if (je.isDirectory() || !je.getName().endsWith(".class")) {
             continue;
           }
-          // -6 because of .class
           String className = je.getName().substring(0, je.getName().length() - 6);
           className = className.replace('/', '.');
           Class c = cl.loadClass(className);
