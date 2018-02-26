@@ -1,7 +1,6 @@
 
 package rowdy.nodes;
 
-import growdy.Node;
 import growdy.Symbol;
 import growdy.NodeFactory;
 import rowdy.BaseNode;
@@ -102,6 +101,10 @@ public class RowdyNodeFactory implements NodeFactory {
         FactorPow pow = new FactorPow(symbol, line);
         pow.setAsNonCompressable();
         return pow;
+      case FACTOR_MINUS:
+        FactorMinus minus = new FactorMinus(symbol, line);
+        minus.setAsNonCompressable();
+        return minus;
       case ATOMIC:
         Atomic atomic = new Atomic(symbol, line);
         atomic.setAsNonCompressable();

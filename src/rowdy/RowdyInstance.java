@@ -68,7 +68,7 @@ public class RowdyInstance {
   public void compress(BaseNode program) {
     List<BaseNode> childrenNodes = program.getAll();
     BaseNode curNode;
-    BaseNode toSet;
+    BaseNode replacement;
     for (int i = 0; i < childrenNodes.size(); i++) {
       curNode = childrenNodes.get(i);
       compress(curNode);
@@ -76,17 +76,17 @@ public class RowdyInstance {
         if (curNode.hasSymbols()) {
           int usefulCount = countUsefulChildren(curNode);
           if (usefulCount < 2) {
-            toSet = curNode.getLeftMost();
+            replacement = curNode.getLeftMost();
             childrenNodes.remove(i);
-            childrenNodes.add(i, toSet);
+            childrenNodes.add(i, replacement);
           }
         } else {
           childrenNodes.remove(i--);
         }
       }
     }
-    BaseNode dup = program.getLeftMost();
-    if (dup != null && dup.symbol().id() == program.symbol().id()) {
+    BaseNode possibleDup = program.getLeftMost();
+    if (possibleDup != null && possibleDup.symbol().id() == program.symbol().id()) {
       int usefulCount = countUsefulChildren(program);
       if (usefulCount < 2) {
         program.setChildren(program.getLeftMost().getAll());

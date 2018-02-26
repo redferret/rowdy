@@ -1,5 +1,5 @@
 
-package rowdy.nodes.statements;
+package rowdy.nodes.statement;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

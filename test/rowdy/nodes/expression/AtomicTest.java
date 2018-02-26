@@ -1,12 +1,12 @@
 
-package rowdy.nodes.expressions;
+package rowdy.nodes.expression;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.nodes.RowdyNode;
-import rowdy.nodes.expression.Atomic;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ATOMIC;
 import static rowdy.testlang.lang.RowdyGrammarConstants.FUNC_CALL;
 import static rowdy.testlang.lang.RowdyGrammarConstants.STATEMENT;
@@ -31,7 +31,8 @@ public class AtomicTest extends TestCase {
 
   public void testAtomicConst() throws Throwable {
     String testCode = "600";
-    Atomic instance = (Atomic) getTestStatement(testCode, ATOMIC);
+    BaseNode instance = getTestStatement(testCode, ATOMIC);
+    assertTrue(instance instanceof Atomic);
     trimEmptyChildren(instance);
     Double expResult = 600.0;
     Double result = instance.execute().valueToDouble();
@@ -40,7 +41,8 @@ public class AtomicTest extends TestCase {
   
   public void testAtomicId() throws Throwable {
     String testCode = "var1";
-    Atomic instance = (Atomic) getTestStatement(testCode, ATOMIC);
+    BaseNode instance = getTestStatement(testCode, ATOMIC);
+    assertTrue(instance instanceof Atomic);
     rowdyInstance.setAsGlobal("var1", new Value(99, false));
     Integer result = (Integer) instance.execute().getValue();
     Integer expected = 99;
@@ -50,12 +52,15 @@ public class AtomicTest extends TestCase {
   public void testAtmoicFuncCall() throws Throwable {
     String testFuncCode = "f = func(){return 199 as int}";
     String testCall = "$f()";
-    RowdyNode funcNode = (RowdyNode) getTestStatement(testFuncCode, STATEMENT);
+    BaseNode funcNode = getTestStatement(testFuncCode, STATEMENT);
     trimEmptyChildren(funcNode);
     rowdyInstance.executeStmt(funcNode, null);
     RowdyNode funcCall = (RowdyNode) getTestStatement(testCall, FUNC_CALL);
     Integer result = (Integer) rowdyInstance.executeFunc(funcCall).getValue();
     Integer expected = 199;
     assertEquals(expected, result);
+  }
+
+  public void testExecute() {
   }
 }

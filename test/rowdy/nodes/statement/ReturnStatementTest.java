@@ -1,14 +1,16 @@
 
-package rowdy.nodes.statements;
+package rowdy.nodes.statement;
 
 import growdy.Node;
 import java.util.HashMap;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.BaseNode;
 import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
+import rowdy.nodes.RowdyNode;
 import rowdy.nodes.statement.ReturnStatement;
 import static rowdy.testlang.lang.RowdyGrammarConstants.RETURN_STMT;
 import static rowdy.testutils.TestUtils.getTestStatement;
@@ -38,7 +40,7 @@ public class ReturnStatementTest extends TestCase {
     
     Function testFunction = new Function("Test", new HashMap<>(), 0);
     rowdyInstance.callStack.push(testFunction);
-    Node seqControl = new Node(null, 0);
+    BaseNode seqControl = new RowdyNode(null, 0);
     seqControl.setSeqActive(true);
     Value seqControlWrapper = new Value(seqControl, false);
     

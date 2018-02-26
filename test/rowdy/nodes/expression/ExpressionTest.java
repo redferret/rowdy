@@ -1,13 +1,14 @@
  
-package rowdy.nodes.expressions;
+package rowdy.nodes.expression;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.Factor;
-import static rowdy.testlang.lang.RowdyGrammarConstants.FACTOR;
+import rowdy.nodes.expression.Expression;
+import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
@@ -15,26 +16,26 @@ import static rowdy.testutils.TestUtils.trimEmptyChildren;
  *
  * @author Richard
  */
-public class FactorTest extends TestCase {
+public class ExpressionTest extends TestCase {
   
-  public FactorTest(String testName) {
+  public ExpressionTest(String testName) {
     super(testName);
   }
 
   public static Test suite() {
-    TestSuite suite = new TestSuite(FactorTest.class);
+    TestSuite suite = new TestSuite(ExpressionTest.class);
     return suite;
   }
 
   /**
-   * Test of execute method, of class Factor.
+   * Test of execute method, of class Expression.
    */
   public void testExecute() throws ConstantReassignmentException {
-    String testCode = "100";
-    Factor instance = (Factor) getTestStatement(testCode, FACTOR);
+    String testCode = "3 + 8 - 9 * 19 >= 100";
+    BaseNode instance = getTestStatement(testCode, EXPRESSION);
     trimEmptyChildren(instance);
-    Double expResult = 100.0;
-    Double result = instance.execute().valueToDouble();
+    Value expResult = new Value(false, false);
+    Value result = instance.execute();
     assertEquals(expResult, result);
   }
   

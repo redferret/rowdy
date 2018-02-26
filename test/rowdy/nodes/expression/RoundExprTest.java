@@ -1,13 +1,13 @@
 
-package rowdy.nodes.expressions;
+package rowdy.nodes.expression;
 
 import growdy.Terminal;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.RoundExpr;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ID;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ROUND_EXPR;
 import static rowdy.testutils.TestUtils.getTestStatement;
@@ -33,7 +33,8 @@ public class RoundExprTest extends TestCase {
    */
   public void testExecute() throws ConstantReassignmentException {
     String testCode = "round a, 1";
-    RoundExpr instance = (RoundExpr) getTestStatement(testCode, ROUND_EXPR);
+    BaseNode instance = getTestStatement(testCode, ROUND_EXPR);
+    assertTrue(instance instanceof RoundExpr);
     rowdyInstance.allocate((Terminal) instance.get(ID).symbol(), new Value(123.87, false), 0);
     Value expResult = new Value(123.9, false);
     Value result = instance.execute();

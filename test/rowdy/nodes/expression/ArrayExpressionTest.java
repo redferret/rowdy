@@ -1,11 +1,13 @@
  
-package rowdy.nodes.expressions;
+package rowdy.nodes.expression;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.BaseNode;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.expression.ArrayExpression;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ARRAY_EXPR;
@@ -26,17 +28,27 @@ public class ArrayExpressionTest extends TestCase {
     return suite;
   }
 
-  /**
-   * Test of execute method, of class ArrayExpression.
-   */
-  public void testExecute() throws ConstantReassignmentException {
+  public void testExecuteArrayList() throws ConstantReassignmentException {
     String testCode = "array(1, 2, 3)";
-    ArrayExpression instance = (ArrayExpression) getTestStatement(testCode, ARRAY_EXPR);
+    BaseNode instance = getTestStatement(testCode, ARRAY_EXPR);
+    assertTrue(instance instanceof ArrayExpression);
     List<Object> expResult = Arrays.asList(1, 2, 3);
     List<Object> result = (List<Object>) instance.execute().getValue();
     
     for (int i = 0; i < 3; i++) {
       assertEquals(((Integer)expResult.get(i)), result.get(i));
+    }
+  }
+  
+  public void testExecuteHashMap() throws ConstantReassignmentException {
+    String testCode = "array(1:\"A\", 2:\"B\", 3:\"C\")";
+    BaseNode instance = getTestStatement(testCode, ARRAY_EXPR);
+    assertTrue(instance instanceof ArrayExpression);
+    List<Object> expResult = Arrays.asList("A", "B", "C");
+    HashMap<String, Object> result = (HashMap<String, Object>) instance.execute().getValue();
+    
+    for (int i = 1; i <= 3; i++) {
+      assertEquals(expResult.get(i-1), result.get(Integer.toString(i)));
     }
   }
   

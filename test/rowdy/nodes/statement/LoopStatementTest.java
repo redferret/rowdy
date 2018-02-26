@@ -1,5 +1,5 @@
 
-package rowdy.nodes.statements;
+package rowdy.nodes.statement;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

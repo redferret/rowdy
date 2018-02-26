@@ -1,5 +1,5 @@
 
-package rowdy.nodes.statements;
+package rowdy.nodes.statement;
 
 import java.util.HashMap;
 import junit.framework.Test;
