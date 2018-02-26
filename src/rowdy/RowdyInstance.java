@@ -416,8 +416,13 @@ public class RowdyInstance {
           callStack.push(searchStack.pop());
         }
         if (!found){
-          Function currentFunction = callStack.peek();
-          currentFunction.getSymbolTable().allocate(idTerminal, value, line);
+          Value exists = globalSymbolTable.get(idTerminal.getName());
+          if (exists == null) {
+            Function currentFunction = callStack.peek();
+            currentFunction.getSymbolTable().allocate(idTerminal, value, line);
+          } else {
+            setAsGlobal(idTerminal, value);
+          }
         }
       } catch (EmptyStackException e) {}
     }
