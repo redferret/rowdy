@@ -1,36 +1,52 @@
 
 package rowdy.nodes.expression;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.util.ArrayList;
+import java.util.List;
 import rowdy.BaseNode;
 import rowdy.Value;
+import org.junit.runners.Parameterized;
+import org.junit.runner.RunWith;
+import org.junit.Test;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_TERM_TAIL;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  *
  * @author Richard
  */
-public class BoolOrTest extends TestCase {
+@RunWith(Parameterized.class)
+public class BoolOrTest {
   
-  public BoolOrTest(String testName) {
-    super(testName);
+  private final String testCode;
+  private final Value expectedResult;
+  private final Value leftValue;
+  
+  public BoolOrTest(String testCode, Value leftValue, Value expectedResult) {
+    this.testCode = testCode;
+    this.expectedResult = expectedResult;
+    this.leftValue = leftValue;
   }
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite(BoolOrTest.class);
-    return suite;
-  }
-
+  @Test
   public void testExecute() {
-    String testCode = "or (1 == 0)";
     BaseNode instance = getTestStatement(testCode, BOOL_TERM_TAIL);
     assertTrue(instance instanceof BoolOr);
-    Value expResult = new Value(true, false);
-    Value result = instance.execute(new Value(true, false));
-    assertEquals(expResult, result);
+    assertTrue(instance.isCompressable());
+    Value result = instance.execute(leftValue);
+    assertEquals(expectedResult, result);
   }
   
+  // Provide data
+  @Parameterized.Parameters
+  public static List<Object[]> data() {
+    List<Object[]> list = new ArrayList<>();
+    list.add(new Object[]{"or true", new Value(true, false), new Value(true, false)});
+    list.add(new Object[]{"or true", new Value(false, false), new Value(true, false)});
+    list.add(new Object[]{"or false", new Value(true, false), new Value(true, false)});
+    list.add(new Object[]{"or false", new Value(false, false), new Value(false, false)});
+    return list;
+  }
 }

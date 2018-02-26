@@ -24,9 +24,6 @@ public class ExpressionSuite extends TestCase {
     suite.addTest(FactorPowTest.suite());
     suite.addTest(TermMinusTest.suite());
     suite.addTest(IssetExprTest.suite());
-    suite.addTest(RelLessEqualTest.suite());
-    suite.addTest(RelEqualTest.suite());
-    suite.addTest(BoolOrTest.suite());
     suite.addTest(AnonymousFuncTest.suite());
     suite.addTest(FactorModTest.suite());
     suite.addTest(AtomicTest.suite());
@@ -35,13 +32,9 @@ public class ExpressionSuite extends TestCase {
     suite.addTest(FactorDivTest.suite());
     suite.addTest(RoundExprTest.suite());
     suite.addTest(TermPlusTest.suite());
-    suite.addTest(BoolAndTest.suite());
-    suite.addTest(RelLessTest.suite());
     suite.addTest(ConcatExprTest.suite());
     suite.addTest(FactorMulTest.suite());
-    suite.addTest(RelGreaterTest.suite());
     suite.addTest(ArrayExpressionTest.suite());
-    suite.addTest(RelGreaterEqualTest.suite());
     return suite;
   }
   

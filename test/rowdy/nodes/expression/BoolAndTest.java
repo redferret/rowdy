@@ -1,39 +1,55 @@
 
 package rowdy.nodes.expression;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.util.ArrayList;
+import java.util.List;
 import rowdy.Value;
 import rowdy.BaseNode;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 
 /**
  *
  * @author Richard
  */
-public class BoolAndTest extends TestCase {
+@RunWith(Parameterized.class)
+public class BoolAndTest {
   
-  public BoolAndTest(String testName) {
-    super(testName);
+  private final String testCode;
+  private final Value expectedResult;
+  private final Value leftValue;
+  
+  public BoolAndTest(String testCode, Value leftValue, Value expectedResult) {
+    this.testCode = testCode;
+    this.expectedResult = expectedResult;
+    this.leftValue = leftValue;
   }
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite(BoolAndTest.class);
-    return suite;
-  }
-
+  @Test
   public void testExecute() {
-    Value leftValue = new Value(true, false);
-    String testCode = "and 1 == 1";
     BaseNode instance = getTestStatement(testCode, BOOL_FACTOR_TAIL);
     assertTrue(instance instanceof BoolAnd);
-    Value expResult = new Value(true, false);
+    assertTrue(instance.isCompressable());
     Value result = instance.execute(leftValue);
-    assertEquals(expResult, result);
+    assertEquals(expectedResult, result);
+  }
+  
+  // Provide data
+  @Parameterized.Parameters
+  public static List<Object[]> data() {
+    List<Object[]> list = new ArrayList<>();
+    list.add(new Object[]{"and true", new Value(true, false), new Value(true, false)});
+    list.add(new Object[]{"and true", new Value(false, false), new Value(false, false)});
+    list.add(new Object[]{"and false", new Value(true, false), new Value(false, false)});
+    list.add(new Object[]{"and false", new Value(false, false), new Value(false, false)});
+    return list;
   }
   
 }
