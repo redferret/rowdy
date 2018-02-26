@@ -25,7 +25,12 @@ public class FactorMinus extends BaseNode {
       factorTail = children.get(2);
     }
     leftValue = instance.fetch(leftValue, factor);
-    double left = leftValue.valueToDouble();
+    double left;
+    if (leftValue == null) {
+      left = 0;
+    } else {
+      left = leftValue.valueToDouble();
+    }
     double right = factor.execute(leftValue).valueToDouble();
     if (factorTail != null) {
       return factorTail.execute(new Value(left - right, false));

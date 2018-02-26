@@ -36,4 +36,12 @@ public class TermMinusTest extends TestCase {
     assertEquals(expResult, result);
   }
   
+  public void testNegativeValue() {
+    String testCode = "- 100";
+    BaseNode instance = getTestStatement(testCode, TERM_MINUS);
+    assertTrue(instance instanceof TermMinus);
+    Value expResult = new Value(-100.0, false);
+    Value result = instance.execute();
+    assertEquals(expResult, result);
+  }
 }

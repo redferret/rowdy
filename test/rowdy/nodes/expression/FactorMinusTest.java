@@ -1,18 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package rowdy.nodes.expression;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
-import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL_DIV;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.FACTOR_MINUS;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.trimEmptyChildren;
@@ -44,4 +39,12 @@ public class FactorMinusTest extends TestCase {
     assertEquals(expResult, result);
   }
   
+  public void testNegativeValue() {
+    String testCode = "- 100";
+    BaseNode instance = getTestStatement(testCode, FACTOR_MINUS);
+    assertTrue(instance instanceof FactorMinus);
+    Value expResult = new Value(-100.0, false);
+    Value result = instance.execute();
+    assertEquals(expResult, result);
+  }
 }
