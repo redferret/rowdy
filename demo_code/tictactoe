@@ -1,0 +1,123 @@
+
+import "core.rowdy"
+
+func main() {
+	xBoard = 0
+	oBoard = 0
+	playBoard = 0
+	
+	$println("For help, type 'help'")
+	$showHelp()
+	
+  xPlays = $getFirstPlayer()
+	$promptTurn()
+	
+	$initGame()
+	
+	loop game: {
+		
+		read input
+		if $equals(input, "exit") {
+			$println("Goodbye")
+			break
+		} else {
+			if $not( $equals(input, "help") ) {
+				if $equals(input, "reset") {
+					$initGame()
+					$printBoard()
+					$promptTurn()
+				} else {
+					if $isNumber(input) {
+						$makeMove()
+					} else {
+						if $not($isEmpty(input)) {
+							$println("Invalid input")
+						}
+					}
+				}
+			} else {
+				$showHelp()
+			}
+		}
+	}
+	
+}
+
+func showHelp() {
+	$println("Type 'reset' to start a new game")
+	print "To make a move, enter the index of the cell\n",
+			  "0 | 1 | 2 \n",
+				"----------\n",
+				"3 | 4 | 5 \n",
+				"----------\n",
+				"6 | 7 | 8 \n"
+}
+
+dynamic func makeMove() {
+	index = input as int
+	if index >= 0 and index <= 8 {
+		this.xPos = (index / 3) as int
+		this.yPos = (index % 3) as int
+		this.role = " "
+		
+		if xPlays {
+			this.board = xBoard
+			role = "X"
+		} else {
+			this.board = oBoard
+			role = "O"
+		}
+		
+		this.row = $get(board, xPos)
+		this.space = $get(playBoard, index)
+		
+		if $get(row, yPos) == 1 or $not( $equals(space, " ") ) {
+			$println("Space is taken!")
+		} else {
+			$set(row, yPos, 1)
+			$set(playBoard, index, role)
+			
+			// Place game logic here to check for a win or a tie
+			
+			$printBoard()
+			xPlays = $not(xPlays)
+			$promptTurn()
+		}
+	} else {
+		$println("Invalid index, try again")
+	}
+}
+
+dynamic func printBoard() {
+	$println()
+	print $get(playBoard, 0)," | ",$get(playBoard, 1), " | ",$get(playBoard, 2),"\n",
+				"----------\n",
+				$get(playBoard, 3)," | ",$get(playBoard, 4), " | ",$get(playBoard, 5),"\n",
+				"----------\n",
+				$get(playBoard, 6)," | ",$get(playBoard, 7), " | ",$get(playBoard, 8),"\n"
+}
+
+dynamic func promptTurn() {
+	if xPlays {
+		$println("X Goes")
+	} else {
+		$println("O Goes")
+	}
+}
+func getFirstPlayer() {
+	return ($rand() * 2 as int) == 0
+}
+
+dynamic func initGame() {
+	playBoard = array(" ", " ", " ", " ", " ", " ", " ", " ", " ")
+	xBoard = array(
+		array(0, 0, 0),
+		array(0, 0, 0),
+		array(0, 0, 0)
+	)
+	oBoard = array(
+		array(0, 0, 0),
+		array(0, 0, 0),
+		array(0, 0, 0)
+	)
+}
