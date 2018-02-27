@@ -479,7 +479,7 @@ public class RowdyInstance {
         // Look in the functions first
         Value foundValue = fetchInCallStack(value);
         if (foundValue != null){
-          return foundValue;
+          return new Value(foundValue.getValue(), foundValue.isConstant());
         }
         String fetchIdName = ((Terminal) value.getValue()).getName();
         Value val = globalSymbolTable.get(fetchIdName);
@@ -487,7 +487,7 @@ public class RowdyInstance {
           throw new RuntimeException("The ID '" + value + "' doesn't exist "
                   + "on line " + curSeq.getLine());
         }
-        return val;
+        return new Value(val.getValue(), val.isConstant());
     } else {
       return value;
     }

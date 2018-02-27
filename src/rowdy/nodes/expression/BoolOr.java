@@ -26,6 +26,11 @@ public class BoolOr extends BaseNode {
     }
     leftValue = instance.fetch(leftValue, this);
     boolean bLeft = leftValue.valueToBoolean();
+    
+    if (bLeft == true) {
+      return new Value(true, false);
+    }
+    
     BaseNode boolTerm = get(BOOL_TERM);
     boolean bRight = boolTerm.execute(leftValue).valueToBoolean();
     BoolOr boolTermTail = (BoolOr) get(BOOL_TERM_TAIL);

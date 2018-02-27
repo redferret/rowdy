@@ -25,6 +25,11 @@ public class BoolAnd extends BaseNode {
     }
     leftValue = instance.fetch(leftValue, this);
     boolean bLeft = leftValue.valueToBoolean();
+    
+    if (bLeft == false){
+      return new Value(false, false);
+    }
+    
     BaseNode boolFactor = get(BOOL_FACTOR);
     boolean bRight = boolFactor.execute(leftValue).valueToBoolean();
     BoolAnd boolFactorTail = (BoolAnd) get(BOOL_FACTOR_TAIL);

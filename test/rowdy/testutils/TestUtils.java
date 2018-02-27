@@ -3,7 +3,6 @@ package rowdy.testutils;
 
 import growdy.GRBuilder;
 import growdy.GRowdy;
-import growdy.Node;
 import growdy.NonTerminal;
 import growdy.Symbol;
 import growdy.Terminal;
@@ -11,15 +10,17 @@ import growdy.exceptions.AmbiguousGrammarException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rowdy.RowdyInstance;
 import rowdy.nodes.RowdyNode;
 import rowdy.nodes.RowdyNodeFactory;
-import static org.junit.Assert.fail;
 import rowdy.BaseNode;
-import static rowdy.Rowdy.getBuilder;
 import rowdy.Value;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ID;
-
+import static rowdy.Rowdy.getBuilder;
+import static org.junit.Assert.fail;
+import rowdy.exceptions.ConstantReassignmentException;
 
 /**
  *
@@ -27,9 +28,15 @@ import static rowdy.testlang.lang.RowdyGrammarConstants.ID;
  */
 public class TestUtils {
   
-  public final static RowdyInstance rowdyInstance = new RowdyInstance();
+  public final static RowdyInstance rowdyInstance;
   
   static {
+    rowdyInstance = new RowdyInstance();
+    try {
+      rowdyInstance.declareSystemConstants();
+    } catch (ConstantReassignmentException ex) {
+      fail("Unable to declare system constants");
+    }
     RowdyNode.initRunner(rowdyInstance);
   }
   

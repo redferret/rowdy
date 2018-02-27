@@ -61,6 +61,4 @@ public class AtomicTest extends TestCase {
     assertEquals(expected, result);
   }
 
-  public void testExecute() {
-  }
 }
