@@ -57,6 +57,10 @@ public class RowdyNodeFactory implements NodeFactory {
         RelEqual eq = new RelEqual(symbol, line);
         eq.setAsNonCompressable();
         return eq;
+       case ARITHM_NOTEQUAL:
+        RelNotEqual noteq = new RelNotEqual(symbol, line);
+        noteq.setAsNonCompressable();
+        return noteq;
       case TERM_PLUS:
         TermPlus termPlus = new TermPlus(symbol, line);
         termPlus.setAsNonCompressable();

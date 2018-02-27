@@ -27,12 +27,8 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
-import static rowdy.lang.RowdyGrammarConstants.IMPORT;
 import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
-import static rowdy.lang.RowdyGrammarConstants.PROGRAM;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**

@@ -304,6 +304,9 @@ public class RowdyInstance {
       
     } else {
       NativeJava nativeJava = (NativeJava) funcVal.getValue();
+      if (nativeJava == null) {
+        throw new IllegalArgumentException("No Native Java found");
+      }
       Value[] values = parameterValues.toArray(new Value[parameterValues.size()]);
       Object[] methodValues = new Object[values.length];
       int i = 0;

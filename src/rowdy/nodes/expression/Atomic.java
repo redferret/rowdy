@@ -7,7 +7,6 @@ import growdy.Terminal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rowdy.BaseNode;
-import rowdy.nodes.RowdyNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.ATOMIC_CONST;

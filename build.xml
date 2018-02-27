@@ -11,7 +11,6 @@
   
   <target name="-post-jar">
     <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
-    <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./dist/bin"/>
     <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./bin"/>
     <copy todir="./test/rowdy/testlang/lang">
       <fileset dir="./src/rowdy/lang"/>
@@ -19,6 +18,9 @@
     <copy todir="./dist/bin/core">
       <fileset dir="bin/core"/>
     </copy>      
+    <copy todir="./dist/bin/">
+      <fileset dir="bin/"/>
+    </copy>   
     
     <replace file="./test/rowdy/testlang/lang/RowdyGrammarConstants.java" 
              token="rowdy.lang;" 
