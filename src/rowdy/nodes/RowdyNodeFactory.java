@@ -22,9 +22,13 @@ public class RowdyNodeFactory implements NodeFactory {
         expr.setAsNonCompressable();
         return expr;
       case BOOL_TERM_TAIL:
-        return new BoolOr(symbol, line);
+        BoolOr or = new BoolOr(symbol, line);
+        or.setAsNonCompressable();
+        return or;
       case BOOL_FACTOR_TAIL:
-        return new BoolAnd(symbol, line);
+        BoolAnd and = new BoolAnd(symbol, line);
+        and.setAsNonCompressable();
+        return and;
       case RELATION_OPTION:
       case TERM:
       case TERM_TAIL:
