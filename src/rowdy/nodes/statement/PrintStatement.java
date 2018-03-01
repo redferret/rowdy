@@ -1,16 +1,12 @@
 
 package rowdy.nodes.statement;
 
-import growdy.Node;
 import growdy.Symbol;
 import java.io.PrintStream;
+import java.util.List;
 import rowdy.BaseNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
-import static rowdy.lang.RowdyGrammarConstants.EXPR_LIST;
-import rowdy.nodes.RowdyNode;
-import rowdy.nodes.expression.Expression;
+import static rowdy.lang.RowdyGrammarConstants.PARAMETERS;
 
 /**
  *
@@ -25,24 +21,18 @@ public class PrintStatement extends BaseNode {
   public Value execute(Value printStreamWrapper) {
     PrintStream stream = (PrintStream) printStreamWrapper.getValue();
     StringBuilder printValue = new StringBuilder();
-    BaseNode printValExpr = get(EXPRESSION);
-    Value printVal = printValExpr.execute();
-    if (printVal == null) {
-      printValue.append("null");
-    } else {
-      printValue.append(printVal.valueToString());
-    }
-    BaseNode atomTailNode = get(EXPR_LIST);
-    while (atomTailNode.hasSymbols()) {
-      printValExpr = atomTailNode.get(EXPRESSION);
-      printVal = printValExpr.execute();
+    
+    BaseNode paramsNode = get(PARAMETERS);
+    List<BaseNode> params = (List<BaseNode>) paramsNode.execute().getValue();
+    params.forEach((expression) -> {
+      Value printVal = expression.execute();
       if (printVal == null) {
         printValue.append("null");
       } else {
         printValue.append(printVal.valueToString());
       }
-      atomTailNode = atomTailNode.get(EXPR_LIST);
-    }
+    });
+    
     char c;
     StringBuilder toPrint = new StringBuilder();
     if (printValue.toString().contains("\\n")) {

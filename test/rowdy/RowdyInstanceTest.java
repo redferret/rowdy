@@ -2,7 +2,8 @@
 package rowdy;
 
 import junit.framework.TestCase;
-import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSION;
+import rowdy.exceptions.ConstantReassignmentException;
+import static rowdy.testlang.lang.RowdyGrammarConstants.*;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.rowdyInstance;
 
@@ -19,12 +20,7 @@ public class RowdyInstanceTest extends TestCase {
   public void testInitialize() {
   }
 
-  public void testCompress() {
-    String testCode = "round a, 2 as int";
-    BaseNode testProgram = getTestStatement(testCode, EXPRESSION);
-    System.out.println(testProgram);
-    rowdyInstance.compress(testProgram);
-    System.out.println(testProgram);
+  public void testCompress() throws ConstantReassignmentException {
   }
 
   public void testDumpCallStack() {
@@ -91,6 +87,21 @@ public class RowdyInstanceTest extends TestCase {
   }
 
   public void testPrint_Node() {
+  }
+
+  public void testSimplifyLists() throws Exception {
+  }
+
+  public void testBuildParameterNodeForParent() {
+  }
+
+  public void testDeclareGlobals_BaseNode() throws Exception {
+  }
+
+  public void testExecuteFunc_BaseNode() throws Exception {
+  }
+
+  public void testExecuteFunc_BaseNode_List() throws Exception {
   }
   
 }

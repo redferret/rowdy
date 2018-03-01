@@ -8,11 +8,14 @@ import java.nio.charset.StandardCharsets;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.statement.PrintStatement;
 import static rowdy.testlang.lang.RowdyGrammarConstants.PRINT_STMT;
+import static rowdy.testlang.lang.RowdyGrammarConstants.STATEMENT;
 import static rowdy.testutils.TestUtils.getTestStatement;
+import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -29,13 +32,11 @@ public class PrintStatementTest extends TestCase {
     return suite;
   }
 
-  /**
-   * Test of execute method, of class PrintStatement.
-   */
   public void testExecute() throws ConstantReassignmentException, UnsupportedEncodingException {
     String testCode = "print \"Hello World!\", (2 * 2) as int";
 
-    PrintStatement instance = (PrintStatement) getTestStatement(testCode, PRINT_STMT);
+    BaseNode instance = getTestStatement(testCode, STATEMENT);
+    trimEmptyChildren(instance);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     
     try (PrintStream printStream = new PrintStream(baos, true, "utf-8")) {

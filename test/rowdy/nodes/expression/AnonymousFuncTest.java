@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
+import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ANONYMOUS_FUNC;
 import static rowdy.testutils.TestUtils.getTestStatement;
 
@@ -24,7 +25,7 @@ public class AnonymousFuncTest extends TestCase {
     return suite;
   }
 
-  public void testExecute() {
+  public void testExecute() throws ConstantReassignmentException {
     String testCode = "func() {}";
     BaseNode func = getTestStatement(testCode, ANONYMOUS_FUNC);
     assertTrue(func instanceof AnonymousFunc);

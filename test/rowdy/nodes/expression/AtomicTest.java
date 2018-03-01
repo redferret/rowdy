@@ -42,6 +42,7 @@ public class AtomicTest extends TestCase {
   public void testAtomicId() throws Throwable {
     String testCode = "var1";
     BaseNode instance = getTestStatement(testCode, ATOMIC);
+    trimEmptyChildren(instance);
     assertTrue(instance instanceof Atomic);
     rowdyInstance.setAsGlobal("var1", new Value(99, false));
     Integer result = (Integer) instance.execute().getValue();
@@ -55,8 +56,10 @@ public class AtomicTest extends TestCase {
     BaseNode funcNode = getTestStatement(testFuncCode, STATEMENT);
     trimEmptyChildren(funcNode);
     rowdyInstance.executeStmt(funcNode, null);
-    RowdyNode funcCall = (RowdyNode) getTestStatement(testCall, FUNC_CALL);
-    Integer result = (Integer) rowdyInstance.executeFunc(funcCall).getValue();
+    BaseNode instance = getTestStatement(testCall, ATOMIC);
+    assertTrue(instance instanceof Atomic);
+    trimEmptyChildren(instance);
+    Integer result = (Integer) instance.execute().getValue();
     Integer expected = 199;
     assertEquals(expected, result);
   }

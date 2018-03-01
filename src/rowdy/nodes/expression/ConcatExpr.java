@@ -2,10 +2,10 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
+import java.util.List;
 import rowdy.BaseNode;
 import rowdy.Value;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
-import static rowdy.lang.RowdyGrammarConstants.EXPR_LIST;
+import static rowdy.lang.RowdyGrammarConstants.PARAMETERS;
 
 /**
  *
@@ -20,14 +20,13 @@ public class ConcatExpr extends BaseNode {
   @Override
   public Value execute(Value leftValue) {
     StringBuilder concatValue = new StringBuilder();
-    BaseNode concatExpr = get(EXPRESSION);
-    concatValue.append(concatExpr.execute(leftValue).valueToString());
-    BaseNode atomTailNode = get(EXPR_LIST);
-    while (atomTailNode.hasSymbols()) {
-      concatExpr = (Expression) atomTailNode.get(EXPRESSION);
-      concatValue.append(concatExpr.execute(leftValue).valueToString());
-      atomTailNode = atomTailNode.get(EXPR_LIST);
-    }
+    
+    BaseNode paramsNode = get(PARAMETERS);
+    List<BaseNode> params = (List<BaseNode>) paramsNode.execute().getValue();
+    
+    params.forEach((expression) -> {
+      concatValue.append(expression.execute().valueToString());
+    });
     return new Value(concatValue.toString(), false);
   }
   

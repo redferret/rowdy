@@ -14,7 +14,9 @@ import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ThreadLocalRandom;
 import static rowdy.lang.RowdyGrammarConstants.*;
+import rowdy.nodes.expression.Atomic;
 
 
 /**
@@ -100,6 +102,9 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < children.size(); i++) {
       curNode = children.get(i);
+      if (curNode == null){
+        int iii = 0;
+      }
       if (curNode.hasSymbols()) {
         usefulCount++;
       }
@@ -107,6 +112,72 @@ public class RowdyInstance {
     return usefulCount;
   }
   
+  public void simplifyLists(BaseNode root) throws ConstantReassignmentException {
+    List<BaseNode> childrenNodes = root.getAll();
+    BaseNode curNode;
+    for (int i = 0; i < childrenNodes.size(); i++) {
+      curNode = childrenNodes.get(i);
+      simplifyLists(curNode);
+      String paramsId;
+      switch (curNode.symbol().id()) {
+        case FUNCTION_BODY:
+          List<String> paramsList = new ArrayList<>();
+          BaseNode parent = curNode.get(PARAMETERS);
+          if (parent.hasSymbols()) {
+            paramsList.add(getIdAsValue(parent.get(ID)).toString());
+            BaseNode paramsTailNode = parent.get(PARAMS_TAIL);
+            while (paramsTailNode.hasSymbols()) {
+              paramsList.add(getIdAsValue(paramsTailNode.get(ID)).toString());
+              paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
+            }
+          }
+          paramsId = "func-params " + curNode.getLine() + ThreadLocalRandom.current().nextInt();
+          buildParameterNodeForParent(parent, paramsId, curNode.getLine());
+          setAsGlobal(paramsId, new Value(paramsList, true));
+          break;
+        case PRINT_STMT:
+        case CONCAT_EXPR:
+        case ID_FUNC_REF:
+          List<BaseNode> params = new ArrayList<>();
+          BaseNode idNode = curNode.get(ID, false);
+          if (idNode != null) {
+            paramsId = getIdAsValue(idNode).toString();
+          } else {
+            paramsId = curNode.symbol().getSymbolAsString();
+          }
+          paramsId += "-params " + curNode.getLine() + ThreadLocalRandom.current().nextInt();
+          
+          BaseNode parentNode = curNode.get(FUNC_BODY_EXPR, false);
+          if (parentNode == null) {
+            parentNode = curNode;
+          }
+          BaseNode param = parentNode.get(EXPRESSION);
+          params.add(param);
+          BaseNode atomTailNode = parentNode.get(EXPR_LIST);
+          while (atomTailNode.hasSymbols()) {
+            param = atomTailNode.get(EXPRESSION);
+            params.add(param);
+            atomTailNode = atomTailNode.get(EXPR_LIST);
+          }
+          buildParameterNodeForParent(parentNode, paramsId, curNode.getLine());
+          setAsGlobal(paramsId, new Value(params, true));
+      }
+    }
+  }
+
+  public void buildParameterNodeForParent(BaseNode parentNode, String paramsId, int line) {
+    BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), line);
+    BaseNode atomic = new Atomic(new NonTerminal("atomic", ATOMIC), line);
+    BaseNode atomicId = new RowdyNode(new NonTerminal("atomic-id", ATOMIC_ID), line);
+    BaseNode id = new RowdyNode(new Terminal("id", ID, paramsId), line);
+
+    atomicId.add(id);
+    atomic.add(atomicId);
+    parameters.add(atomic);
+    parentNode.getAll().clear();
+    parentNode.add(parameters);
+  }
+
   /**
    * Only call this method if the program has stopped executing.
    */
@@ -124,6 +195,7 @@ public class RowdyInstance {
   public void executeLine() throws ConstantReassignmentException {
     declareSystemConstants();
     compress(root);
+    simplifyLists(root);
     executeStmt(root, null);
   }
   
@@ -147,6 +219,7 @@ public class RowdyInstance {
       throw new MainNotFoundException("main method not found");
     }
     compress(main);
+    simplifyLists(root);
     executeStmt(main, null);
   }
   
@@ -176,14 +249,11 @@ public class RowdyInstance {
       cur = children.get(i);
       currentID = cur.symbol().id();
       switch (currentID) {
-        case ASSIGN_STMT:
-          ((AssignStatement) cur).execute(null);
-          break;
         case FUNCTION:
-          Node modOpts = cur.get(NATIVE_FUNC_OPT);
+          Node asNativeFunction = cur.get(NATIVE_FUNC_OPT);
           
           String functionName = ((Terminal) cur.get(ID).symbol()).getName();
-          if (modOpts.hasSymbols()) {
+          if (asNativeFunction.hasSymbols()) {
             setAsGlobal(functionName, new Value());
           } else {
             if (functionName.equals("main")) {
@@ -260,32 +330,28 @@ public class RowdyInstance {
   
   /**
    * Function calls with parameters are sent to this method.
-   * @param cur
+   * @param root
    * @return
    * @throws ConstantReassignmentException 
    */
-  public Value executeFunc(BaseNode cur) throws ConstantReassignmentException {
+  public Value executeFunc(BaseNode root) throws ConstantReassignmentException {
     
-    BaseNode idFuncRef = cur.get(ID_FUNC_REF);
+    BaseNode idFuncRef = root.get(ID_FUNC_REF);
     List<Value> parameterValues = new ArrayList<>();
     
     BaseNode funcBodyExpr = idFuncRef.get(FUNC_BODY_EXPR);
-    BaseNode paramValue = funcBodyExpr.get(EXPRESSION);
-    parameterValues.add(paramValue.execute());
-    BaseNode atomTailNode = funcBodyExpr.get(EXPR_LIST);
+    List<BaseNode> params = (List<BaseNode>) funcBodyExpr.execute().getValue();
     
-    while (atomTailNode.hasSymbols()) {
-      paramValue = atomTailNode.get(EXPRESSION);
-      parameterValues.add(paramValue.execute());
-      atomTailNode = atomTailNode.get(EXPR_LIST);
-    }
+    params.forEach((expression) -> {
+      parameterValues.add(expression.execute());
+    });
     
-    return executeFunc(cur, parameterValues);
+    return executeFunc(root, parameterValues);
   }
   
   /**
    * Determines if the function is native or not and executes it's code
-   * with the given parameter values
+   * with the given parameter values. Native code is executed here.
    *
    * @param cur The function being executed
    * @param parameterValues The parameters passed to this function
@@ -337,26 +403,18 @@ public class RowdyInstance {
       functionNode = ((BaseNode) funcVal.getValue()).copy();
     } else {
       functionNode = ((BaseNode) funcVal.getValue());
-      runningList.add(funcName);
     }
-    List<String> paramsList = new ArrayList<>();
-    if (!parameterValues.isEmpty()) {
-      BaseNode functionBody = functionNode.get(FUNCTION_BODY);
-      BaseNode paramsNode = functionBody.get(PARAMETERS);
-      if (paramsNode.hasSymbols()) {
-        paramsList.add(((Terminal) paramsNode.get(ID).symbol()).getName());
-        BaseNode paramsTailNode = paramsNode.get(PARAMS_TAIL);
-        while (paramsTailNode.hasSymbols()) {
-          paramsList.add(((Terminal) paramsTailNode.get(ID).symbol()).getName());
-          paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
-        }
-      }
-    }
+    runningList.add(funcName);
+    // 1. Get the formal parameters
+    BaseNode functionBody = functionNode.get(FUNCTION_BODY);
+    BaseNode parameters = functionBody.get(PARAMETERS);
+    List<String> formalParams = (List<String>) parameters.execute().getValue();
+    
     // 2. Copy actual parameters to formal parameters
     HashMap<String, Value> params = new HashMap<>();
     String paramName;
-    for (int p = 0; p < paramsList.size(); p++) {
-      paramName = paramsList.get(p);
+    for (int p = 0; p < formalParams.size(); p++) {
+      paramName = formalParams.get(p);
       params.put(paramName, parameterValues.get(p));
     }
     // 3. Push the function onto the call stack

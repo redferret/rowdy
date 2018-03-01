@@ -35,8 +35,8 @@ public class Atomic extends BaseNode {
       case ATOMIC_ID:
         child = atomicType.get(ID);
         Value searchValue = new Value(child.symbol(), false);
-        Node thisRef = atomicType.get(THIS_REF);
-        if (thisRef.hasSymbols()) {
+        Node thisRef = atomicType.get(THIS_REF, false);
+        if (thisRef != null && thisRef.hasSymbols()) {
           value = instance.callStack.peek().getSymbolTable().getValue(searchValue);
           if (value == null) {
             throw new RuntimeException("The ID '" + searchValue + "' doesn't exist "
