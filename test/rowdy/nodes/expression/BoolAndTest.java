@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -36,7 +37,7 @@ public class BoolAndTest {
   public void testExecute() {
     BaseNode instance = getTestStatement(testCode, BOOL_FACTOR_TAIL);
     assertTrue(instance instanceof BoolAnd);
-    assertTrue(instance.isCompressable());
+    assertFalse(instance.isCompressable());
     Value result = instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }

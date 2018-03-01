@@ -69,7 +69,14 @@ public class TestUtils {
     } catch (ParseException | SyntaxException | AmbiguousGrammarException ex) {
       fail("Unable to load or build grammar " + ex.getLocalizedMessage());
     }
-    return (BaseNode) growdy.getProgram();
+    BaseNode root = (BaseNode) growdy.getProgram();
+    rowdyInstance.compress(root);
+    try {
+      rowdyInstance.simplifyLists(root);
+    } catch (ConstantReassignmentException ex) {
+      Logger.getLogger(TestUtils.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return root;
   }
   
 }

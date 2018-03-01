@@ -1,0 +1,136 @@
+
+import "core.rowdy"
+
+func main() {
+	xBoard = 0
+	oBoard = 0
+	playBoard = 0
+	
+	$println("For help, type 'help'")
+	$showHelp()
+	
+  xPlays = $getFirstPlayer()
+	$promptTurn()
+	
+	$initGame()
+	$printBoard()
+	loop game: {
+		
+		read input
+		
+		if $equals(input, "exit") {
+			$println("Goodbye")
+			break
+		} else {
+			if $not( $equals(input, "help") ) {
+				if $equals(input, "reset") {
+					$initGame()
+					$printBoard()
+					$promptTurn()
+				} else {
+					if $isNumber(input) {
+						$makeMove()
+					} else {
+						if $not($isEmpty(input)) {
+							$println("Invalid input")
+						}
+					}
+				}
+			} else {
+				$showHelp()
+			}
+		}
+		
+		// if $equals(input, "exit") {
+			// $println("Goodbye")
+			// break
+		// } else if $equals(input, "help") {
+			// $showHelp()
+		// } else if $equals(input, "reset") {
+			// $initGame()
+			// $printBoard()
+			// $promptTurn()
+		// } else if $isNumber(input){
+			// $makeMove()
+		// } else {
+			// if $isNotEmpty(input) {
+				// $println("Invalid input")
+			// }
+		// }
+		
+	}
+	
+}
+
+func showHelp() {
+	$println("Type 'reset' to start a new game")
+	$println("To make a move, enter the index of the cell")
+}
+
+dynamic func makeMove() {
+	index = input as int
+	if index >= 0 and index <= 8 {
+		this.xPos = (index / 3) as int
+		this.yPos = (index % 3) as int
+		this.role = " "
+		
+		if xPlays {
+			this.board = xBoard
+			role = "X"
+		} else {
+			this.board = oBoard
+			role = "O"
+		}
+		
+		this.row = $get(board, xPos)
+		this.space = $get(playBoard, index)
+		if $get(row, yPos) == 1 or $equals(space, "X") or $equals(space, "O") {
+			$println("Space is taken!")
+		} else {
+			$set(row, yPos, 1)
+			$set(playBoard, index, role)
+			
+			// Place game logic here to check for a win or a tie
+			
+			$printBoard()
+			xPlays = $not(xPlays)
+			$promptTurn()
+		}
+	} else {
+		$println("Invalid index, try again")
+	}
+}
+
+dynamic func printBoard() {
+	$println()
+	$println(concat $get(playBoard, 0)," | ",$get(playBoard, 1), " | ",$get(playBoard, 2))
+	$println("----------")
+	$println(concat $get(playBoard, 3)," | ",$get(playBoard, 4), " | ",$get(playBoard, 5))
+	$println("----------")
+	$println(concat $get(playBoard, 6)," | ",$get(playBoard, 7), " | ",$get(playBoard, 8))
+}
+
+dynamic func promptTurn() {
+	if xPlays {
+		$println("X Goes")
+	} else {
+		$println("O Goes")
+	}
+}
+func getFirstPlayer() {
+	return ($rand() * 2 as int) == 0
+}
+
+dynamic func initGame() {
+	playBoard = array("0", "1", "2", "3", "4", "5", "6", "7", "8")
+	xBoard = array(
+		array(0, 0, 0),
+		array(0, 0, 0),
+		array(0, 0, 0)
+	)
+	oBoard = array(
+		array(0, 0, 0),
+		array(0, 0, 0),
+		array(0, 0, 0)
+	)
+}

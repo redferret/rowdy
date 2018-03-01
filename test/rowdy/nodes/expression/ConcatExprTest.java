@@ -6,7 +6,9 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
+import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.testlang.lang.RowdyGrammarConstants.CONCAT_EXPR;
+import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.testutils.TestUtils.getTestStatement;
 
 /**
@@ -24,10 +26,9 @@ public class ConcatExprTest extends TestCase {
     return suite;
   }
 
-  public void testExecute() {
+  public void testExecute() throws ConstantReassignmentException {
     String testCode = "concat \"Test\", \" \", \"Concat\"";
-    BaseNode instance = getTestStatement(testCode, CONCAT_EXPR);
-    assertTrue(instance instanceof ConcatExpr);
+    BaseNode instance = getTestStatement(testCode, EXPRESSION);
     String result = instance.execute().getValue().toString();
     String expected = new Value("Test Concat", false).getValue().toString();
     assertEquals(expected, result);

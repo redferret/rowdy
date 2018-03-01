@@ -31,7 +31,7 @@ public class BoolOr extends BaseNode {
       return new Value(true, false);
     }
     
-    BaseNode boolTerm = get(BOOL_TERM);
+    BaseNode boolTerm = getLeftMost();
     boolean bRight = boolTerm.execute(leftValue).valueToBoolean();
     BoolOr boolTermTail = (BoolOr) get(BOOL_TERM_TAIL);
     

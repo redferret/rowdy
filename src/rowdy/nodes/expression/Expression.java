@@ -1,12 +1,10 @@
 
 package rowdy.nodes.expression;
 
-import growdy.Node;
 import growdy.Symbol;
 import java.math.BigInteger;
 import rowdy.BaseNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.*;
 

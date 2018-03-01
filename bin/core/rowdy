@@ -6,6 +6,8 @@ native func Map()
 native func List()
 native func put(map, key, value)
 native func add(list, value)
+native func set(list, index, value)
+native func remove(list, index)
 native func get(collection, index)
 native func forEach(list, callback)
 native func forLoop(initial, end, inc, callback)
@@ -14,9 +16,30 @@ native func size(collection)
 native func strcmp(str1, str2)
 native func slice(str1, from, to)
 
+native func isNumber(value)
 native func pow(a, b)
 native func cos(a)
 native func sin(a)
 native func tan(a)
 native func rand()
 // native func type(var)
+
+func not(bool) {
+	return bool == false
+}
+
+func isEmpty(str) {
+	return $equals(str, "")
+}
+
+func isNotEmpty(str) {
+	return $not($equals(str, ""))
+}
+
+func equals(var1, var2) {
+	return $strcmp(var1, var2) == 0
+}
+
+func notEqual(var1, var2) {
+	return $strcmp(var1, var2) != 0
+}
