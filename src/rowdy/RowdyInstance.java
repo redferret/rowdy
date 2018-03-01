@@ -102,9 +102,6 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < children.size(); i++) {
       curNode = children.get(i);
-      if (curNode == null){
-        int iii = 0;
-      }
       if (curNode.hasSymbols()) {
         usefulCount++;
       }
