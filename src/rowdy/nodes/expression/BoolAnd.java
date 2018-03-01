@@ -30,7 +30,7 @@ public class BoolAnd extends BaseNode {
       return new Value(false, false);
     }
     
-    BaseNode boolFactor = get(BOOL_FACTOR);
+    BaseNode boolFactor = getLeftMost();
     boolean bRight = boolFactor.execute(leftValue).valueToBoolean();
     BoolAnd boolFactorTail = (BoolAnd) get(BOOL_FACTOR_TAIL);
     
