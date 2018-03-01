@@ -17,6 +17,7 @@ func main() {
 	loop game: {
 		
 		read input
+		
 		if $equals(input, "exit") {
 			$println("Goodbye")
 			break
@@ -63,7 +64,7 @@ func main() {
 
 func showHelp() {
 	$println("Type 'reset' to start a new game")
-	print "To make a move, enter the index of the cell\n"
+	$println("To make a move, enter the index of the cell")
 }
 
 dynamic func makeMove() {
@@ -102,11 +103,11 @@ dynamic func makeMove() {
 
 dynamic func printBoard() {
 	$println()
-	print $get(playBoard, 0)," | ",$get(playBoard, 1), " | ",$get(playBoard, 2),"\n",
-				"----------\n",
-				$get(playBoard, 3)," | ",$get(playBoard, 4), " | ",$get(playBoard, 5),"\n",
-				"----------\n",
-				$get(playBoard, 6)," | ",$get(playBoard, 7), " | ",$get(playBoard, 8),"\n"
+	$println(concat $get(playBoard, 0)," | ",$get(playBoard, 1), " | ",$get(playBoard, 2))
+	$println("----------")
+	$println(concat $get(playBoard, 3)," | ",$get(playBoard, 4), " | ",$get(playBoard, 5))
+	$println("----------")
+	$println(concat $get(playBoard, 6)," | ",$get(playBoard, 7), " | ",$get(playBoard, 8))
 }
 
 dynamic func promptTurn() {
