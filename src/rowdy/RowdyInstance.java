@@ -149,7 +149,9 @@ public class RowdyInstance {
             parentNode = curNode;
           }
           BaseNode param = parentNode.get(EXPRESSION);
-          params.add(param);
+          if (param.hasSymbols()) {
+            params.add(param);
+          }
           BaseNode atomTailNode = parentNode.get(EXPR_LIST);
           while (atomTailNode.hasSymbols()) {
             param = atomTailNode.get(EXPRESSION);
@@ -410,9 +412,27 @@ public class RowdyInstance {
     // 2. Copy actual parameters to formal parameters
     HashMap<String, Value> params = new HashMap<>();
     String paramName;
-    for (int p = 0; p < formalParams.size(); p++) {
-      paramName = formalParams.get(p);
-      params.put(paramName, parameterValues.get(p));
+    if (parameterValues.isEmpty() && !formalParams.isEmpty()) {
+      for (int p = 0; p < formalParams.size(); p++) {
+        paramName = formalParams.get(p);
+        params.put(paramName, new Value(null, false));
+      }
+    } else if (parameterValues.size() < formalParams.size()) {
+      for (int p = 0; p < parameterValues.size(); p++) {
+        paramName = formalParams.get(p);
+        params.put(paramName, parameterValues.get(p));
+      }
+      int formalDiff = parameterValues.size();
+      for (int p = formalDiff; p < formalParams.size(); p++) {
+        paramName = formalParams.get(p);
+        params.put(paramName, new Value(null, false));
+      }
+    } else if (parameterValues.size() > formalParams.size() || 
+            parameterValues.size() == formalParams.size()) {
+      for (int p = 0; p < formalParams.size(); p++) {
+        paramName = formalParams.get(p);
+        params.put(paramName, parameterValues.get(p));
+      }
     }
     // 3. Push the function onto the call stack
     Function function = new Function(funcName, params, functionNode.getLine());
@@ -522,12 +542,13 @@ public class RowdyInstance {
     Value foundValue = fetchInCallStack(value);
     if (foundValue == null) {
       String fetchIdName = ((Terminal) value.getValue()).getName();
-      return globalSymbolTable.get(fetchIdName) != null;
+      foundValue = globalSymbolTable.get(fetchIdName);
+      return (foundValue != null && foundValue.getValue() != null);
     } else {
-      return true;
+      return (foundValue != null && foundValue.getValue() != null);
     }
   }
-  
+
   public Value fetch(Value value, Node curSeq) {
     if (value == null) {
       return null;
