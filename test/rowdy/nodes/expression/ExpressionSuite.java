@@ -26,7 +26,6 @@ public class ExpressionSuite extends TestCase {
     suite.addTest(IssetExprTest.suite());
     suite.addTest(AnonymousFuncTest.suite());
     suite.addTest(FactorModTest.suite());
-    suite.addTest(AtomicTest.suite());
     suite.addTest(ExpressionTest.suite());
     suite.addTest(FactorMinusTest.suite());
     suite.addTest(FactorDivTest.suite());

@@ -40,6 +40,8 @@ public class RowdyNodeFactory implements NodeFactory {
       case BOOL_TERM:
       case BOOL_FACTOR:
       case EXPRESSIONS:
+      case ATOMIC:
+      case STATEMENT:
         return new RowdyNode(symbol, line);
       case ARITHM_GREATER:
         RelGreater greater = new RelGreater(symbol, line);
@@ -113,10 +115,19 @@ public class RowdyNodeFactory implements NodeFactory {
         FactorMinus minus = new FactorMinus(symbol, line);
         minus.setAsNonCompressable();
         return minus;
-      case ATOMIC:
-        Atomic atomic = new Atomic(symbol, line);
-        atomic.setAsNonCompressable();
-        return atomic;
+      case ATOMIC_CONST:
+        AtomicConst atomicConst = new AtomicConst(symbol, line);
+        atomicConst.setAsNonCompressable();
+        return atomicConst;
+      case ATOMIC_ID:
+        AtomicId atomicId = new AtomicId(symbol, line);
+        atomicId.setAsNonCompressable();
+        return atomicId;
+      case ATOMIC_FUNC_CALL:
+        AtomicFuncCall atomicFuncCall = new AtomicFuncCall(symbol, line);
+        atomicFuncCall.setAsNonCompressable();
+        return atomicFuncCall;
+      
       case ASSIGN_STMT:
         AssignStatement asgnstmt = new AssignStatement(symbol, line);
         asgnstmt.setAsNonCompressable();

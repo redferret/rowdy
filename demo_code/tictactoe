@@ -15,9 +15,7 @@ func main() {
 	$initGame()
 	$printBoard()
 	loop game: {
-		
 		read input
-		
 		if $equals(input, "exit") {
 			$println("Goodbye")
 			break
@@ -52,10 +50,8 @@ func main() {
 			// $promptTurn()
 		// } else if $isNumber(input){
 			// $makeMove()
-		// } else {
-			// if $isNotEmpty(input) {
-				// $println("Invalid input")
-			// }
+		// } else if $isNotEmpty(input) {
+			// $println("Invalid input")
 		// }
 		
 	}

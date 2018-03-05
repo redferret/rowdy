@@ -24,6 +24,10 @@ native func tan(a)
 native func rand()
 // native func type(var)
 
+func roundVal(value, p) {
+	return round value, p
+}
+
 func not(bool) {
 	return bool == false
 }

@@ -3,6 +3,7 @@ package rowdy.nodes.statement;
 
 import growdy.Symbol;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import rowdy.BaseNode;
 import rowdy.Value;
@@ -23,7 +24,7 @@ public class PrintStatement extends BaseNode {
     StringBuilder printValue = new StringBuilder();
     
     BaseNode paramsNode = get(PARAMETERS);
-    List<BaseNode> params = (List<BaseNode>) paramsNode.execute().getValue();
+    List<BaseNode> params = (List<BaseNode>) paramsNode.execute(new Value(new ArrayList<>(), false)).getValue();
     params.forEach((expression) -> {
       Value printVal = expression.execute();
       if (printVal == null) {

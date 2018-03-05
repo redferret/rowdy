@@ -6,45 +6,43 @@
 	import "core.rowdy"
 	
 	func main (price, amt) {
-		global price = price
-		global amt = amt
-		$println(concat "Finished in ", $runtime(prog), " ms")
+		$println(concat "Finished in ", $runtime(func () {
+			if ((isset price) and (isset amt)) == false {
+				print "Illegal or Missing Arguments\n"
+				return 1
+			}
+		
+			change = amt - price
+			change = round change, 2
+			
+			chg = change
+			
+			twenties	= $getChange(20)
+			tens 			= $getChange(10)
+			fives 		= $getChange(5)
+			ones	 		= $getChange(1)
+			quarters 	= $getChange(0.25)
+			dimes 		= $getChange(0.1)
+			nickels 	= $getChange(0.05)
+			pennies 	= $getChange(0.01)
+			
+			print
+			"Amount Due: ", price,		"\n",
+			"Amount Given: ", amt,		"\n",
+			"\nChange Due: 	", chg, 	"\n",
+			"----------------------------\n",
+			"Twenties:	", twenties, 	"\n",
+			"Tens:		", tens, 		"\n",
+			"Fives:		", fives, 		"\n",
+			"Ones:		", ones, 		"\n",
+			"Quarters:	", quarters, 	"\n",
+			"Dimes:		", dimes, 		"\n",
+			"Nickels:	", nickels, 	"\n",
+			"Pennies:	", pennies, 	"\n\n"
+		}), " ms")
 	}
 	
-	func prog () {
-		if ((isset price) and (isset amt)) == false {
-			print "Illegal or Missing Arguments\n"
-			return 1
-		}
 	
-		change = amt - price
-		change = round change, 2
-		
-		chg = change
-		
-		twenties	= $getChange(20)
-		tens 			= $getChange(10)
-		fives 		= $getChange(5)
-		ones	 		= $getChange(1)
-		quarters 	= $getChange(0.25)
-		dimes 		= $getChange(0.1)
-		nickels 	= $getChange(0.05)
-		pennies 	= $getChange(0.01)
-		
-		print
-		"Amount Due: ", price,		"\n",
-		"Amount Given: ", amt,		"\n",
-		"\nChange Due: 	", chg, 	"\n",
-		"----------------------------\n",
-		"Twenties:	", twenties, 	"\n",
-		"Tens:		", tens, 		"\n",
-		"Fives:		", fives, 		"\n",
-		"Ones:		", ones, 		"\n",
-		"Quarters:	", quarters, 	"\n",
-		"Dimes:		", dimes, 		"\n",
-		"Nickels:	", nickels, 	"\n",
-		"Pennies:	", pennies, 	"\n\n"
-	}
 	
 	dynamic func getChange(denom) {
 		loop qty: {
