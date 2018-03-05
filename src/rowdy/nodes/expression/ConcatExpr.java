@@ -2,6 +2,7 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
+import java.util.ArrayList;
 import java.util.List;
 import rowdy.BaseNode;
 import rowdy.Value;
@@ -22,7 +23,7 @@ public class ConcatExpr extends BaseNode {
     StringBuilder concatValue = new StringBuilder();
     
     BaseNode paramsNode = get(PARAMETERS);
-    List<BaseNode> params = (List<BaseNode>) paramsNode.execute().getValue();
+    List<BaseNode> params = (List<BaseNode>) paramsNode.execute(new Value(new ArrayList<>(), false)).getValue();
     
     params.forEach((expression) -> {
       concatValue.append(expression.execute().valueToString());

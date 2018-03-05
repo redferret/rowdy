@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 import static rowdy.lang.RowdyGrammarConstants.*;
-import rowdy.nodes.expression.Atomic;
+import rowdy.nodes.expression.AtomicId;
 
 
 /**
@@ -128,9 +128,15 @@ public class RowdyInstance {
               paramsTailNode = paramsTailNode.get(PARAMS_TAIL);
             }
           }
-          paramsId = "func-params " + curNode.getLine() + ThreadLocalRandom.current().nextInt();
-          buildParameterNodeForParent(parent, paramsId, curNode.getLine());
-          setAsGlobal(paramsId, new Value(paramsList, true));
+          if (!paramsList.isEmpty()) {
+            paramsId = "func-params " + curNode.getLine() + ThreadLocalRandom.current().nextInt();
+            buildParameterNodeForParent(parent, paramsId, curNode.getLine());
+            parent.setChildren(parent.get(PARAMETERS).getAll());
+            setAsGlobal(paramsId, new Value(paramsList, true));
+          } else {
+            BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), curNode.getLine());
+            parent.add(parameters);
+          }
           break;
         case PRINT_STMT:
         case CONCAT_EXPR:
@@ -158,21 +164,24 @@ public class RowdyInstance {
             params.add(param);
             atomTailNode = atomTailNode.get(EXPR_LIST);
           }
-          buildParameterNodeForParent(parentNode, paramsId, curNode.getLine());
-          setAsGlobal(paramsId, new Value(params, true));
+          if (!params.isEmpty()) {
+            buildParameterNodeForParent(parentNode, paramsId, curNode.getLine());
+            setAsGlobal(paramsId, new Value(params, true));
+          } else {
+            BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), curNode.getLine());
+            parentNode.add(parameters);
+          }
       }
     }
   }
 
   public void buildParameterNodeForParent(BaseNode parentNode, String paramsId, int line) {
     BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), line);
-    BaseNode atomic = new Atomic(new NonTerminal("atomic", ATOMIC), line);
-    BaseNode atomicId = new RowdyNode(new NonTerminal("atomic-id", ATOMIC_ID), line);
+    BaseNode atomicId = new AtomicId(new NonTerminal("atomic-id", ATOMIC_ID), line);
     BaseNode id = new RowdyNode(new Terminal("id", ID, paramsId), line);
 
     atomicId.add(id);
-    atomic.add(atomicId);
-    parameters.add(atomic);
+    parameters.add(atomicId);
     parentNode.getAll().clear();
     parentNode.add(parameters);
   }
@@ -339,7 +348,7 @@ public class RowdyInstance {
     List<Value> parameterValues = new ArrayList<>();
     
     BaseNode funcBodyExpr = idFuncRef.get(FUNC_BODY_EXPR);
-    List<BaseNode> params = (List<BaseNode>) funcBodyExpr.execute().getValue();
+    List<BaseNode> params = (List<BaseNode>) funcBodyExpr.execute(new Value(new ArrayList<>(), false)).getValue();
     
     params.forEach((expression) -> {
       parameterValues.add(expression.execute());
@@ -407,7 +416,8 @@ public class RowdyInstance {
     // 1. Get the formal parameters
     BaseNode functionBody = functionNode.get(FUNCTION_BODY);
     BaseNode parameters = functionBody.get(PARAMETERS);
-    List<String> formalParams = (List<String>) parameters.execute().getValue();
+    Value paramValue = parameters.execute(new Value(new ArrayList<>(), false));
+    List<String> formalParams = (List<String>) paramValue.getValue();
     
     // 2. Copy actual parameters to formal parameters
     HashMap<String, Value> params = new HashMap<>();

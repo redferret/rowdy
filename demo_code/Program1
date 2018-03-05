@@ -1,0 +1,4 @@
+
+func main(a, b) {
+	print "Hello, World!\n"
+}
