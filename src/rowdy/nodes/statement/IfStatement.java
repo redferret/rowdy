@@ -5,7 +5,7 @@ import growdy.Symbol;
 import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.lang.RowdyGrammarConstants.ELSE_PART;
+import static rowdy.lang.RowdyGrammarConstants.ELSE_IF_PART;
 import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.STMT_BLOCK;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
@@ -30,7 +30,7 @@ public class IfStatement extends BaseNode {
         BaseNode ifStmtList = get(STMT_BLOCK).get(STMT_LIST);
         instance.executeStmt(ifStmtList, seqControl);
       } else {
-        instance.executeStmt(get(ELSE_PART), seqControl);
+        instance.executeStmt(get(ELSE_IF_PART), seqControl);
       }
     } catch (ConstantReassignmentException ex) {
       ex.printStackTrace();
