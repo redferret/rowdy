@@ -181,6 +181,13 @@ public class Rowdy {
           if (imports != null) {
             String importPath = ((Terminal) imports.symbol()).getName().replaceAll("\\.", "/").replaceAll("\"", "");
             importPaths.add(importPath);
+            Node nextImport = currentTreeNode.get(IMPORTS);
+            while (nextImport.hasSymbols()) {
+              imports = nextImport.get(CONSTANT);
+              importPath = ((Terminal) imports.symbol()).getName().replaceAll("\\.", "/").replaceAll("\"", "");
+              importPaths.add(importPath);
+              nextImport = nextImport.get(IMPORTS);
+            }
           }
       }
     }
@@ -201,7 +208,7 @@ public class Rowdy {
       }
     });
   }
-  
+
   public static GRBuilder getBuilder() {
     GRBuilder grBuilder = null;
     try {
