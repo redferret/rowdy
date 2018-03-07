@@ -2,21 +2,25 @@
 	import "core.rowdy"
 	
 	func main(max) {
-		if (isset max) == false {
-			max = 1000
-		}
-		$println($fibby(max))
+		time = $runtime(func() {
+			if (isset max) == false {
+				max = 1000
+			}
+			$println($fibby(max))
+		})
+		
+		$println(concat "Took ", time, " ms to finish")
 	}
 
 	func fibby(max) {
 		fibs = $List()
 		z = 0
 		y = 1
-		loop x: { if x >= max {break}
+		$forLoop(0, max, 1, func(x) {
 			$add(fibs, x as long)
 			z = x + y
 			x = y
 			y = z
-		}
+		})
 		return fibs
 	}
