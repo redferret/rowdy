@@ -19,40 +19,17 @@ func main() {
 		if $equals(input, "exit") {
 			$println("Goodbye")
 			break
-		} else {
-			if $not( $equals(input, "help") ) {
-				if $equals(input, "reset") {
-					$initGame()
-					$printBoard()
-					$promptTurn()
-				} else {
-					if $isNumber(input) {
-						$makeMove()
-					} else {
-						if $not($isEmpty(input)) {
-							$println("Invalid input")
-						}
-					}
-				}
-			} else {
-				$showHelp()
-			}
+		} else if $equals(input, "help") {
+			$showHelp()
+		} else if $equals(input, "reset") {
+			$initGame()
+			$printBoard()
+			$promptTurn()
+		} else if $isNumber(input){
+			$makeMove()
+		} else if $isNotEmpty(input) {
+			$println("Invalid input")
 		}
-		
-		// if $equals(input, "exit") {
-			// $println("Goodbye")
-			// break
-		// } else if $equals(input, "help") {
-			// $showHelp()
-		// } else if $equals(input, "reset") {
-			// $initGame()
-			// $printBoard()
-			// $promptTurn()
-		// } else if $isNumber(input){
-			// $makeMove()
-		// } else if $isNotEmpty(input) {
-			// $println("Invalid input")
-		// }
 		
 	}
 	

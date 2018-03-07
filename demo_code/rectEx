@@ -11,7 +11,7 @@
 			return 1
 		}
 		
-		cap = func() {
+		cap = func(width) {
 			print "-"
 			$forLoop(0, width, 1, func() {
 				print "---"
@@ -19,7 +19,7 @@
 			$println("-")
 		}
 		
-		center = func() {
+		center = func(width) {
 			print "|"
 			$forLoop(0, width, 1, func() {
 				print "   "
@@ -27,18 +27,18 @@
 			print "|\n"
 		}
 		
-		body = func() {
+		body = func(width, height) {
 			$forLoop(0, height, 1, func() {
 				$center(width)
 			})
 		}
 		
-		drawRect = func() {
-			$cap()
-			$body()
-			$cap()
+		drawRect = func(width, height) {
+			$cap(width)
+			$body(width, height)
+			$cap(width)
 			$println(concat "The area is ", (width * height) as int)
 		}
 		
-		$drawRect()
+		$drawRect(width, height)
 	}
