@@ -26,7 +26,7 @@ public class IfStatement extends BaseNode {
     BaseNode ifExpr = get(EXPRESSION);
     Value ifExprValue = ifExpr.execute();
     try {
-      if (ifExprValue.valueToBoolean()) {
+      if ((boolean) ifExprValue.getValue()) {
         BaseNode ifStmtList = get(STMT_BLOCK).get(STMT_LIST);
         instance.executeStmt(ifStmtList, seqControl);
       } else {

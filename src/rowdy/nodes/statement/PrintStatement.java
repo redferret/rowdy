@@ -30,7 +30,7 @@ public class PrintStatement extends BaseNode {
       if (printVal == null) {
         printValue.append("null");
       } else {
-        printValue.append(printVal.valueToString());
+        printValue.append(printVal.getValue());
       }
     });
     

@@ -26,16 +26,16 @@ public class RelNotEqual extends BaseNode {
     }
     leftValue = instance.fetch(leftValue, this);
     Value rightValue = arithmExpr.execute(leftValue);
-    double left, right;
+    Number left, right;
     if (leftValue.getValue() instanceof Boolean) {
-      left = leftValue.valueToBoolean() ? 1 : 0;
+      left = (boolean) leftValue.getValue() ? 1 : 0;
     } else {
-      left = leftValue.valueToDouble();
+      left = (Number) leftValue.getValue();
     }
     if (rightValue.getValue() instanceof Boolean) {
-      right = rightValue.valueToBoolean() ? 1 : 0;
+      right = (boolean) rightValue.getValue() ? 1 : 0;
     } else {
-      right = rightValue.valueToDouble();
+      right = (Number) rightValue.getValue();
     }
     return new Value(left != right, false);
   }

@@ -1,7 +1,6 @@
 package rowdy;
 
 import growdy.Symbol;
-import growdy.Terminal;
 import java.util.Objects;
 
 /**
@@ -11,7 +10,10 @@ import java.util.Objects;
  */
 public class Value {
 
+  public static enum Type {Integer, Double, Boolean, Short, Byte, Long, String}
+  
   private Object value;
+  private Type dataType;
   private boolean isConstant;
 
   public Value() {
@@ -21,8 +23,30 @@ public class Value {
   public Value(Object value, boolean isConstant) {
     this.value = value;
     this.isConstant = isConstant;
+    castValue();
   }
 
+  private void castValue() {
+    if (value != null && value instanceof String) {
+      String toCast = value.toString();
+      if (isInteger(toCast)) {
+        value = Integer.parseInt(toCast);
+        dataType = Type.Integer;
+      } else if (isLong(toCast)) {
+        value = Long.parseLong(toCast);
+        dataType = Type.Long;
+      } else if (isDouble(toCast)) {
+        value = Double.parseDouble(toCast);
+        dataType = Type.Double;
+      } else if (toCast.equals("false") || toCast.equals("true")) {
+        value = Boolean.parseBoolean(toCast);
+        dataType = Type.Boolean;
+      } else {
+        dataType = Type.String;
+      }
+    }
+  }
+  
   public void setAsConstant(boolean isConstant){
     this.isConstant = isConstant;
   }
@@ -37,30 +61,34 @@ public class Value {
     }
   }
 
-  public String valueToString() {
-    if (value == null) {
-      return "null";
-    }
-    return value.toString().replaceAll("\"", "");
-  }
-
-  public Double valueToDouble() {
-    if (value == null) {
-      return 0d;
-    }
-    if (value instanceof String) {
-      return Double.parseDouble((String) value);
-    } else {
-      Double v;
-      try {
-        v = Double.parseDouble(value.toString());
-      } catch (Exception e){
-        v = 0d;
-      }
-      return v;
+  
+  public static boolean isInteger(String str) {
+    try {
+      Integer.parseInt(str);
+      return true;
+    } catch (NumberFormatException e) {
+      return false;
     }
   }
 
+  public static boolean isLong(String str) {
+    try {
+      Long.parseLong(str);
+      return true;
+    } catch (NumberFormatException e) {
+      return false;
+    }
+  }
+  
+  public static boolean isDouble(String str) {
+    try {
+      Double.parseDouble(str);
+      return true;
+    } catch (NumberFormatException e) {
+      return false;
+    }
+  }
+  
   public Symbol valueToSymbol() {
     if (value == null) {
       return null;
@@ -69,20 +97,6 @@ public class Value {
       return (Symbol) value;
     }
     return null;
-  }
-
-  public Boolean valueToBoolean() {
-    if (value == null) {
-      return false;
-    }
-    if (value instanceof Terminal) {
-      return Boolean.parseBoolean(((Terminal) value).getName());
-    } else if (value instanceof Value) {
-      return Boolean.parseBoolean(value.toString());
-    } else if (value instanceof String) {
-      return Boolean.parseBoolean(value.toString());
-    }
-    return (Boolean) value;
   }
 
   public Object getValue() {

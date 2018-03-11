@@ -42,8 +42,6 @@
 		}), " ms")
 	}
 	
-	
-	
 	dynamic func getChange(denom) {
 		loop qty: {
 			if (change >= denom) {
@@ -51,7 +49,7 @@
 				qty = qty + 1
 				change = round change, 2
 			} else {
-				return qty as int
+				return qty
 			}
 		}
 	}

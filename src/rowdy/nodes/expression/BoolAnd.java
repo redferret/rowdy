@@ -5,7 +5,6 @@ import growdy.Symbol;
 import java.util.ArrayList;
 import rowdy.BaseNode;
 import rowdy.Value;
-import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR;
 import static rowdy.lang.RowdyGrammarConstants.BOOL_FACTOR_TAIL;
 
 /**
@@ -24,14 +23,14 @@ public class BoolAnd extends BaseNode {
       return instance.fetch(leftValue, this);
     }
     leftValue = instance.fetch(leftValue, this);
-    boolean bLeft = leftValue.valueToBoolean();
+    boolean bLeft = (boolean) leftValue.getValue();
     
     if (bLeft == false){
       return new Value(false, false);
     }
     
     BaseNode boolFactor = getLeftMost();
-    boolean bRight = boolFactor.execute(leftValue).valueToBoolean();
+    boolean bRight = (boolean) boolFactor.execute(leftValue).getValue();
     BoolAnd boolFactorTail = (BoolAnd) get(BOOL_FACTOR_TAIL);
     
     return boolFactorTail.execute(new Value(bLeft && bRight, false));

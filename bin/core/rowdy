@@ -1,17 +1,8 @@
 
+import "core.lists"
+
 native func runtime(function)
 native func println(str)
-
-native func Map()
-native func List()
-native func put(map, key, value)
-native func add(list, value)
-native func set(list, index, value)
-native func remove(list, index)
-native func get(collection, index)
-native func forEach(list, callback)
-native func forLoop(initial, end, inc, callback)
-native func size(collection)
 
 native func strcmp(str1, str2)
 native func slice(str1, from, to)

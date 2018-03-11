@@ -3,6 +3,7 @@ package rowdy.nodes.expression;
 
 import growdy.Symbol;
 import rowdy.BaseNode;
+import rowdy.Calculator;
 import rowdy.Value;
 
 /**
@@ -17,22 +18,16 @@ public class FactorDiv extends BaseNode {
 
   @Override
   public Value execute(Value leftValue) {
-    BaseNode factor = getLeftMost();
-    if (factor == null) {
+    BaseNode leftNode = getLeftMost();
+    if (leftNode == null) {
       return instance.fetch(leftValue, this);
     }
-    BaseNode factorTail = null;
+    BaseNode tailNode = null;
     if (children.size() > 2) {
-      factorTail = children.get(2);
+      tailNode = children.get(2);
     }
-    leftValue = instance.fetch(leftValue, factor);
-    double left = leftValue.valueToDouble();
-    double right = factor.execute(leftValue).valueToDouble();
-    if (factorTail != null) {
-      return factorTail.execute(new Value(left / right, false));
-    } else {
-      return new Value(left / right, false);
-    }
+    leftValue = instance.fetch(leftValue, leftNode);
+    return Calculator.calculate(leftValue, leftNode, tailNode, Calculator.Operation.DIVIDE);
   }
   
 }

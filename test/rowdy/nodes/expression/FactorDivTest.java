@@ -33,7 +33,7 @@ public class FactorDivTest extends TestCase {
     assertTrue(instance instanceof FactorDiv);
     assertFalse(instance.isCompressable());
     trimEmptyChildren(instance);
-    Value expResult = new Value(20.0, false);
+    Value expResult = new Value(20, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

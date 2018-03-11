@@ -4,7 +4,6 @@ package rowdy.nodes.expression;
 import growdy.Symbol;
 import rowdy.BaseNode;
 import rowdy.Value;
-import static rowdy.lang.RowdyGrammarConstants.ARITHM_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 
 /**
@@ -20,9 +19,9 @@ public class RoundExpr extends BaseNode {
   @Override
   public Value execute(Value leftValue) {
     Value valueToRound = instance.fetch(instance.getIdAsValue(get(ID)), this);
-    double roundedValue = valueToRound.valueToDouble();
+    double roundedValue = (double) valueToRound.getValue();
     BaseNode arithmExpr = getAll().get(3);
-    int precision = arithmExpr.execute().valueToDouble().intValue();
+    int precision = (int) arithmExpr.execute().getValue();
     double factor = 1;
     while (precision > 0) {
       factor *= 10;

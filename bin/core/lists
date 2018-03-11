@@ -1,0 +1,27 @@
+
+native func Map()
+native func List()
+native func put(map, key, value)
+native func add(list, value)
+native func set(list, index, value)
+native func remove(list, index)
+native func get(collection, index)
+native func forEach(list, callback)
+native func forLoop(initial, end, inc, callback)
+native func size(collection)
+
+dynamic func apply(list, applier) {
+	this.nlist = $List()
+	$forEach(list, func(i) { 
+		$applier(i, nlist) 
+	})
+	return nlist 
+}
+
+func range(from, to) { 
+ nlist = $List()
+ $forLoop(from, to, 1, func(i) { 
+  $add(nlist, i)
+ })
+ return nlist
+}
