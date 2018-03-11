@@ -70,9 +70,8 @@ public class TestUtils {
       fail("Unable to load or build grammar " + ex.getLocalizedMessage());
     }
     BaseNode root = (BaseNode) growdy.getProgram();
-    rowdyInstance.compress(root);
     try {
-      rowdyInstance.simplifyLists(root);
+      rowdyInstance.optimizeProgram(root);
     } catch (ConstantReassignmentException ex) {
       Logger.getLogger(TestUtils.class.getName()).log(Level.SEVERE, null, ex);
     }
