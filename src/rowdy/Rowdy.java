@@ -73,8 +73,7 @@ public class Rowdy {
         loadImports((BaseNode) growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
-            rowdyInstance.compress(tree);
-            rowdyInstance.simplifyLists(tree);
+            rowdyInstance.optimizeProgram(tree);
             rowdyInstance.declareGlobals(tree);
           } catch (ConstantReassignmentException ex) {
             handleException(ex);
@@ -123,8 +122,7 @@ public class Rowdy {
         loadImports((BaseNode) growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
-            rowdyInstance.compress(tree);
-            rowdyInstance.simplifyLists(tree);
+            rowdyInstance.optimizeProgram(tree);
             rowdyInstance.declareGlobals(tree);
           } catch (ConstantReassignmentException ex) {
             handleException(ex);

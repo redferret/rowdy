@@ -30,7 +30,7 @@ public class TermPlusTest extends TestCase {
     Value leftValue = new Value(100, false);
     BaseNode instance = getTestStatement(testCode, TERM_PLUS);
     assertTrue(instance instanceof TermPlus);
-    Value expResult = new Value(200.0, false);
+    Value expResult = new Value(200, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

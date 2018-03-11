@@ -167,9 +167,6 @@ public class RowdyInstance {
           if (!params.isEmpty()) {
             buildParameterNodeForParent(parentNode, paramsId, curNode.getLine());
             setAsGlobal(paramsId, new Value(params, true));
-          } else {
-            BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), curNode.getLine());
-            parentNode.add(parameters);
           }
       }
     }
@@ -186,6 +183,33 @@ public class RowdyInstance {
     parentNode.add(parameters);
   }
 
+  public void extractConstants(BaseNode parent) throws ConstantReassignmentException {
+    List<BaseNode> childrenNodes = parent.getAll();
+    BaseNode curNode;
+    for (int i = 0; i < childrenNodes.size(); i++) {
+      curNode = childrenNodes.get(i);
+      extractConstants(curNode);
+      switch (curNode.symbol().id()) {
+        case ATOMIC_CONST:
+          int line = parent.getLine();
+          String paramsId = "const-" +line + "-"+ ThreadLocalRandom.current().nextInt();
+          BaseNode atomicId = new AtomicId(new NonTerminal("atomic-id", ATOMIC_ID), line);
+          BaseNode id = new RowdyNode(new Terminal("id", ID, paramsId), line);
+          atomicId.add(id);
+          childrenNodes.remove(i);
+          childrenNodes.add(i, atomicId);
+          String baseValue = curNode.get(CONSTANT).toString().replaceAll("\"", "");
+          setAsGlobal(paramsId, new Value(baseValue, true));
+      }
+    }
+  }
+
+  public void optimizeProgram(BaseNode root) throws ConstantReassignmentException {
+    compress(root);
+    extractConstants(root);
+    simplifyLists(root);
+  }
+  
   /**
    * Only call this method if the program has stopped executing.
    */
@@ -202,8 +226,7 @@ public class RowdyInstance {
 
   public void executeLine() throws ConstantReassignmentException {
     declareSystemConstants();
-    compress(root);
-    simplifyLists(root);
+    optimizeProgram(root);
     executeStmt(root, null);
   }
   
@@ -226,8 +249,7 @@ public class RowdyInstance {
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
-    compress(main);
-    simplifyLists(root);
+    optimizeProgram(root);
     executeStmt(main, null);
   }
   
@@ -302,7 +324,7 @@ public class RowdyInstance {
           if (exitValue == null){
             exitValue = new Value(0, false);
           }
-          System.exit(exitValue.valueToDouble().intValue());
+          System.exit(exitValue.getValue() == null ? 0 : (int) exitValue.getValue());
         case ASSIGN_STMT:
         case LOOP_STMT:
         case BREAK_STMT:

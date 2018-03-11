@@ -3,6 +3,7 @@ package rowdy.nodes.expression;
 
 import growdy.Symbol;
 import rowdy.BaseNode;
+import rowdy.Calculator;
 import rowdy.Value;
 
 /**
@@ -16,23 +17,11 @@ public class RelLess extends BaseNode  {
   }
   @Override
   public Value execute(Value leftValue) {
-    BaseNode arithmExpr = getLeftMost();
-    if (arithmExpr == null) {
+    BaseNode leftNode = getLeftMost();
+    if (leftNode == null) {
       return instance.fetch(leftValue, this);
     }
     leftValue = instance.fetch(leftValue, this);
-    Value rightValue = arithmExpr.execute(leftValue);
-    double left, right;
-    if (leftValue.getValue() instanceof Boolean) {
-      left = leftValue.valueToBoolean() ? 1 : 0;
-    } else {
-      left = leftValue.valueToDouble();
-    }
-    if (rightValue.getValue() instanceof Boolean) {
-      right = rightValue.valueToBoolean() ? 1 : 0;
-    } else {
-      right = rightValue.valueToDouble();
-    }
-    return new Value(left < right, false);
+    return Calculator.calculate(leftValue, leftNode, null, Calculator.Operation.LESS);
   }
 }

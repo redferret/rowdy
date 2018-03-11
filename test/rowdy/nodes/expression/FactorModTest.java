@@ -33,7 +33,7 @@ public class FactorModTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, FACTOR_TAIL_MOD);
     assertTrue(instance instanceof FactorMod);
     trimEmptyChildren(instance);
-    Value expResult = new Value(0.0, false);
+    Value expResult = new Value(0, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);
   }

@@ -26,7 +26,7 @@ public class ConcatExpr extends BaseNode {
     List<BaseNode> params = (List<BaseNode>) paramsNode.execute(new Value(new ArrayList<>(), false)).getValue();
     
     params.forEach((expression) -> {
-      concatValue.append(expression.execute().valueToString());
+      concatValue.append(expression.execute().getValue().toString());
     });
     return new Value(concatValue.toString(), false);
   }

@@ -115,10 +115,6 @@ public class RowdyNodeFactory implements NodeFactory {
         FactorMinus minus = new FactorMinus(symbol, line);
         minus.setAsNonCompressable();
         return minus;
-      case ATOMIC_CONST:
-        AtomicConst atomicConst = new AtomicConst(symbol, line);
-        atomicConst.setAsNonCompressable();
-        return atomicConst;
       case ATOMIC_ID:
         AtomicId atomicId = new AtomicId(symbol, line);
         atomicId.setAsNonCompressable();
