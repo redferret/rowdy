@@ -6,45 +6,46 @@
 	import "core.rowdy"
 	
 	func main (price, amt) {
-		$println(concat "Finished in ", $runtime(func () {
-			if ((isset price) and (isset amt)) == false {
-				print "Illegal or Missing Arguments\n"
-				return 1
-			}
+		if ((isset price) and (isset amt)) == false {
+			print "Illegal or Missing Arguments\n"
+			return 1
+		}
+	
+		change = amt - price
+		change = round change, 2
 		
-			change = amt - price
-			change = round change, 2
-			
-			chg = change
-			
-			twenties	= $getChange(20)
-			tens 			= $getChange(10)
-			fives 		= $getChange(5)
-			ones	 		= $getChange(1)
-			quarters 	= $getChange(0.25)
-			dimes 		= $getChange(0.1)
-			nickels 	= $getChange(0.05)
-			pennies 	= $getChange(0.01)
-			
-			print
-			"Amount Due: ", price,		"\n",
-			"Amount Given: ", amt,		"\n",
-			"\nChange Due: 	", chg, 	"\n",
-			"----------------------------\n",
-			"Twenties:	", twenties, 	"\n",
-			"Tens:		", tens, 		"\n",
-			"Fives:		", fives, 		"\n",
-			"Ones:		", ones, 		"\n",
-			"Quarters:	", quarters, 	"\n",
-			"Dimes:		", dimes, 		"\n",
-			"Nickels:	", nickels, 	"\n",
-			"Pennies:	", pennies, 	"\n\n"
-		}), " ms")
+		chg = change
+		hundreds 	= $getChange(100.0)
+		fifties   = $getChange(50.0)
+		twenties	= $getChange(20.0)
+		tens 			= $getChange(10.0)
+		fives 		= $getChange(5.0)
+		ones	 		= $getChange(1.0)
+		quarters 	= $getChange(0.25)
+		dimes 		= $getChange(0.1)
+		nickels 	= $getChange(0.05)
+		pennies 	= $getChange(0.01)
+		
+		print
+		"Amount Due: ", price,	"\n",
+		"Amount Given: ", amt,	"\n",
+		"\nChange Due: 	", chg,	"\n",
+		"----------------------------\n",
+		"Hundreds:	", hundreds,"\n",
+		"Fifties:	", fifties,	"\n",
+		"Twenties:	", twenties,"\n",
+		"Tens:		", tens,			"\n",
+		"Fives:		", fives, 		"\n",
+		"Ones:		", ones, 			"\n",
+		"Quarters:	", quarters,"\n",
+		"Dimes:		", dimes, 		"\n",
+		"Nickels:	", nickels, 	"\n",
+		"Pennies:	", pennies, 	"\n\n"
 	}
 	
 	dynamic func getChange(denom) {
 		loop qty: {
-			if (change >= denom) {
+			if change >= denom {
 				change = change - denom
 				qty = qty + 1
 				change = round change, 2

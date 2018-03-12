@@ -48,6 +48,10 @@ public class RelNotEqualTest {
     list.add(new Object[]{"!= 100", new Value(50, false), new Value(true, false)});
     list.add(new Object[]{"!= 100", new Value(100, false), new Value(false, false)});
     list.add(new Object[]{"!= 50", new Value(100, false), new Value(true, false)});
+    list.add(new Object[]{"!= true", new Value(true, false), new Value(false, false)});
+    list.add(new Object[]{"!= true", new Value(false, false), new Value(true, false)});
+    list.add(new Object[]{"!= null", new Value(true, false), new Value(true, false)});
+    list.add(new Object[]{"!= null", new Value(false, false), new Value(true, false)});
     return list;
   }
 }

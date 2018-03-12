@@ -47,6 +47,12 @@ public class RelEqualTest {
     list.add(new Object[]{"== 100", new Value(50, false), new Value(false, false)});
     list.add(new Object[]{"== 100", new Value(150, false), new Value(false, false)});
     list.add(new Object[]{"== 100", new Value(100, false), new Value(true, false)});
+    list.add(new Object[]{"== true", new Value(true, false), new Value(true, false)});
+    list.add(new Object[]{"== true", new Value(false, false), new Value(false, false)});
+    list.add(new Object[]{"== null", new Value(true, false), new Value(false, false)});
+    list.add(new Object[]{"== null", new Value(false, false), new Value(false, false)});
+    list.add(new Object[]{"== 0", new Value(false, false), new Value(true, false)});
+    list.add(new Object[]{"== 1", new Value(true, false), new Value(true, false)});
     return list;
   }
 }
