@@ -25,11 +25,15 @@ public class RelEqual extends BaseNode  {
     Number left, right;
     if (leftValue.getValue() instanceof Boolean) {
       left = (boolean) leftValue.getValue() ? 1 : 0;
+    } else if (leftValue.getValue() instanceof String) {
+      return new Value(false, false);
     } else {
       left = (Number) leftValue.getValue();
     }
     if (rightValue.getValue() instanceof Boolean) {
       right = (boolean) rightValue.getValue() ? 1 : 0;
+    } else if (rightValue.getValue() instanceof String) {
+      return new Value(false, false);
     } else {
       right = (Number) rightValue.getValue();
     }

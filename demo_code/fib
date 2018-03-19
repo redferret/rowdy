@@ -6,7 +6,7 @@
 			if (isset max) == false {
 				max = 1000
 			}
-			$println($fibby(max))
+			$println($fibby(max as long))
 		})
 		
 		$println(concat "Took ", time, " ms to finish")
@@ -14,13 +14,17 @@
 
 	func fibby(max) {
 		fibs = $List()
-		z = 0
-		y = 1
-		$forLoop(0, max, 1, func(x) {
-			$add(fibs, x as long)
+		x = 0 as long
+		z = 0 as long
+		y = 1 as long
+		loop fib: {
+			$add(fibs, x)
 			z = x + y
 			x = y
 			y = z
-		})
+			if x >= max {
+				break
+			}
+		}
 		return fibs
 	}

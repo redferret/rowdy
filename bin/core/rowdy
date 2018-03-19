@@ -14,6 +14,15 @@ native func sin(a)
 native func tan(a)
 native func rand()
 // native func type(var)
+const PI = 3.141592653589793
+const ln = "\n"
+
+func degrees(rads) {
+	return rads * (180 / PI)
+}
+func radians(degs) {
+	return degs * (PI / 180)
+}
 
 func roundVal(value, p) {
 	return round value, p

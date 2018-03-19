@@ -12,22 +12,34 @@ public class Calculator {
 
   public static Value calculate(Value leftValue, BaseNode leftNode, BaseNode tailNode, Operation operation) {
     
-    Object left = (leftValue == null) ? 0 : (Number) leftValue.getValue();
-    Object right = (Number) leftNode.execute(leftValue).getValue();
+    Object left = (leftValue == null) ? 0 : leftValue.getValue();
+    Object right = leftNode.execute(leftValue).getValue();
     Value.Type castTo;
 
     if (left instanceof Double && right instanceof Double) {
       castTo = Value.Type.Double;
     } else if (left instanceof Double || right instanceof Double) {
+      if (left instanceof Integer) {
+        left = (Double) Double.sum(0, (Integer)left);
+      } else {
+        right = (Double) Double.sum(0, (Integer)right);
+      }
       castTo = Value.Type.Double;
     } else if (left instanceof Integer && right instanceof Integer) {
       castTo = Value.Type.Integer;
     } else if (left instanceof Long && right instanceof Long) {
       castTo = Value.Type.Long;
     } else if (left instanceof Long || right instanceof Long) {
-      castTo = Value.Type.Double;
+      if (left instanceof Integer) {
+        left = (Long) Long.sum(0, (Integer)left);
+      } else {
+        right = (Long) Long.sum(0, (Integer)right);
+      }
+      castTo = Value.Type.Long;
     } else if (left instanceof Boolean && right instanceof Boolean) {
       castTo = Value.Type.Boolean;
+    } else if (left instanceof String || right instanceof String) {
+      castTo = Value.Type.String;
     } else {
       return new Value(Double.NaN, false);
     }

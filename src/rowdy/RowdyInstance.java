@@ -279,6 +279,9 @@ public class RowdyInstance {
       cur = children.get(i);
       currentID = cur.symbol().id();
       switch (currentID) {
+        case ASSIGN_STMT:
+          ((AssignStatement) cur).execute();
+          break;
         case FUNCTION:
           Node asNativeFunction = cur.get(NATIVE_FUNC_OPT);
           

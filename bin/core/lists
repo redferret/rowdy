@@ -13,7 +13,10 @@ native func size(collection)
 dynamic func apply(list, applier) {
 	this.nlist = $List()
 	$forEach(list, func(i) { 
-		$applier(i, nlist) 
+		this.val = $applier(i)
+		if (val != null) {
+			$add(nlist, val)
+		}
 	})
 	return nlist 
 }
