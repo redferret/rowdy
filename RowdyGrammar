@@ -75,7 +75,8 @@ AT					=> "@";
 
 PROGRAM(FUNC NATIVE DYNAMIC IMPORT)		=> IMPORTS DEFINITION;
 IMPORTS(IMPORT)  											=> IMPORT CONSTANT IMPORTS;
-DEFINITION(FUNC NATIVE DYNAMIC)				=> FUNCTION DEFINITION;
+DEFINITION(FUNC NATIVE DYNAMIC CONST ID)				
+																			=> FUNCTION* | STATEMENT* DEFINITION;
 
 // ********************************************* Statements ****************************************************
 STMT_BLOCK(LCURLY)										=> LCURLY STMT_LIST RCURLY;

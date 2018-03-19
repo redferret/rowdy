@@ -15,12 +15,12 @@
 		change = round change, 2
 		
 		chg = change
-		hundreds 	= $getChange(100.0)
-		fifties   = $getChange(50.0)
-		twenties	= $getChange(20.0)
-		tens 			= $getChange(10.0)
-		fives 		= $getChange(5.0)
-		ones	 		= $getChange(1.0)
+		hundreds 	= $getChange(100)
+		fifties   = $getChange(50)
+		twenties	= $getChange(20)
+		tens 			= $getChange(10)
+		fives 		= $getChange(5)
+		ones	 		= $getChange(1)
 		quarters 	= $getChange(0.25)
 		dimes 		= $getChange(0.1)
 		nickels 	= $getChange(0.05)
@@ -44,14 +44,15 @@
 	}
 	
 	dynamic func getChange(denom) {
-		loop qty: {
-			if change >= denom {
-				change = change - denom
-				qty = qty + 1
-				change = round change, 2
-			} else {
-				return qty
-			}
+		if change == denom {
+			change = $roundVal(change - denom, 2)
+			return 1
+		} else if change > denom {
+			this.qty = (change / denom) as int
+			change = $roundVal(change - (qty * denom), 2)
+			return qty
+		} else {
+			return 0
 		}
 	}
 	
