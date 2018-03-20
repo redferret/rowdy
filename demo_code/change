@@ -44,19 +44,14 @@
 	}
 	
 	dynamic func getChange(denom) {
-		print denom, ":", change, " ", denom == change, ln
 		if change == denom {
-			print "Equal amount",ln
 			change = $roundVal(change - denom, 2)
 			return 1
 		} else if change > denom {
-			print "amount is greater", ln
 			this.qty = (change / denom) as int
 			change = $roundVal(change - (qty * denom), 2)
-			print qty, ln
 			return qty
 		} else {
-			print "neither", ln
 			return 0
 		}
 	}
