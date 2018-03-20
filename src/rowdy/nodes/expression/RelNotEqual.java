@@ -49,6 +49,13 @@ public class RelNotEqual extends BaseNode {
     } else {
       right = (Number) rightValue.getValue();
     }
-    return new Value(left != right, false);
+    
+    if (left instanceof Double && right instanceof Integer) {
+      right = (double) ((Integer)right + 0.0d);
+    } else if (right instanceof Double && left instanceof Integer) {
+      left = (double) ((Integer)left + 0.0d);
+    }
+    
+    return new Value(!left.equals(right), false);
   }
 }
