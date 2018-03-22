@@ -69,7 +69,7 @@ public class Rowdy {
       try {
         growdy.buildFromSource(programFileName);
         rowdyInstance.initialize(growdy);
-        rowdyInstance.declareGlobals();
+        
         loadImports((BaseNode) growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
@@ -85,10 +85,8 @@ public class Rowdy {
                 IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
           handleException(ex);
         }
-        
-        
       } catch (IOException | SyntaxException | ParseException | 
-              AmbiguousGrammarException | ConstantReassignmentException e) {
+              AmbiguousGrammarException e) {
         handleException(e);
         System.exit(500);
       }

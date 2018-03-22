@@ -44,6 +44,12 @@ public class RelEqual extends BaseNode  {
       left = (double) ((Integer)left + 0.0d);
     }
     
+    if (left instanceof Integer && right instanceof Long) {
+      left = (long) ((Integer)left + 0L);
+    } else if (right instanceof Integer && left instanceof Long) {
+      right = (long) ((Integer)right + 0L);
+    }
+    
     return new Value(left.equals(right), false);
   }
 }

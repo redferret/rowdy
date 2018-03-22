@@ -48,8 +48,8 @@ public class AssignStatement extends BaseNode {
         }
       }
       
-      RowdyNode idAccess = (RowdyNode) get(ID_ACCESS);
-      if (idAccess.hasSymbols()) {
+      RowdyNode idAccess = (RowdyNode) get(ID_ACCESS, false);
+      if (idAccess != null && idAccess.hasSymbols()) {
         switch(idAccess.getLeftMost().symbol().id()) {
           case THIS_REF:
             Function curFunction = instance.callStack.peek();

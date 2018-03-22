@@ -15,6 +15,22 @@ native func tan(a)
 native func rand()
 native func type(var)
 
+func min(a, b) {
+	if a > b {
+		return b
+	} else {
+		return a
+	}
+}
+
+func max(a, b) {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 const global PI = 3.141592653589793
 const global ln = "\n"
 
