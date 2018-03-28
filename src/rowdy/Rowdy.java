@@ -76,7 +76,6 @@ public class Rowdy {
             rowdyInstance.optimizeProgram(tree);
             rowdyInstance.declareGlobals(tree);
           } catch (ConstantReassignmentException ex) {
-            handleException(ex);
           }
         });
         try {
