@@ -6,19 +6,15 @@ func multTable() {
 	$forLoop(1, 10, 1, func(n) { 
 		print " ", n, " "
 	})
-	$forLoop(0, 10, 1, func(i) { 
-		if i != 0 { 
-			print i
-		}
-		$forLoop(0, 10, 1, func(j) { 
+	$forLoop(1, 10, 1, func(i) { 
+		print i
+		$forLoop(1, 10, 1, func(j) { 
 			this.num = i * j 
-			if num != 0 { 
-				if num < 10 { 
-					print " ", num, " "
-				} else { 
-					print num, " " 
-				} 
-			}
+			if num < 10 { 
+				print " ", num, " "
+			} else { 
+				print num, " " 
+			} 
 		}) 
 		print ln 
 	})

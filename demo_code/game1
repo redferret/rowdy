@@ -13,15 +13,11 @@ func main() {
 	print "The number is ", total, ln
 	loop game: {
 		if firstToPlay == 0 {
-			if $humanPlay() {
-				break
-			} else if $computerPlay() {
+			if $humanPlay() or $computerPlay() {
 				break
 			}
 		} else {
-			if $computerPlay() {
-				break
-			} else if $humanPlay() {
+			if $computerPlay() or $humanPlay() {
 				break
 			}
 		}
