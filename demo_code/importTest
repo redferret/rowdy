@@ -1,0 +1,8 @@
+
+import "core.rowdy"
+import "multiplicationTable"
+
+func main() {
+	print "Multiplication Table", ln
+	$multTable()
+}

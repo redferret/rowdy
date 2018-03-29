@@ -13,9 +13,26 @@ native func cos(a)
 native func sin(a)
 native func tan(a)
 native func rand()
-// native func type(var)
-const PI = 3.141592653589793
-const ln = "\n"
+native func type(var)
+
+func min(a, b) {
+	if a > b {
+		return b
+	} else {
+		return a
+	}
+}
+
+func max(a, b) {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+const global NaN = 0d / 0d
+const global PI = 3.141592653589793
+const global ln = "\n"
 
 func degrees(rads) {
 	return rads * (180 / PI)
@@ -38,6 +55,10 @@ func isEmpty(str) {
 
 func isNotEmpty(str) {
 	return $not($equals(str, ""))
+}
+
+func isString(var) {
+	return $equals($type(var), "String")
 }
 
 func equals(var1, var2) {

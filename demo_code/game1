@@ -1,45 +1,61 @@
 
 import "core.rowdy"
 
+const informMessageComputer = "Computer went: Total = "
+const winMessageComputer = "I win"
+const informMessageHuman = "You went: Total = "
+const winMessageHuman = "You win"
+
 func main() {
 	
-	total = (36 * $rand()) as int
+	total = $max(28, (50 * $rand()) as int)
+	firstToPlay = (2 * $rand()) as int
+	print "The number is ", total, ln
+	loop game: {
+		if firstToPlay == 0 {
+			if $humanPlay() or $computerPlay() {
+				break
+			}
+		} else {
+			if $computerPlay() or $humanPlay() {
+				break
+			}
+		}
+	}
+}
+
+dynamic func humanPlay() {
+	print "Enter 1 or 2: "
+	loop user: {
+		read input
+		if (input < 1 or input > 2) {
+			print "Must only enter 1 or 2", ln
+		} else {
+			total = total - input
+			break user
+		}
+	}
 	
-	prompt = func(informMessage, winMessage) {
-		$println(concat informMessage, total as int)
+	return $promptAndCheckForWin(informMessageHuman, winMessageHuman)
+}
+
+dynamic func computerPlay() {
+	N = total % 3
+	if (N > 0) {
+		total = total - N
+	} else {
+		total = total - 1
+	}
+	
+	return $promptAndCheckForWin(informMessageComputer, winMessageComputer)
+}
+
+dynamic func promptAndCheckForWin(informMessage, winMessage) {
+		print informMessage, total as int, ln
 		if (total <= 0){
-			$println(winMessage)
+			print winMessage, ln
 			return true
 		} else {
 			return false
 		}
 	}
-	
-	$println(concat "The number is ", total)
-	loop x: {
-		loop y: {
-			print "Enter 1 or 2: " read input
-			if (input < 1 or input > 2) {
-				$println("Must only enter 1 or 2")
-			} else {
-				total = total - input
-				break y
-			}
-		}
-		
-		if ($prompt("You went: Total = ", "You Win") == true) {
-			break x
-		}
-		
-		N = total % 3
-		if (N > 0) {
-			total = total - N
-		} else {
-			total = total - 1
-		}
-		
-		if ($prompt("Computer went: Total = ", "I Win") == true) {
-			break x
-		}
-	}
-}
