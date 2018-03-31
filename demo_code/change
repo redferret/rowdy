@@ -11,8 +11,7 @@
 			return 1
 		}
 	
-		change = amt - price
-		change = round change, 2
+		change = $roundVal(amt - price as double, 2)
 		
 		chg = change
 		hundreds 	= $getChange(100)
