@@ -44,11 +44,6 @@ public class RelEqualTest {
   @Parameterized.Parameters
   public static List<Object[]> data() {
     List<Object[]> list = new ArrayList<>();
-    list.add(new Object[]{"== 100", new Value(100L, false), new Value(true, false)});
-    list.add(new Object[]{"== (100 as long)", new Value(100, false), new Value(true, false)});
-    list.add(new Object[]{"== 100", new Value(100.0d, false), new Value(true, false)});
-    list.add(new Object[]{"== 100.0d", new Value(100, false), new Value(true, false)});
-    
     list.add(new Object[]{"== 100", new Value(50, false), new Value(false, false)});
     list.add(new Object[]{"== 100", new Value(150, false), new Value(false, false)});
     list.add(new Object[]{"== 100", new Value(100, false), new Value(true, false)});

@@ -6,7 +6,7 @@
 	import "core.rowdy"
 	
 	func main (price, amt) {
-		if $not((isset price) and (isset amt)) {
+		if ((isset price) and (isset amt)) == false {
 			print "Illegal or Missing Arguments\n"
 			return 1
 		}

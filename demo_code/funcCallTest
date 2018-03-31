@@ -1,0 +1,26 @@
+
+import "core.rowdy"
+
+	func main() {
+		
+		forLoop = func(M, f) {
+			loop i: {if i >= M {break} i=i+1
+				$f()
+			}
+		}
+		
+		f1 = func(w, h) {
+			$forLoop(w, func(){
+				$f2(h)
+			})
+		}
+	
+		f2 = func(w) {
+			$forLoop(w, func(){
+				print "."
+			})
+			$println()
+		}
+	
+		$f1(10, 20)
+	}

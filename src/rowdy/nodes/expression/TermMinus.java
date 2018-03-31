@@ -23,8 +23,8 @@ public class TermMinus extends BaseNode{
       return instance.fetch(leftValue, this);
     }
     BaseNode tailNode = null;
-    if (children.size() > 1) {
-      tailNode = children.get(1);
+    if (children.size() > 2) {
+      tailNode = children.get(2);
     }
     leftValue = instance.fetch(leftValue, leftNode);
     
