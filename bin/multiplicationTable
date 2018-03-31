@@ -1,0 +1,21 @@
+
+import "core.rowdy"
+
+func multTable() { 
+	print " "
+	$forLoop(1, 10, 1, func(n) { 
+		print " ", n, " "
+	})
+	$forLoop(1, 10, 1, func(i) { 
+		print i
+		$forLoop(1, 10, 1, func(j) { 
+			this.num = i * j 
+			if num < 10 { 
+				print " ", num, " "
+			} else { 
+				print num, " " 
+			} 
+		}) 
+		print ln 
+	})
+}

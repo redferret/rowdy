@@ -38,8 +38,8 @@ public class AssignStatement extends BaseNode {
       if (rightValue.isConstant()) {
         rightValue.setAsConstant(false);
       }
-      RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER);
-      if (idModifier.hasSymbols()) {
+      RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER, false);
+      if (idModifier != null && idModifier.hasSymbols()) {
         switch (idModifier.getLeftMost().symbol().id()) {
           case CONST_OPT:
             rightValue.setAsConstant(true);

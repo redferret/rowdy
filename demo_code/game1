@@ -10,14 +10,16 @@ func main() {
 	
 	total = $max(28, (50 * $rand()) as int)
 	firstToPlay = (2 * $rand()) as int
-	$println(concat "The number is ", total)
+	print "The number is ", total, ln
 	loop game: {
 		if firstToPlay == 0 {
-			$humanPlay()
-			$computerPlay()
+			if $humanPlay() or $computerPlay() {
+				break
+			}
 		} else {
-			$computerPlay()
-			$humanPlay()
+			if $computerPlay() or $humanPlay() {
+				break
+			}
 		}
 	}
 }
@@ -27,16 +29,14 @@ dynamic func humanPlay() {
 	loop user: {
 		read input
 		if (input < 1 or input > 2) {
-			$println("Must only enter 1 or 2")
+			print "Must only enter 1 or 2", ln
 		} else {
 			total = total - input
 			break user
 		}
 	}
 	
-	if $promptAndCheckForWin(informMessageHuman, winMessageHuman) {
-		break game
-	}
+	return $promptAndCheckForWin(informMessageHuman, winMessageHuman)
 }
 
 dynamic func computerPlay() {
@@ -47,15 +47,13 @@ dynamic func computerPlay() {
 		total = total - 1
 	}
 	
-	if $promptAndCheckForWin(informMessageComputer, winMessageComputer) {
-		break game
-	}
+	return $promptAndCheckForWin(informMessageComputer, winMessageComputer)
 }
 
 dynamic func promptAndCheckForWin(informMessage, winMessage) {
-		$println(concat informMessage, total as int)
+		print informMessage, total as int, ln
 		if (total <= 0){
-			$println(winMessage)
+			print winMessage, ln
 			return true
 		} else {
 			return false

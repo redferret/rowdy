@@ -207,8 +207,23 @@ public class RowdyInstance {
     }
   }
 
+  public void removeTerms(BaseNode root) {
+    List<BaseNode> childrenNodes = root.getAll();
+    BaseNode curNode;
+    for (int i = 0; i < childrenNodes.size(); i++) {
+      curNode = childrenNodes.get(i);
+      removeTerms(curNode);
+      if (curNode.symbol() instanceof Terminal &&
+              curNode.symbol().id() != CONSTANT &&
+              curNode.symbol().id() != ID) {
+        childrenNodes.remove(i--);
+      }
+    }
+  }
+  
   public void optimizeProgram(BaseNode root) throws ConstantReassignmentException {
     compress(root);
+    removeTerms(root);
     extractConstants(root);
     simplifyLists(root);
   }
