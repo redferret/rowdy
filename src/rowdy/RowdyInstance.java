@@ -73,7 +73,6 @@ public class RowdyInstance {
     BaseNode replacement;
     for (int i = 0; i < childrenNodes.size(); i++) {
       curNode = childrenNodes.get(i);
-      if (curNode == null) continue;
       compress(curNode);
       if (curNode.isCompressable()) {
         if (curNode.hasSymbols()) {
@@ -103,7 +102,7 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < children.size(); i++) {
       curNode = children.get(i);
-      if (curNode != null && curNode.hasSymbols()) {
+      if (curNode.hasSymbols()) {
         usefulCount++;
       }
     }
@@ -115,7 +114,6 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < childrenNodes.size(); i++) {
       curNode = childrenNodes.get(i);
-      if (curNode == null) continue;
       simplifyLists(curNode);
       String paramsId;
       switch (curNode.symbol().id()) {
@@ -190,7 +188,6 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < childrenNodes.size(); i++) {
       curNode = childrenNodes.get(i);
-      if (curNode == null) continue;
       extractConstants(curNode);
       switch (curNode.symbol().id()) {
         case ATOMIC_CONST:
@@ -207,23 +204,8 @@ public class RowdyInstance {
     }
   }
 
-  public void removeTerms(BaseNode root) {
-    List<BaseNode> childrenNodes = root.getAll();
-    BaseNode curNode;
-    for (int i = 0; i < childrenNodes.size(); i++) {
-      curNode = childrenNodes.get(i);
-      removeTerms(curNode);
-      if (curNode.symbol() instanceof Terminal &&
-              curNode.symbol().id() != CONSTANT &&
-              curNode.symbol().id() != ID) {
-        childrenNodes.remove(i--);
-      }
-    }
-  }
-  
   public void optimizeProgram(BaseNode root) throws ConstantReassignmentException {
     compress(root);
-    removeTerms(root);
     extractConstants(root);
     simplifyLists(root);
   }
@@ -264,11 +246,10 @@ public class RowdyInstance {
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareSystemConstants();
-    optimizeProgram(root);
-    declareGlobals();
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
+    optimizeProgram(root);
     executeStmt(main, null);
   }
   
@@ -302,10 +283,10 @@ public class RowdyInstance {
           ((AssignStatement) cur).execute();
           break;
         case FUNCTION:
-          Node asNativeFunction = cur.get(NATIVE_FUNC_OPT, false);
+          Node asNativeFunction = cur.get(NATIVE_FUNC_OPT);
           
           String functionName = ((Terminal) cur.get(ID).symbol()).getName();
-          if (asNativeFunction != null && asNativeFunction.hasSymbols()) {
+          if (asNativeFunction.hasSymbols()) {
             setAsGlobal(functionName, new Value());
           } else {
             if (functionName.equals("main")) {
@@ -490,8 +471,7 @@ public class RowdyInstance {
     }
     // 3. Push the function onto the call stack
     Function function = new Function(funcName, params, functionNode.getLine());
-    BaseNode isDynamic = functionNode.get(DYNAMIC_OPT, false);
-    if (functionNode.symbol().id() == ANONYMOUS_FUNC || (isDynamic != null && isDynamic.hasSymbols())) {
+    if (functionNode.symbol().id() == ANONYMOUS_FUNC || functionNode.get(DYNAMIC_OPT).hasSymbols()) {
       function.setAsDynamic();
     }
     callStack.push(function);

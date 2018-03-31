@@ -38,8 +38,8 @@ public class AssignStatement extends BaseNode {
       if (rightValue.isConstant()) {
         rightValue.setAsConstant(false);
       }
-      RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER, false);
-      if (idModifier != null && idModifier.hasSymbols()) {
+      RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER);
+      if (idModifier.hasSymbols()) {
         switch (idModifier.getLeftMost().symbol().id()) {
           case CONST_OPT:
             rightValue.setAsConstant(true);
@@ -48,8 +48,8 @@ public class AssignStatement extends BaseNode {
         }
       }
       
-      RowdyNode idAccess = (RowdyNode) get(ID_ACCESS, false);
-      if (idAccess != null && idAccess.hasSymbols()) {
+      RowdyNode idAccess = (RowdyNode) get(ID_ACCESS);
+      if (idAccess.hasSymbols()) {
         switch(idAccess.getLeftMost().symbol().id()) {
           case THIS_REF:
             Function curFunction = instance.callStack.peek();
