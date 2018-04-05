@@ -54,6 +54,12 @@ public class RelNotEqual extends BaseNode {
       right = (long) ((Integer)right + 0L);
     }
     
+    if (left == null && right == null) {
+      return new Value(true, false);
+    } else if (left == null && right != null || left != null && right == null) {
+      return new Value(true, false);
+    }
+    
     return new Value(!left.equals(right), false);
   }
 }
