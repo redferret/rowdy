@@ -1,22 +1,37 @@
 
 import "core.lists"
 
-native func runtime(function)
-native func println(str)
+const global PI = 3.141592653589793
+const global NaN = 0d / 0d
+const global ln = "\n"
 
+native func runtime(function)
+
+native func equalsIgnoreCase(str1, str2)
 native func strcmp(str1, str2)
 native func slice(str1, from, to)
+native func DecimalFormat(pattern)
+native func format(str, formatter)
 
 native func isNumber(value)
-native func pow(a, b)
 native func cos(a)
 native func sin(a)
 native func tan(a)
 native func rand()
 native func type(var)
-const global PI = 3.141592653589793
-const global ln = "\n"
-const global NaN = 0d / 0d
+
+func isFunction(var) {
+	return $equals($type(var), "rowdy.nodes.expression.AnonymousFunc")
+					or $equals($type(var), "rowdy.nodes.RowdyNode")
+}
+
+func executeFunctions(funcs) {
+	$forEach(funcs, func(f) {
+		if $isFunction(f) {
+			$f()
+		}
+	})
+}
 
 func max(a, b) {
 	if a > b {

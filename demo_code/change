@@ -1,19 +1,17 @@
 	// Change Program
 	// Author: Richard DeSilvey
-	// Demonstrates the 'round' function to help fix floating point errors
-	// and recursion.
 	
 	import "core.rowdy"
 	
 	func main (price, amt) {
-		if ((isset price) and (isset amt)) == false {
-			print "Illegal or Missing Arguments\n"
+		if $not( (isset price) and (isset amt) ) {
+			print "Illegal or Missing Arguments", ln
 			return 1
 		}
-	
-		change = $roundVal(amt - price as double, 2)
+		currency = $DecimalFormat("$###,##0.00")
+		change = $roundVal(amt - price, 2)
+		prtChange = change
 		
-		chg = change
 		hundreds 	= $getChange(100)
 		fifties   = $getChange(50)
 		twenties	= $getChange(20)
@@ -26,20 +24,20 @@
 		pennies 	= $getChange(0.01)
 		
 		print
-		"Amount Due: ", price,	"\n",
-		"Amount Given: ", amt,	"\n",
-		"\nChange Due: 	", chg,	"\n",
-		"----------------------------\n",
-		"Hundreds:	", hundreds,"\n",
-		"Fifties:	", fifties,	"\n",
-		"Twenties:	", twenties,"\n",
-		"Tens:		", tens,			"\n",
-		"Fives:		", fives, 		"\n",
-		"Ones:		", ones, 			"\n",
-		"Quarters:	", quarters,"\n",
-		"Dimes:		", dimes, 		"\n",
-		"Nickels:	", nickels, 	"\n",
-		"Pennies:	", pennies, 	"\n\n"
+		"Amount Due: ", $format(price, currency),	ln,
+		"Amount Given: ", $format(amt, currency),	ln,
+		"\nChange Due: 	", $format(prtChange, currency),	ln,
+		"----------------------------", ln,
+		"Hundreds:	", hundreds,ln,
+		"Fifties:	", fifties,	ln,
+		"Twenties:	", twenties,ln,
+		"Tens:		", tens,			ln,
+		"Fives:		", fives, 		ln,
+		"Ones:		", ones, 			ln,
+		"Quarters:	", quarters,ln,
+		"Dimes:		", dimes, 		ln,
+		"Nickels:	", nickels, 	ln,
+		"Pennies:	", pennies, 	ln,ln
 	}
 	
 	dynamic func getChange(denom) {
