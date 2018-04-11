@@ -55,7 +55,7 @@ public class RelNotEqual extends BaseNode {
     }
     
     if (left == null && right == null) {
-      return new Value(true, false);
+      return new Value(false, false);
     } else if (left == null && right != null || left != null && right == null) {
       return new Value(true, false);
     }

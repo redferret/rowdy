@@ -57,6 +57,7 @@ public class RelNotEqualTest {
     list.add(new Object[]{"!= true", new Value(false, false), new Value(true, false)});
     list.add(new Object[]{"!= null", new Value(true, false), new Value(true, false)});
     list.add(new Object[]{"!= null", new Value(false, false), new Value(true, false)});
+    list.add(new Object[]{"!= null", new Value(null, false), new Value(false, false)});
     return list;
   }
 }
