@@ -66,10 +66,11 @@ public class Rowdy {
   public void run() {
     if (!programFileName.isEmpty()) {
       List<BaseNode> programTrees = new ArrayList<>();
+      RowdyNode mainProgram;
       try {
         growdy.buildFromSource(programFileName);
-        rowdyInstance.initialize(growdy);
-        rowdyInstance.declareGlobals();
+        mainProgram = (RowdyNode) growdy.getProgram();
+        rowdyInstance.initialize(mainProgram);
         loadImports((BaseNode) growdy.getProgram(), programTrees);
         programTrees.forEach(tree -> {
           try {
@@ -86,9 +87,8 @@ public class Rowdy {
           handleException(ex);
         }
         
-        
       } catch (IOException | SyntaxException | ParseException | 
-              AmbiguousGrammarException | ConstantReassignmentException e) {
+              AmbiguousGrammarException e) {
         handleException(e);
         System.exit(500);
       }
@@ -97,18 +97,9 @@ public class Rowdy {
         List<Value> programParameters = new ArrayList<>();
 
         for (int p = 1; p < args.length; p++) {
-          String in = args[p];
-          if (Character.isDigit(in.charAt(0))) {
-            programParameters.add(new Value(Double.parseDouble(args[p]), false));
-          } else {
-            String argStr = args[p];
-            if (argStr.equals("true") || argStr.equals("false")) {
-              programParameters.add(new Value(Boolean.valueOf(argStr), false));
-            } else {
-              programParameters.add(new Value(args[p], false));
-            }
-          }
+          programParameters.add(new Value(args[p], false));
         }
+        
         rowdyInstance.execute(programParameters);
       } catch (NumberFormatException | MainNotFoundException
               | ConstantReassignmentException e) {
@@ -125,7 +116,6 @@ public class Rowdy {
             rowdyInstance.optimizeProgram(tree);
             rowdyInstance.declareGlobals(tree);
           } catch (ConstantReassignmentException ex) {
-            handleException(ex);
           }
         });
         loadJarLibs("bin/");
@@ -155,7 +145,7 @@ public class Rowdy {
         }
         try {
           growdy.buildFromString(program.toString(), STMT_LIST);
-          rowdyInstance.initialize(growdy);
+          rowdyInstance.initialize((RowdyNode) growdy.getProgram());
           rowdyInstance.executeLine();
         } catch (ParseException | SyntaxException | AmbiguousGrammarException | 
                 ConstantReassignmentException e) {

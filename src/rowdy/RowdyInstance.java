@@ -57,8 +57,8 @@ public class RowdyInstance {
     runningList = new ArrayList<>(50);
   }
   
-  public void initialize(GRowdy builder) {
-    root = (RowdyNode) builder.getProgram();
+  public void initialize(RowdyNode program) {
+    root = program;
   }
   
   /**
@@ -102,7 +102,7 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < children.size(); i++) {
       curNode = children.get(i);
-      if (curNode.hasSymbols()) {
+      if (curNode != null && curNode.hasSymbols()) {
         usefulCount++;
       }
     }
@@ -114,6 +114,7 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < childrenNodes.size(); i++) {
       curNode = childrenNodes.get(i);
+      if (curNode == null) continue;
       simplifyLists(curNode);
       String paramsId;
       switch (curNode.symbol().id()) {
@@ -188,6 +189,7 @@ public class RowdyInstance {
     BaseNode curNode;
     for (int i = 0; i < childrenNodes.size(); i++) {
       curNode = childrenNodes.get(i);
+      if (curNode == null) continue;
       extractConstants(curNode);
       switch (curNode.symbol().id()) {
         case ATOMIC_CONST:
@@ -246,10 +248,11 @@ public class RowdyInstance {
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareSystemConstants();
+    optimizeProgram(root);
+    declareGlobals();
     if (main == null){
       throw new MainNotFoundException("main method not found");
     }
-    optimizeProgram(root);
     executeStmt(main, null);
   }
   

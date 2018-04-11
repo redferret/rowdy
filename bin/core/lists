@@ -10,6 +10,9 @@ native func forEach(list, callback)
 native func forLoop(initial, end, inc, callback)
 native func size(collection)
 
+native func next(iterator)
+native func Iterator(collection)
+
 dynamic func apply(list, applier) {
 	this.nlist = $List()
 	$forEach(list, func(i) { 

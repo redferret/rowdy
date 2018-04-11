@@ -21,21 +21,36 @@ public class Calculator {
     } else if (left instanceof Double || right instanceof Double) {
       if (left instanceof Integer) {
         left = (Double) Double.sum(0, (Integer)left);
-      } else {
+        castTo = Value.Type.Double;
+      } else if (left instanceof Long) {
+        right = Long.sum(0, ((Double)right).intValue());
+        castTo = Value.Type.Long;
+      } else if (right instanceof Integer) {
         right = (Double) Double.sum(0, (Integer)right);
+        castTo = Value.Type.Double;
+      } else if (right instanceof Long) {
+        left = Long.sum(0, ((Double)left).intValue());
+        castTo = Value.Type.Long;
+      } else {
+        castTo = Value.Type.String;
       }
-      castTo = Value.Type.Double;
     } else if (left instanceof Integer && right instanceof Integer) {
       castTo = Value.Type.Integer;
     } else if (left instanceof Long && right instanceof Long) {
       castTo = Value.Type.Long;
     } else if (left instanceof Long || right instanceof Long) {
-      if (left instanceof Integer) {
-        left = (Long) Long.sum(0, (Integer)left);
-      } else {
-        right = (Long) Long.sum(0, (Integer)right);
-      }
       castTo = Value.Type.Long;
+      if (left instanceof Integer) {
+        left = Long.sum(0, (Integer) left);
+      } else if (right instanceof Integer) {
+        right = Long.sum(0, (Integer)right);
+      } else if (left instanceof Double) {
+        left = Long.sum(0, ((Double)left).intValue());
+      } else if (right instanceof Double) {
+        right = Long.sum(0, ((Double)right).intValue());
+      } else {
+        castTo = Value.Type.String;
+      }
     } else if (left instanceof Boolean && right instanceof Boolean) {
       castTo = Value.Type.Boolean;
     } else if (left instanceof String || right instanceof String) {

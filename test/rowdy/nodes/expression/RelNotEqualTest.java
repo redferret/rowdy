@@ -27,6 +27,7 @@ public class RelNotEqualTest {
   private final Value leftValue;
   
   public RelNotEqualTest(String testCode, Value leftValue, Value expectedResult) {
+    System.out.println("Testing: " + testCode);
     this.testCode = testCode;
     this.expectedResult = expectedResult;
     this.leftValue = leftValue;
@@ -45,6 +46,10 @@ public class RelNotEqualTest {
   @Parameterized.Parameters
   public static List<Object[]> data() {
     List<Object[]> list = new ArrayList<>();
+    list.add(new Object[]{"!= \"Hello\"", new Value("Hello", false), new Value(true, false)});
+    list.add(new Object[]{"!= 1.1", new Value(1, false), new Value(true, false)});
+    list.add(new Object[]{"!= 1", new Value(1.1, false), new Value(true, false)});
+    list.add(new Object[]{"!= 1.0", new Value(1.1, false), new Value(true, false)});
     list.add(new Object[]{"!= 100", new Value(50, false), new Value(true, false)});
     list.add(new Object[]{"!= 100", new Value(100, false), new Value(false, false)});
     list.add(new Object[]{"!= 50", new Value(100, false), new Value(true, false)});
@@ -52,6 +57,7 @@ public class RelNotEqualTest {
     list.add(new Object[]{"!= true", new Value(false, false), new Value(true, false)});
     list.add(new Object[]{"!= null", new Value(true, false), new Value(true, false)});
     list.add(new Object[]{"!= null", new Value(false, false), new Value(true, false)});
+    list.add(new Object[]{"!= null", new Value(null, false), new Value(false, false)});
     return list;
   }
 }

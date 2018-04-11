@@ -30,25 +30,36 @@ public class RelNotEqual extends BaseNode {
     if (leftValue.getValue() instanceof Boolean) {
       left = (boolean) leftValue.getValue() ? 1 : 0;
     } else if (leftValue.getValue() instanceof String) {
-      if (rightValue.getValue() == null) {
-        return new Value(true, false);
-      } else {
-        return new Value(false, false);
-      }
+      return new Value(true, false);
     } else {
       left = (Number) leftValue.getValue();
     }
     if (rightValue.getValue() instanceof Boolean) {
       right = (boolean) rightValue.getValue() ? 1 : 0;
     } else if (rightValue.getValue() instanceof String) {
-      if (left == null) {
-        return new Value(true, false);
-      } else {
-        return new Value(false, false);
-      }
+      return new Value(true, false);
     } else {
       right = (Number) rightValue.getValue();
     }
-    return new Value(left != right, false);
+    
+    if (left instanceof Double && right instanceof Integer) {
+      right = (double) ((Integer)right + 0.0d);
+    } else if (right instanceof Double && left instanceof Integer) {
+      left = (double) ((Integer)left + 0.0d);
+    }
+    
+    if (left instanceof Integer && right instanceof Long) {
+      left = (long) ((Integer)left + 0L);
+    } else if (right instanceof Integer && left instanceof Long) {
+      right = (long) ((Integer)right + 0L);
+    }
+    
+    if (left == null && right == null) {
+      return new Value(false, false);
+    } else if (left == null && right != null || left != null && right == null) {
+      return new Value(true, false);
+    }
+    
+    return new Value(!left.equals(right), false);
   }
 }

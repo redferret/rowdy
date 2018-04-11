@@ -1,0 +1,62 @@
+
+import "core.rowdy"
+
+const PRIZES = array(0, 50, 200, 1000, 25000, 1000000)
+const pattern = $DecimalFormat("$###,###,##0")
+
+func main() {
+
+	currentMoney = 0
+	costToPlay = 10
+	
+	print "Rowdy Lotto!", ln, "Pick 5 numbers 1 - 26. Good luck!", ln
+	print "Cost to play each round: ", $format(costToPlay, pattern), ln
+	
+	loop lottoGame: {
+		
+		lottoNumbers = array()
+		$forLoop(0, 5, 1, func() {
+			$add(lottoNumbers, $getRN())
+		})
+		
+		currentMoney = currentMoney - costToPlay
+		print "You currently have ", $format(currentMoney, pattern), ln, ln
+		
+		print "Enter your 5 numbers one at a time", ln 
+		read n1, n2, n3, n4, n5
+		playerNumbers = array(n1, n2, n3, n4, n5)
+		
+		wins = 0
+		$forLoop(0, 5, 1, func(i) {
+			playerNumber = $get(playerNumbers, i)
+			lottoNumber = $get(lottoNumbers, i)
+			if playerNumber == lottoNumber {
+				wins = wins + 1
+			}
+		})
+		print "The lotto numbers are: "
+		$forEach(lottoNumbers, func(lottoNumber) {
+			print lottoNumber, " "
+		}) print ln
+		
+		if wins == 0 {
+			print "You didn't win anything, sorry :(", ln
+		} else if wins == 5 {
+			print "YOU WON THE GRAND PRIZE OF ", $format($get(PRIZES, wins), pattern), "!!!!!", ln
+			currentMoney = currentMoney + $get(PRIZES, wins)
+		} else {
+			print "You won ", $format($get(PRIZES, wins), pattern), "!!", ln
+			currentMoney = currentMoney + $get(PRIZES, wins)
+		}
+		print "Keep playing? " read answer
+		
+		if $equalsIgnoreCase(answer, "no") {
+			break lottoGame
+		}
+	}
+	print "Your winnings are ", $format(currentMoney, pattern), ln
+}
+
+func getRN() {
+	return $max(1, $rand() * 26) as int
+}

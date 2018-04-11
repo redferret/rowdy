@@ -37,6 +37,25 @@ public class RelEqual extends BaseNode  {
     } else {
       right = (Number) rightValue.getValue();
     }
-    return new Value(left == right, false);
+    
+    if (left instanceof Double && right instanceof Integer) {
+      right = (double) ((Integer)right + 0.0d);
+    } else if (right instanceof Double && left instanceof Integer) {
+      left = (double) ((Integer)left + 0.0d);
+    }
+    
+    if (left instanceof Integer && right instanceof Long) {
+      left = (long) ((Integer)left + 0L);
+    } else if (right instanceof Integer && left instanceof Long) {
+      right = (long) ((Integer)right + 0L);
+    }
+    
+    if (left == null && right == null) {
+      return new Value(true, false);
+    } else if (left == null && right != null || left != null && right == null) {
+      return new Value(false, false);
+    }
+    
+    return new Value(left.equals(right), false);
   }
 }
