@@ -3,13 +3,13 @@
 	
 	func main(max) {
 		time = $runtime(func() {
-			if (isset max) == false {
+			if $not(isset max){
 				max = 1000
 			}
-			$println($fibby(max as long))
+			print $fibby(max as long), ln
 		})
 		
-		$println(concat "Took ", time, " ms to finish")
+		print "Took ", time, " ms to finish", ln
 	}
 
 	func fibby(max) {
@@ -23,6 +23,7 @@
 			x = y
 			y = z
 			if x >= max {
+				$add(fibs, x)
 				break
 			}
 		}
