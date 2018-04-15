@@ -25,14 +25,6 @@ func isFunction(var) {
 					or $equals($type(var), "rowdy.nodes.RowdyNode")
 }
 
-func executeFunctions(funcs) {
-	$forEach(funcs, func(f) {
-		if $isFunction(f) {
-			$f()
-		}
-	})
-}
-
 func max(a, b) {
 	if a > b {
 		return a
@@ -47,6 +39,10 @@ func min(a, b) {
 	} else {
 		return b
 	}
+}
+
+func isNotSet(var) { 
+	return $not(isset var)
 }
 
 func degrees(rads) {
