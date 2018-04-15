@@ -22,6 +22,7 @@ public class RelGreaterEqual extends BaseNode  {
       return instance.fetch(leftValue, this);
     }
     leftValue = instance.fetch(leftValue, this);
-    return Calculator.calculate(leftValue, leftNode, null, Calculator.Operation.GREATEREQUAL);
+    Value rightValue = leftNode.execute(leftValue);
+    return Calculator.calculate(leftValue, rightValue, null, Calculator.Operation.GREATEREQUAL);
   }
 }

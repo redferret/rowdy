@@ -6,17 +6,22 @@ import growdy.Terminal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rowdy.BaseNode;
+import rowdy.Calculator;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
 import rowdy.Function;
 import rowdy.SymbolTable;
+import static rowdy.lang.RowdyGrammarConstants.ASSIGN_VALUE;
+import static rowdy.lang.RowdyGrammarConstants.BECOMES_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.CONST_OPT;
+import static rowdy.lang.RowdyGrammarConstants.DECREMENT_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.GLOBAL_DEF;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.ID_ACCESS;
 import static rowdy.lang.RowdyGrammarConstants.ID_MODIFIER;
+import static rowdy.lang.RowdyGrammarConstants.INCREMENT_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
 
 /**
@@ -32,9 +37,25 @@ public class AssignStatement extends BaseNode {
   public Value execute(Value leftValue) {
     try {
       Terminal idTerminal = (Terminal) get(ID).symbol();
-      BaseNode assignExpr = get(EXPRESSION);
-      Value rightValue = assignExpr.execute();
-      
+      BaseNode assignValue = get(ASSIGN_VALUE);
+      Value rightValue = null;
+      switch(assignValue.getLeftMost().symbol().id()) {
+        case INCREMENT_EXPR:
+          rightValue = instance.fetch(instance.getIdAsValue(get(ID)), this);
+          rightValue = Calculator.calculate(rightValue, new Value(1, false), null, Calculator.Operation.ADD);
+          break;
+        case DECREMENT_EXPR:
+          rightValue = instance.fetch(instance.getIdAsValue(get(ID)), this);
+          rightValue = Calculator.calculate(rightValue, new Value(1, false), null, Calculator.Operation.SUBTRACT);
+          break;
+        case BECOMES_EXPR:
+          RowdyNode becomesExpr = (RowdyNode) assignValue.getLeftMost();
+          rightValue = becomesExpr.execute(null);
+          break;
+      }
+      if (rightValue == null) {
+        return null;
+      }
       if (rightValue.isConstant()) {
         rightValue.setAsConstant(false);
       }
