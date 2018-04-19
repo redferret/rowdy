@@ -11,7 +11,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.FACTOR_TAIL_POW;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -34,7 +33,6 @@ public class FactorPowTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, FACTOR_TAIL_POW);
     assertTrue(instance instanceof FactorPow);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value expResult = new Value(4, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);

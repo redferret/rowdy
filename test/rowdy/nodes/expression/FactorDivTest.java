@@ -7,7 +7,6 @@ import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.lang.RowdyGrammarConstants.FACTOR_TAIL_DIV;
@@ -32,7 +31,6 @@ public class FactorDivTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, FACTOR_TAIL_DIV);
     assertTrue(instance instanceof FactorDiv);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value expResult = new Value(20, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);

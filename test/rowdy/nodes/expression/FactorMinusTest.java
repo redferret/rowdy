@@ -10,7 +10,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.FACTOR_MINUS;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -33,7 +32,6 @@ public class FactorMinusTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, FACTOR_MINUS);
     assertTrue(instance instanceof FactorMinus);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value expResult = new Value(38, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);

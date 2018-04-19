@@ -8,7 +8,6 @@ import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.testlang.lang.RowdyGrammarConstants.FACTOR_TAIL_MOD;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -32,7 +31,6 @@ public class FactorModTest extends TestCase {
     Value leftValue = new Value(40, false);
     BaseNode instance = getTestStatement(testCode, FACTOR_TAIL_MOD);
     assertTrue(instance instanceof FactorMod);
-    trimEmptyChildren(instance);
     Value expResult = new Value(0, false);
     Value result = instance.execute(leftValue);
     assertEquals(expResult, result);

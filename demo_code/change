@@ -4,7 +4,7 @@
 	import "core.rowdy"
 	
 	func main (price, amt) {
-		if $not( (isset price) and (isset amt) ) {
+		if $isNotSet(price) or $isNotSet(amt) {
 			print "Missing Arguments, the amount due and the amount given are needed", ln
 			return 1
 		}

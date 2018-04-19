@@ -13,7 +13,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ARITHM_LESSEQUAL;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -37,7 +36,6 @@ public class RelLessEqualTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_LESSEQUAL);
     assertTrue(instance instanceof RelLessEqual);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value result = instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }

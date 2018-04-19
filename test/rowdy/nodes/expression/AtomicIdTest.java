@@ -9,7 +9,6 @@ import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.rowdyInstance;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -21,7 +20,6 @@ public class AtomicIdTest {
   public void testAtomicId() throws Throwable {
     String testCode = "var1";
     BaseNode instance = getTestStatement(testCode, ATOMIC_ID);
-    trimEmptyChildren(instance);
     assertTrue(instance instanceof AtomicId);
     rowdyInstance.setAsGlobal("var1", new Value(99, false));
     Integer result = (Integer) instance.execute().getValue();

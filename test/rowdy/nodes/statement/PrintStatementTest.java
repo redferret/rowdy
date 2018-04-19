@@ -11,8 +11,6 @@ import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.statement.PrintStatement;
-import static rowdy.testlang.lang.RowdyGrammarConstants.PRINT_STMT;
 import static rowdy.testlang.lang.RowdyGrammarConstants.STATEMENT;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.trimEmptyChildren;

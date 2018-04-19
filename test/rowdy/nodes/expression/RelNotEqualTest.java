@@ -13,7 +13,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ARITHM_NOTEQUAL;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -38,7 +37,6 @@ public class RelNotEqualTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_NOTEQUAL);
     assertTrue(instance instanceof RelNotEqual);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value result = instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }

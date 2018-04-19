@@ -12,7 +12,6 @@ import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ARITHM_GREATER;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -36,7 +35,6 @@ public class RelGreaterTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_GREATER);
     assertTrue(instance instanceof RelGreater);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value result = instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }
