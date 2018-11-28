@@ -46,8 +46,11 @@
 		$numberProgram()
 		$vars()
 		
-		const C = 1000
-		C = func(){} // should throw an exception
+		list = $apply($range(0, 10), func(n) {
+			if n % 2 == 0 {
+				return n
+			}
+		})
 		
 	}
 	

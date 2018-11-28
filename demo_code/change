@@ -13,8 +13,8 @@
 		
 		print
 		"Amount Due: ", $format(price, currency),	ln,
-		"Amount Given: ", $format(amt, currency),	ln,
-		"\nChange Due: 	", $format(change, currency),	ln,
+		"Amount Given: ", $format(amt, currency),	ln,ln,
+		"Change Due: 	", $format(change, currency),	ln,
 		"----------------------------",ln,
 		"Hundreds:  ", $getChange(100),ln,
 		"Fifties:   ", $getChange(50),ln,

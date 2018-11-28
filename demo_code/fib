@@ -3,7 +3,7 @@
 	
 	func main(max) {
 		time = $runtime(func() {
-			if $not(isset max){
+			if $isNotSet(max){
 				max = 1000
 			}
 			print $fibby(max as long), ln
@@ -12,7 +12,7 @@
 		print "Took ", time, " ms to finish", ln
 	}
 
-	func fibby(max) {
+	func getFibList(max) {
 		fibs = $List()
 		x = 0 as long
 		z = 0 as long
