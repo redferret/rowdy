@@ -26,7 +26,8 @@ public class FactorPow extends BaseNode {
       tailNode = children.get(2);
     }
     leftValue = instance.fetch(leftValue, leftNode);
-    return Calculator.calculate(leftValue, leftNode, tailNode, Calculator.Operation.POW);
+    Value rightValue = leftNode.execute(leftValue);
+    return Calculator.calculate(leftValue, rightValue, tailNode, Calculator.Operation.POW);
   }
   
 }

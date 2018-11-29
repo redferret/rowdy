@@ -3,7 +3,6 @@ package rowdy.nodes.expression;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import rowdy.BaseNode;
 import rowdy.Value;
 import org.junit.runner.RunWith;
@@ -13,7 +12,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ARITHM_GREATEREQUAL;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -37,7 +35,6 @@ public class RelGreaterEqualTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_GREATEREQUAL);
     assertTrue(instance instanceof RelGreaterEqual);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value result = instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }

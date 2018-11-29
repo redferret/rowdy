@@ -26,12 +26,20 @@ public class IssetExprTest extends TestCase {
     return suite;
   }
 
-  public void testExecute() throws ConstantReassignmentException {
+  public void testExistsExecute() throws ConstantReassignmentException {
     String testCode = "isset AAA";
     rowdyInstance.setAsGlobal("AAA", new Value(0, false));
     BaseNode instance = getTestStatement(testCode, ISSET_EXPR);
     assertTrue(instance instanceof IssetExpr);
     Value expected = new Value(true, false);
+    assertEquals(expected, instance.execute());
+  }
+  
+  public void testNotExistsExecute() throws ConstantReassignmentException {
+    String testCode = "isset BBB";
+    BaseNode instance = getTestStatement(testCode, ISSET_EXPR);
+    assertTrue(instance instanceof IssetExpr);
+    Value expected = new Value(false, false);
     assertEquals(expected, instance.execute());
   }
   

@@ -10,10 +10,10 @@ public class Calculator {
     ADD, SUBTRACT, DIVIDE, MULTIPLY, MODULUS, POW, LESS, LESSEQUAL, GREATER, GREATEREQUAL
   }
 
-  public static Value calculate(Value leftValue, BaseNode leftNode, BaseNode tailNode, Operation operation) {
+  public static Value calculate(Value leftValue, Value rightValue, BaseNode tailNode, Operation operation) {
     
     Object left = (leftValue == null) ? 0 : leftValue.getValue();
-    Object right = leftNode.execute(leftValue).getValue();
+    Object right = rightValue.getValue();
     Value.Type castTo;
 
     if (left instanceof Double && right instanceof Double) {
@@ -61,8 +61,8 @@ public class Calculator {
     return calculate(left, right, tailNode, operation, castTo);
     
   }
-
-  private static Value calculate(Object left, Object right, BaseNode tailNode, Operation operation, Value.Type type) {
+  
+  public static Value calculate(Object left, Object right, BaseNode tailNode, Operation operation, Value.Type type) {
     
     Value value = new Value(null, false);
     switch (operation) {

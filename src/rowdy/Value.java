@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public class Value {
 
-  public static enum Type {Integer, Double, Boolean, Short, Byte, Long, String}
+  public static enum Type {Integer, Double, Boolean, Short, Byte, Long, String, NaN}
   
   private Object value;
   private Type dataType;

@@ -153,9 +153,9 @@ public class RowdyNodeFactory implements NodeFactory {
         lpstmt.setAsNonCompressable();
         return lpstmt;
       default:
-        RowdyNode atomicType = new RowdyNode(symbol, line);
-        atomicType.setAsNonCompressable();
-        return atomicType;
+        RowdyNode defaultNode = new RowdyNode(symbol, line);
+        defaultNode.setAsNonCompressable();
+        return defaultNode;
     }
   }
   

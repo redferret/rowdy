@@ -4,40 +4,28 @@
 	import "core.rowdy"
 	
 	func main (price, amt) {
-		if $not( (isset price) and (isset amt) ) {
-			print "Illegal or Missing Arguments", ln
+		if $isNotSet(price) or $isNotSet(amt) {
+			print "Missing Arguments, the amount due and the amount given are needed", ln
 			return 1
 		}
 		currency = $DecimalFormat("$###,##0.00")
 		change = $roundVal(amt - price, 2)
-		prtChange = change
-		
-		hundreds 	= $getChange(100)
-		fifties   = $getChange(50)
-		twenties	= $getChange(20)
-		tens 			= $getChange(10)
-		fives 		= $getChange(5)
-		ones	 		= $getChange(1)
-		quarters 	= $getChange(0.25)
-		dimes 		= $getChange(0.1)
-		nickels 	= $getChange(0.05)
-		pennies 	= $getChange(0.01)
 		
 		print
 		"Amount Due: ", $format(price, currency),	ln,
-		"Amount Given: ", $format(amt, currency),	ln,
-		"\nChange Due: 	", $format(prtChange, currency),	ln,
-		"----------------------------", ln,
-		"Hundreds:	", hundreds,ln,
-		"Fifties:	", fifties,	ln,
-		"Twenties:	", twenties,ln,
-		"Tens:		", tens,			ln,
-		"Fives:		", fives, 		ln,
-		"Ones:		", ones, 			ln,
-		"Quarters:	", quarters,ln,
-		"Dimes:		", dimes, 		ln,
-		"Nickels:	", nickels, 	ln,
-		"Pennies:	", pennies, 	ln,ln
+		"Amount Given: ", $format(amt, currency),	ln,ln,
+		"Change Due: 	", $format(change, currency),	ln,
+		"----------------------------",ln,
+		"Hundreds:  ", $getChange(100),ln,
+		"Fifties:   ", $getChange(50),ln,
+		"Twenties:  ", $getChange(20),ln,
+		"Tens:      ", $getChange(10),ln,
+		"Fives:     ", $getChange(5),ln,
+		"Ones:      ", $getChange(1),ln,
+		"Quarters:  ", $getChange(0.25),ln,
+		"Dimes:     ", $getChange(0.10),ln,
+		"Nickels:   ", $getChange(0.05),ln,
+		"Pennies:   ", $getChange(0.01),ln,ln
 	}
 	
 	dynamic func getChange(denom) {

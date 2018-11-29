@@ -12,7 +12,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static rowdy.lang.RowdyGrammarConstants.ARITHM_EQUAL;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -36,7 +35,6 @@ public class RelEqualTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_EQUAL);
     assertTrue(instance instanceof RelEqual);
     assertFalse(instance.isCompressable());
-    trimEmptyChildren(instance);
     Value result = instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }

@@ -6,11 +6,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.expression.Expression;
 import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.testutils.TestUtils.getTestStatement;
-import static rowdy.testutils.TestUtils.trimEmptyChildren;
 
 /**
  *
@@ -30,10 +27,9 @@ public class ExpressionTest extends TestCase {
   /**
    * Test of execute method, of class Expression.
    */
-  public void testExecute() throws ConstantReassignmentException {
+  public void testExecute() {
     String testCode = "3 + 8 - 9 * 19 >= 100";
     BaseNode instance = getTestStatement(testCode, EXPRESSION);
-    trimEmptyChildren(instance);
     Value expResult = new Value(false, false);
     Value result = instance.execute();
     assertEquals(expResult, result);

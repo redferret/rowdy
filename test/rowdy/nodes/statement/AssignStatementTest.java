@@ -9,7 +9,6 @@ import rowdy.Function;
 import rowdy.RowdyObject;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.statement.AssignStatement;
 import static rowdy.testlang.lang.RowdyGrammarConstants.ASSIGN_STMT;
 import static rowdy.testutils.TestUtils.fetch;
 import static rowdy.testutils.TestUtils.getTestStatement;
@@ -105,6 +104,34 @@ public class AssignStatementTest extends TestCase {
     assertNull(value);
     value = function.getParent().getSymbolTable().getValue("G");
     assertNotNull(value);
+  }
+  
+  public void testIncrementTest() {
+    String testCode = "var1 = 0";
+    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+    instance.execute();
+    testCode = "var1++";
+    instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+    instance.execute();
+    Boolean result = isset("var1");
+    assertTrue("The ID 'var1' doesn't exist", result);
+    Integer expected = 1;
+    Integer actual = (Integer) fetch("var1").getValue();
+    assertEquals(expected, actual);
+  }
+  
+  public void testDecrementTest() {
+    String testCode = "var1 = 1";
+    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+    instance.execute();
+    testCode = "var1--";
+    instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+    instance.execute();
+    Boolean result = isset("var1");
+    assertTrue("The ID 'var1' doesn't exist", result);
+    Integer expected = 0;
+    Integer actual = (Integer) fetch("var1").getValue();
+    assertEquals(expected, actual);
   }
   
 }

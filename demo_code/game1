@@ -35,7 +35,7 @@ func main() {
 		if (N > 0) {
 			total = total - N
 		} else {
-			total = total - 1
+			total--
 		}
 		
 		if $prompt("Computer went: Total = ", "I Win") {

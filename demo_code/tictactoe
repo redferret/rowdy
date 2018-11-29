@@ -37,7 +37,7 @@ func main() {
 
 func showHelp() {
 	$println("Type 'reset' to start a new game")
-	$println("To make a move, enter the index of the cell")
+	$println("To make a move, enter the index of the cell. To exit, type 'exit'")
 }
 
 dynamic func makeMove() {
