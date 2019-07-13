@@ -38,7 +38,7 @@ public class SymbolTable {
   }
 
   public void allocate(Terminal cur, Value value, int line) throws ConstantReassignmentException {
-    this.allocate(cur.getName(), value, line);
+    this.allocate(cur.getValue(), value, line);
   }
   
   public void allocate(HashMap<String, Value> table) {
@@ -75,7 +75,7 @@ public class SymbolTable {
       return null;
     }
     if (value.getValue() instanceof Terminal) {
-      String idName = ((Terminal) value.getValue()).getName();
+      String idName = ((Terminal) value.getValue()).getValue();
       return getValue(idName);
     } else {
       return value;

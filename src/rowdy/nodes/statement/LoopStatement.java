@@ -23,7 +23,7 @@ public class LoopStatement extends BaseNode {
   @Override
   public Value execute(Value leftValue) {
     Terminal loopIdTerminal = (Terminal) get(ID).symbol();
-    String idName = (loopIdTerminal).getName();
+    String idName = (loopIdTerminal).getValue();
     Function curFunction = null;
     try {
       if (!instance.callStack.isEmpty()) {

@@ -29,9 +29,9 @@ public class BreakStatement extends RowdyNode {
                 + getLine());
       }
       Node loopId = instance.activeLoops.peek();
-      idName = ((Terminal) loopId.get(ID).symbol()).getName();
+      idName = ((Terminal) loopId.get(ID).symbol()).getValue();
     } else {
-      idName = ((Terminal) get(ID_OPTION).get(ID).symbol()).getName();
+      idName = ((Terminal) get(ID_OPTION).get(ID).symbol()).getValue();
     }
     Function curFunction = null;
     if (!instance.callStack.isEmpty()) {
@@ -44,7 +44,7 @@ public class BreakStatement extends RowdyNode {
     for (;;) {
       Node lp = instance.activeLoops.pop();
       lp.setSeqActive(false);
-      String tempBinding = ((Terminal) lp.get(ID).symbol()).getName();
+      String tempBinding = ((Terminal) lp.get(ID).symbol()).getValue();
       if (curFunction != null){
         curFunction.getSymbolTable().unset(tempBinding);
       } else {
