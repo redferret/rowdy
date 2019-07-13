@@ -106,15 +106,15 @@ public class Rowdy {
         handleException(e);
       }
     } else {
-      List<BaseNode> programTrees = new ArrayList<>();
+      List<BaseNode> compiledImports = new ArrayList<>();
       try {
         growdy.buildFromSource("bin/core/rowdy");
-        programTrees.add((BaseNode) growdy.getProgram());
-        loadImports((BaseNode) growdy.getProgram(), programTrees);
-        programTrees.forEach(tree -> {
+        compiledImports.add((BaseNode) growdy.getProgram());
+        loadImports((BaseNode) growdy.getProgram(), compiledImports);
+        compiledImports.forEach(compiledImport -> {
           try {
-            rowdyInstance.optimizeProgram(tree);
-            rowdyInstance.declareGlobals(tree);
+            rowdyInstance.optimizeProgram(compiledImport);
+            rowdyInstance.declareGlobals(compiledImport);
           } catch (ConstantReassignmentException ex) {
           }
         });
@@ -147,6 +147,12 @@ public class Rowdy {
           growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyInstance.initialize((RowdyNode) growdy.getProgram());
           rowdyInstance.executeLine();
+          
+          // Check for a single line import
+          String importPath = rowdyInstance.getNextImport();
+          if (importPath != null) {
+            loadImport(importPath);
+          }
         } catch (ParseException | SyntaxException | AmbiguousGrammarException | 
                 ConstantReassignmentException e) {
           handleException(e);
@@ -155,24 +161,52 @@ public class Rowdy {
     }
   }
   
+  public void loadImport(String importPath) {
+    try {
+      growdy.buildFromSource("bin/" + importPath);
+      BaseNode compiledImport = (BaseNode) growdy.getProgram();
+      rowdyInstance.optimizeProgram(compiledImport);
+      rowdyInstance.declareGlobals(compiledImport);
+    } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
+      handleException(ex);
+    } catch (ConstantReassignmentException cex) {
+      // ignore
+    }
+  }
+  
+  public void loadImports(BaseNode program, List<BaseNode> compiledImports) {
+    List<String> localImports = getImports(program);
+    localImports.forEach(localImport -> {
+      String importPath = "bin/" + localImport;
+      try {
+        growdy.buildFromSource(importPath);
+        BaseNode compliedImport = (BaseNode) growdy.getProgram();
+        compiledImports.add(compliedImport);
+        loadImports(compliedImport, compiledImports);
+      } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
+        handleException(ex);
+      }
+    });
+  }
+  
   public List<String> getImports(BaseNode root) {
-    BaseNode currentTreeNode;
+    BaseNode importTreeNodes;
     ArrayList<BaseNode> children = root.getAll();
     int currentID;
     List<String> importPaths = new ArrayList<>();
     for (int i = 0; i < children.size(); i++) {
-      currentTreeNode = children.get(i);
-      currentID = currentTreeNode.symbol().id();
+      importTreeNodes = children.get(i);
+      currentID = importTreeNodes.symbol().id();
       switch (currentID) {
         case IMPORTS:
-          Node imports = currentTreeNode.get(CONSTANT, false);
-          if (imports != null) {
-            String importPath = ((Terminal) imports.symbol()).getName().replaceAll("\\.", "/").replaceAll("\"", "");
+          Node importConstant = importTreeNodes.get(CONSTANT, false);
+          if (importConstant != null) {
+            String importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
             importPaths.add(importPath);
-            Node nextImport = currentTreeNode.get(IMPORTS);
+            Node nextImport = importTreeNodes.get(IMPORTS);
             while (nextImport.hasSymbols()) {
-              imports = nextImport.get(CONSTANT);
-              importPath = ((Terminal) imports.symbol()).getName().replaceAll("\\.", "/").replaceAll("\"", "");
+              importConstant = nextImport.get(CONSTANT);
+              importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
               importPaths.add(importPath);
               nextImport = nextImport.get(IMPORTS);
             }
@@ -182,21 +216,6 @@ public class Rowdy {
     return importPaths;
   }
   
-  public void loadImports(BaseNode program, List<BaseNode> programTrees) {
-    List<String> localImports = getImports(program);
-    localImports.forEach(imprt -> {
-      String importPath = "bin/" + imprt;
-      try {
-        growdy.buildFromSource(importPath);
-        BaseNode subProgram = (BaseNode) growdy.getProgram();
-        programTrees.add(subProgram);
-        loadImports(subProgram, programTrees);
-      } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
-        handleException(ex);
-      }
-    });
-  }
-
   public static GRBuilder getBuilder() {
     GRBuilder grBuilder = null;
     try {

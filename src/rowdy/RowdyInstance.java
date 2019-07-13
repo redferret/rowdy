@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static rowdy.lang.RowdyGrammarConstants.*;
 import rowdy.nodes.expression.AtomicId;
 
@@ -46,6 +48,7 @@ public class RowdyInstance {
   private final List<String> runningList;
   private List<Value> programParamValues;
   private boolean firstTimeInitialization;
+  private String nextImport;
 
   public RowdyInstance() {
     this.root = null;
@@ -288,7 +291,7 @@ public class RowdyInstance {
         case FUNCTION:
           Node asNativeFunction = cur.get(NATIVE_FUNC_OPT);
           
-          String functionName = ((Terminal) cur.get(ID).symbol()).getName();
+          String functionName = ((Terminal) cur.get(ID).symbol()).getValue();
           if (asNativeFunction.hasSymbols()) {
             setAsGlobal(functionName, new Value());
           } else {
@@ -324,7 +327,7 @@ public class RowdyInstance {
       curID = cur.symbol().id();
       switch (curID) {
         case FUNCTION:
-          String funcName = ((Terminal) cur.get(ID).symbol()).getName();
+          String funcName = ((Terminal) cur.get(ID).symbol()).getValue();
           Value funcVal = fetch(getIdAsValue(cur.get(ID)), cur);
           Value exitValue = executeFunc(funcName, funcVal, programParamValues);
           if (exitValue == null){
@@ -352,6 +355,11 @@ public class RowdyInstance {
         case PRINT_STMT:
           ((PrintStatement) cur).execute(new Value(System.out, false));
           break;
+        case IMPORT_SINGLE:
+          Node importConstant = cur.get(CONSTANT, false);
+          if (importConstant != null) {
+            nextImport = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
+          }
         default:
           if (seqControl != null) {
             if (seqControl.isSeqActive()) {
@@ -362,6 +370,12 @@ public class RowdyInstance {
           }
       }
     }
+  }
+  
+  public String getNextImport() {
+    String temp = nextImport;
+    nextImport = null;
+    return temp;
   }
   
   /**
@@ -397,7 +411,7 @@ public class RowdyInstance {
   public Value executeFunc(BaseNode cur, List<Value> parameterValues) throws ConstantReassignmentException {
     // 1. Collect parameters
     BaseNode idFuncRef = cur.get(ID_FUNC_REF);
-    String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getName();
+    String funcName = ((Terminal) idFuncRef.get(ID).symbol()).getValue();
     Value funcVal = fetch(getIdAsValue(idFuncRef.get(ID)), cur);
     
     if (funcVal.getValue() instanceof BaseNode) {
@@ -519,7 +533,7 @@ public class RowdyInstance {
         while(!callStack.isEmpty()) {
           Function currentFunction = callStack.pop();
           searchStack.push(currentFunction);
-          Value v = currentFunction.getSymbolTable().getValue(idTerminal.getName());
+          Value v = currentFunction.getSymbolTable().getValue(idTerminal.getValue());
           if (v != null) {
             currentFunction.getSymbolTable().allocate(idTerminal, value, line);
             found = true;
@@ -532,7 +546,7 @@ public class RowdyInstance {
           callStack.push(searchStack.pop());
         }
         if (!found){
-          Value exists = globalSymbolTable.get(idTerminal.getName());
+          Value exists = globalSymbolTable.get(idTerminal.getValue());
           if (exists == null) {
             Function currentFunction = callStack.peek();
             currentFunction.getSymbolTable().allocate(idTerminal, value, line);
@@ -566,7 +580,7 @@ public class RowdyInstance {
   }
 
   public void setAsGlobal(Terminal cur, Value value) throws ConstantReassignmentException {
-    setAsGlobal(cur.getName(), value);
+    setAsGlobal(cur.getValue(), value);
   }
 
   public Value getIdAsValue(Node id) {
@@ -579,7 +593,7 @@ public class RowdyInstance {
     }
     Value foundValue = fetchInCallStack(value);
     if (foundValue == null) {
-      String fetchIdName = ((Terminal) value.getValue()).getName();
+      String fetchIdName = ((Terminal) value.getValue()).getValue();
       foundValue = globalSymbolTable.get(fetchIdName);
       return (foundValue != null && foundValue.getValue() != null);
     } else {
@@ -598,7 +612,7 @@ public class RowdyInstance {
         if (foundValue != null){
           return new Value(foundValue.getValue(), foundValue.isConstant());
         }
-        String fetchIdName = ((Terminal) value.getValue()).getName();
+        String fetchIdName = ((Terminal) value.getValue()).getValue();
         Value val = globalSymbolTable.get(fetchIdName);
         if (val == null) {
           throw new RuntimeException("The ID '" + value + "' doesn't exist "
@@ -691,5 +705,23 @@ public class RowdyInstance {
         System.out.println(children.get(i).symbol());
       }
     }
+  }
+  
+  public BaseNode buildAndAllocateCallBack(RowdyInstance instance, BaseNode callback) {
+    
+    String funcName = callback.symbol().getSymbolAsString();
+    BaseNode callBackFunc = new RowdyNode(callback.symbol(), callback.getLine());
+    
+    BaseNode idFuncRef = new RowdyNode(new NonTerminal("id-func-ref", ID_FUNC_REF, new int[][]{}), callback.getLine());
+    Terminal idTerm = new Terminal("id", ID, funcName + ThreadLocalRandom.current().nextInt());
+    RowdyNode funcId = new RowdyNode(idTerm, ATOMIC);
+    idFuncRef.add(funcId);
+    callBackFunc.add(idFuncRef);
+    try {
+      instance.allocate(idTerm, new Value(callback, false), callback.getLine());
+    } catch (ConstantReassignmentException ex) {
+      Logger.getLogger(RowdyInstance.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return callBackFunc;
   }
 }
