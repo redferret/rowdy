@@ -1,4 +1,8 @@
 language: java
+addons:
+  apt:
+    packages:
+      ant
 notifications:
   email:
     on_success: never
