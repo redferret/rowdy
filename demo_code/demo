@@ -1,91 +1,91 @@
 
-	import "core.rowdy"
+import "rowdy.core"
 
-	func func2(a, b) {
-	  print "Function adds ", a, " and ", b, " to get: ", a + b, "\n"
-	}
-	
-	func main() {
-		print $myfunc(1, 3), "\n"
-		print $noReturn(), "\n"
-		
-		func1 = func2
-		
-		$func1(2, 8)
-		count = 1
-		// Strings, print statements have concat built into them, so it's not always 
-		// needed and may be more efficient to not use concat statements inside print statements
-		print ( concat "These are ", "Concatenated ", count ), "\n"
-		count = count + 1
-		print "These are ", ( concat "Concatenated ", count, "\n")
-		count = count + 1
-		print "These are ", "Concatenated ", count, "\n"
-		count = count + 1
-		// Above same as below
-		print ( concat "These are ", "Concatenated ", count, "\n" )
-		
-		str1 = "Hello "
-		str2 = "World!\n"
-		
-		str3 = concat str1, str2
-		print str3
-		
-		// Slicing Strings
-		str4 = $slice(str3, 0, 5) // [0, 5)
-		print ( concat str4, "\n" )
-		v1 = 0 
-		v2 = 5
-		
-		str4 = $slice(str3, v1, v2) // [0, 5)
-		print ( concat str4, " World!" ), "\n"
-		
-		print $slice($slice("This will be cut into pieces", 0, 16), 5, 16), "\n"
-		print $strcmp("AAA", "AAA"), "\n"
-		print "STRCMP: ", ( $strcmp("AAA", "AAA") == 0), "\n"
-		
-		$numberProgram()
-		$vars()
-		
-		list = $apply($range(0, 10), func(n) {
-			if n % 2 == 0 {
-				return n
-			}
-		})
-		
-	}
-	
-	// vars will print the following:
-	// 12
-	// 100
-	// 12
-	func vars() {
-		print "Variables\n"
-		$f2()
-	}
-	func f1(v1) {
-		v1 = 100
-		print v1, "\n" // 100
-	}
-	func f2() {
-		v1 = 12
-		print v1, "\n" // 12
-		$f1(v1)
-		print v1, "\n" // Still 12
-	}
+func func2(a, b) {
+	print "Function sums ", a, " and ", b, " to get: ", a + b, ln
+}
 
-	func noReturn () {
-	  // do something then don't return anything
-	}
+func main() {
+	print $myfunc(1, 3), ln
+	print $noReturn(), ln
 	
-	func myfunc(a, b) {
-		return a + b
-	}
+	func1 = func2
 	
-	func numberProgram() {
-		print 1 + 4 ^ (5 - 2), "\n" // Evaluates to 1 + 4 ^ 3 => 1 + 64 => 65.0
-		print (1 + 4) ^ (5 - 2), "\n" // Evaluates to 5 ^ 3 => 125.0
-		print $pow(1 + 4, 5 - 2), "\n"
-		print 5 % 10 + 1, "\n" // Evaluates to 6
-		
-		
-	}
+	$func1(2, 8)
+	$func2(9, -6)
+	count = 1
+	// Strings, print statements have concat built into them, so it's not always 
+	// needed and will be more efficient to not use concat statements inside print statements
+	print ( concat "These are ", "Concatenated ", count ), ln
+	count = count + 1
+	print "These are ", ( concat "Concatenated ", count, ln)
+	count = count + 1
+	print "These are ", "Concatenated ", count, ln
+	count = count + 1
+	// Above same as below
+	print ( concat "These are ", "Concatenated ", count, ln )
+	
+	str1 = "Hello "
+	str2 = "World!\n"
+	
+	str3 = concat str1, str2
+	print str3
+	
+	// Slicing Strings
+	str4 = $slice(str3, 0, 5) // [0, 5)
+	print ( concat str4, ln )
+	v1 = 0 
+	v2 = 5
+	
+	str4 = $slice(str3, v1, v2) // [0, 5)
+	print ( concat str4, " World!" ), ln
+	
+	print $slice($slice("This will be cut into pieces", 0, 16), 5, 16), ln
+	print $strcmp("AAA", "AAA"), ln
+	print "STRCMP: ", ( $strcmp("AAA", "AAA") == 0), ln
+	
+	$numberProgram()
+	$vars()
+	
+	list = $apply($range(0, 10), func(n) {
+		if n % 2 == 0 {
+			return n
+		}
+	})
+	
+}
+
+// vars will print the following:
+// 12
+// 100
+// 12
+func vars() {
+	print "Variables\n"
+	$f2()
+}
+func f1(v1) {
+	v1 = 100
+	print v1, ln // 100
+}
+func f2() {
+	v1 = 12
+	print v1, ln // 12
+	$f1(v1)
+	print v1, ln // Still 12
+}
+
+func noReturn () {
+	// do something then don't return anything, this will return null by default
+}
+
+func myfunc(a, b) {
+	return a + b
+}
+
+func numberProgram() {
+	print 1 + 4 ^ (5 - 2), ln // Evaluates to 1 + 4 ^ 3 => 1 + 64 => 65.0
+	print (1 + 4) ^ (5 - 2), ln // Evaluates to 5 ^ 3 => 125.0
+	print 5 % 10 + 1, ln // Evaluates to 6
+	
+	
+}

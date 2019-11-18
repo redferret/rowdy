@@ -26,7 +26,6 @@ public class RelNotEqualTest {
   private final Value leftValue;
   
   public RelNotEqualTest(String testCode, Value leftValue, Value expectedResult) {
-    System.out.println("Testing: " + testCode);
     this.testCode = testCode;
     this.expectedResult = expectedResult;
     this.leftValue = leftValue;
@@ -37,7 +36,7 @@ public class RelNotEqualTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_NOTEQUAL);
     assertTrue(instance instanceof RelNotEqual);
     assertFalse(instance.isCompressable());
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }
   // Provide data

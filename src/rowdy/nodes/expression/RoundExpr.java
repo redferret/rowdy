@@ -17,7 +17,7 @@ public class RoundExpr extends BaseNode {
   }
 
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     Value valueToRound = instance.fetch(instance.getIdAsValue(get(ID)), this);
     
     if (valueToRound.getValue() instanceof Integer) {
@@ -25,8 +25,8 @@ public class RoundExpr extends BaseNode {
     }
     
     double roundedValue = (double) valueToRound.getValue();
-    BaseNode arithmExpr = getAll().get(3);
-    int precision = (int) arithmExpr.execute().getValue();
+    BaseNode arithmExpr = getAll().get(1);
+    int precision = (int) ((Value)arithmExpr.execute()).getValue();
     double factor = 1;
     while (precision > 0) {
       factor *= 10;

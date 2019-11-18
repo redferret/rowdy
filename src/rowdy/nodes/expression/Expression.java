@@ -18,13 +18,13 @@ public class Expression extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     BaseNode leftNode = getLeftMost();
     if (leftNode == null) {
-      return instance.fetch(leftValue, this);
+      return instance.fetch((Value) leftValue, this);
     }
     RowdyNode castAs = (RowdyNode) get(CAST_AS, false);
-    Value castValue = instance.fetch(leftNode.execute(), this); 
+    Value castValue = instance.fetch((Value) leftNode.execute(), this); 
     if (castAs != null) { 
       RowdyNode castOpt = (RowdyNode) castAs.get(CAST_OPT, false);
       if (castOpt != null) {

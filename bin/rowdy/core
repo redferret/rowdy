@@ -1,18 +1,27 @@
 
-import "core.lists"
+import "rowdy.lists"
 
-const global PI = 3.141592653589793
-const global NaN = 0d / 0d
-const global ln = "\n"
+const PI = 3.141592653589793
+const NaN = 0d / 0d
+const ln = "\n"
+
+// Formal: native func java(object, method, paramClasses, paramValues ... )
+native func java(object, method, paramClasses)
 
 native func runtime(function)
 
 native func equalsIgnoreCase(str1, str2)
 native func strcmp(str1, str2)
+native func contains(str, substring)
 native func slice(str1, from, to)
+
 native func DecimalFormat(pattern)
 native func format(str, formatter)
 
+native func instance(nameOfClass)
+native func getRowdyInstance()
+
+native func intToChar(integer)
 native func isNumber(value)
 native func cos(a)
 native func sin(a)
@@ -39,10 +48,6 @@ func min(a, b) {
 	} else {
 		return b
 	}
-}
-
-func isNotSet(var) { 
-	return $not(isset var)
 }
 
 func degrees(rads) {
@@ -73,7 +78,7 @@ func isEmpty(str) {
 }
 
 func isNotEmpty(str) {
-	return $not($equals(str, ""))
+	return $notEqual(str, "")
 }
 
 func equals(var1, var2) {

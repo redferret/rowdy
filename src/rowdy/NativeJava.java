@@ -1,10 +1,8 @@
 
 package rowdy;
 
-/**
- *
- * @author Richard
- */
-public interface NativeJava {
-  public Object execute(RowdyInstance instance, Object ... parameters);
-}
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NativeJava {}

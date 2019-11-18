@@ -4,6 +4,7 @@ package rowdy.nodes.statement;
 import growdy.Node;
 import growdy.Symbol;
 import growdy.Terminal;
+import rowdy.BaseNode;
 import rowdy.Function;
 import rowdy.Value; 
 import rowdy.nodes.RowdyNode;
@@ -21,9 +22,10 @@ public class BreakStatement extends RowdyNode {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     String idName;
-    if (!get(ID_OPTION).hasSymbols()) {
+    BaseNode idOption = get(ID_OPTION);
+    if (idOption == null) {
       if (instance.activeLoops.isEmpty()) {
         throw new RuntimeException("No loop to break. Line " 
                 + getLine());

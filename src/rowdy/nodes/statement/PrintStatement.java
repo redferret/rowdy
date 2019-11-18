@@ -19,14 +19,15 @@ public class PrintStatement extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value printStreamWrapper) {
-    PrintStream stream = (PrintStream) printStreamWrapper.getValue();
+  public Object execute(Object printStreamWrapper) {
+    PrintStream stream = (PrintStream) ((Value) printStreamWrapper).getValue();
     StringBuilder printValue = new StringBuilder();
     
     BaseNode paramsNode = get(PARAMETERS);
-    List<BaseNode> params = (List<BaseNode>) paramsNode.execute(new Value(new ArrayList<>(), false)).getValue();
+    Value listValue = (Value) paramsNode.execute(new Value(new ArrayList<>()));
+    List<BaseNode> params = (List<BaseNode>) listValue.getValue();
     params.forEach((expression) -> {
-      Value printVal = expression.execute();
+      Value printVal = (Value) expression.execute();
       if (printVal == null) {
         printValue.append("null");
       } else {

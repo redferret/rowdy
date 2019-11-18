@@ -14,7 +14,7 @@ native func next(iterator)
 native func Iterator(collection)
 
 dynamic func apply(list, applier) {
-	this.nlist = $List()
+	this.nlist = new []
 	$forEach(list, func(i) { 
 		this.val = $applier(i)
 		if (val != null) {
@@ -25,7 +25,7 @@ dynamic func apply(list, applier) {
 }
 
 func range(from, to) { 
- nlist = $List()
+ nlist = new []
  $forLoop(from, to, 1, func(i) { 
   $add(nlist, i)
  })

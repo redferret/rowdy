@@ -17,21 +17,25 @@ public class BoolAnd extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     ArrayList<BaseNode> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
-      return instance.fetch(leftValue, this);
+      return instance.fetch((Value) leftValue, this);
     }
-    leftValue = instance.fetch(leftValue, this);
-    boolean bLeft = (boolean) leftValue.getValue();
+    leftValue = instance.fetch((Value) leftValue, this);
+    boolean bLeft = (boolean) ((Value) leftValue).getValue();
     
     if (bLeft == false){
       return new Value(false, false);
     }
     
     BaseNode boolFactor = getLeftMost();
-    boolean bRight = (boolean) boolFactor.execute(leftValue).getValue();
+    boolean bRight = (boolean) ((Value)boolFactor.execute(leftValue)).getValue();
     BoolAnd boolFactorTail = (BoolAnd) get(BOOL_FACTOR_TAIL);
+    
+    if (boolFactorTail == null) {
+      return new Value(bLeft && bRight, false);
+    }
     
     return boolFactorTail.execute(new Value(bLeft && bRight, false));
   }

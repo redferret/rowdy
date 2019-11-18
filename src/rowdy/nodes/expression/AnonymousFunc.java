@@ -16,8 +16,8 @@ public class AnonymousFunc extends BaseNode {
   }
 
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     return new Value(this, false);
   }
-  
+
 }

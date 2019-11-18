@@ -21,13 +21,13 @@ public class IfStatement extends BaseNode {
   }
 
   @Override
-  public Value execute(Value seqControlWrapper) {
-    BaseNode seqControl = (BaseNode) seqControlWrapper.getValue();
-    BaseNode ifExpr = get(EXPRESSION);
-    Value ifExprValue = ifExpr.execute();
+  public Object execute(Object seqControlWrapper) {
+    BaseNode seqControl = (BaseNode) ((Value)seqControlWrapper).getValue();
+    BaseNode ifExpr = getLeftMost();
+    Value ifExprValue = (Value) ifExpr.execute();
     try {
       if ((boolean) ifExprValue.getValue()) {
-        BaseNode ifStmtList = get(STMT_BLOCK).get(STMT_LIST);
+        BaseNode ifStmtList = get(STMT_LIST);
         instance.executeStmt(ifStmtList, seqControl);
       } else {
         instance.executeStmt(get(ELSE_IF_PART), seqControl);

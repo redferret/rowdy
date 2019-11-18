@@ -1,7 +1,7 @@
 
 package rowdy.testutils;
 
-import growdy.GRBuilder;
+import growdy.Grammar;
 import growdy.GRowdy;
 import growdy.NonTerminal;
 import growdy.Symbol;
@@ -61,19 +61,19 @@ public class TestUtils {
   }
   
   public static BaseNode getTestStatement(String sourceCode, int programNode) {
-    GRBuilder grBuilder = getBuilder();
+    Grammar grBuilder = getBuilder();
     RowdyNodeFactory factory = new RowdyNodeFactory();
     GRowdy growdy = GRowdy.getInstance(grBuilder, factory);
     try {
       growdy.buildFromString(sourceCode, programNode);
     } catch (ParseException | SyntaxException | AmbiguousGrammarException ex) {
-      fail("Unable to load or build grammar " + ex.getLocalizedMessage());
+      fail("Build error: " + ex.getLocalizedMessage());
     }
     BaseNode root = (BaseNode) growdy.getProgram();
     try {
       rowdyInstance.optimizeProgram(root);
     } catch (ConstantReassignmentException ex) {
-      Logger.getLogger(TestUtils.class.getName()).log(Level.SEVERE, null, ex);
+      fail("Run error: " + ex.getLocalizedMessage());
     }
     return root;
   }

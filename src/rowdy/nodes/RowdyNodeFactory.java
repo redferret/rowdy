@@ -17,9 +17,49 @@ public class RowdyNodeFactory implements NodeFactory {
   @Override
   public BaseNode getNode(Symbol symbol, int line) {
     switch(symbol.id()) {
+      case ID:
+      case CONSTANT:
+      case CAST_STR:
+      case CAST_INT:
+      case CAST_BINT:
+      case CAST_SHRT:
+      case CAST_BYT:
+      case CAST_LNG:
+      case CAST_BOL:
+      case CAST_DBL:
+      case INCREMENT:
+      case DECREMENT:
+      case SUPER:
+      case CONST:
+      case GLOBAL:
+      case THIS:
+      case PUBLIC:
+      case PRIVATE:
+      case BREAK:
+      case AS:
+      case IS:
+      case TEMP:
+      case NEW:
+      case AT:
+      case FUNCTION_BODY:
+      case ARRAY_ACCESS:
+      case FUNC_BODY_EXPR:
+      case REF_ACCESS:
+      case INHERIT_OPT:
+      case DYNAMIC:
+        RowdyNode terminal = new RowdyNode(symbol, line);
+        terminal.setAsNonCompressable();
+        terminal.setAsCriticalTerminal();
+        return terminal;
+      case NEW_OBJ:
+        NewObject newObject = new NewObject(symbol, line);
+        newObject.setAsNonCompressable();
+        return newObject;
+      // EXPRESSION shouldn't be both non compressable and reducable
       case EXPRESSION:
         Expression expr = new Expression(symbol, line);
         expr.setAsNonCompressable();
+        expr.reduce();
         return expr;
       case BOOL_TERM_TAIL:
         BoolOr or = new BoolOr(symbol, line);
@@ -78,7 +118,13 @@ public class RowdyNodeFactory implements NodeFactory {
       case ARRAY_EXPR:
         ArrayExpression arrayExpr = new ArrayExpression(symbol, line);
         arrayExpr.setAsNonCompressable();
+        arrayExpr.setAsCriticalTerminal();
         return arrayExpr;
+      case MAP_EXPR:
+        MapExpression mapExpr = new MapExpression(symbol, line);
+        mapExpr.setAsNonCompressable();
+        mapExpr.setAsCriticalTerminal();
+        return mapExpr;
       case ROUND_EXPR:
         RoundExpr roundExpr = new RoundExpr(symbol, line);
         roundExpr.setAsNonCompressable();
@@ -152,6 +198,12 @@ public class RowdyNodeFactory implements NodeFactory {
         LoopStatement lpstmt = new LoopStatement(symbol, line);
         lpstmt.setAsNonCompressable();
         return lpstmt;
+      // STMT_BLOCK shouldn't be both non compressable and reducable
+      case STMT_BLOCK:
+        RowdyNode stmtBlock = new RowdyNode(symbol, line);
+        stmtBlock.setAsNonCompressable();
+        stmtBlock.reduce();
+        return stmtBlock;
       default:
         RowdyNode defaultNode = new RowdyNode(symbol, line);
         defaultNode.setAsNonCompressable();

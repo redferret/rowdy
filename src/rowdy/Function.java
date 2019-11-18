@@ -20,13 +20,16 @@ public class Function {
 
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
     this.name = name;
-    this.symbolTable = new SymbolTable(params);
+    this.symbolTable = new SymbolTable(params, this);
     funcReturnValue = null;
     this.lineCalledOn = lineCalledOn;
     parent = null;
     isDynamic = false;
   }
   
+  /**
+   * Sets this function with a dynamic scope
+   */
   public void setAsDynamic() {
     isDynamic = true;
   }
@@ -35,15 +38,28 @@ public class Function {
     return this.isDynamic;
   }
   
+  /**
+   * Determines if this function is part of a class
+   * @return 
+   */
   public boolean isMemberFunction() {
     return parent != null;
   }
 
-  public void setParent(RowdyObject parent) {
+  /**
+   * If this function is part of a class the parent is referenced making
+   * this function a member of that object.
+   * @param parent 
+   */
+  public void setClassObject(RowdyObject parent) {
     this.parent = parent;
   }
   
-  public RowdyObject getParent() {
+  /**
+   * Gets the reference of the object this function belongs to
+   * @return 
+   */
+  public RowdyObject getClassObject() {
     return parent;
   }
   

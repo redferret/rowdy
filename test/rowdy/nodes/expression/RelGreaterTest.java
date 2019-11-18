@@ -35,7 +35,7 @@ public class RelGreaterTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_GREATER);
     assertTrue(instance instanceof RelGreater);
     assertFalse(instance.isCompressable());
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }
   // Provide data

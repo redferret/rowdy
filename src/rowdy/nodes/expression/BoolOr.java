@@ -18,21 +18,25 @@ public class BoolOr extends BaseNode {
   }
   
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     ArrayList<BaseNode> boolChildren = getAll();
     if (boolChildren.isEmpty()) {
-      return instance.fetch(leftValue, this);
+      return instance.fetch((Value) leftValue, this);
     }
-    leftValue = instance.fetch(leftValue, this);
-    boolean bLeft = (boolean)leftValue.getValue();
+    leftValue = instance.fetch((Value) leftValue, this);
+    boolean bLeft = (boolean)((Value)leftValue).getValue();
     
     if (bLeft == true) {
       return new Value(true, false);
     }
     
     BaseNode boolTerm = getLeftMost();
-    boolean bRight = (boolean)boolTerm.execute(leftValue).getValue();
+    boolean bRight = (boolean) ((Value)boolTerm.execute(leftValue)).getValue();
     BoolOr boolTermTail = (BoolOr) get(BOOL_TERM_TAIL);
+    
+    if (boolTermTail == null) {
+      return new Value(bLeft || bRight, false);
+    }
     
     return boolTermTail.execute(new Value(bLeft || bRight, false));
   }

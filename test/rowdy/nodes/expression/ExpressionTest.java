@@ -31,7 +31,7 @@ public class ExpressionTest extends TestCase {
     String testCode = "3 + 8 - 9 * 19 >= 100";
     BaseNode instance = getTestStatement(testCode, EXPRESSION);
     Value expResult = new Value(false, false);
-    Value result = instance.execute();
+    Value result = (Value) instance.execute();
     assertEquals(expResult, result);
   }
   

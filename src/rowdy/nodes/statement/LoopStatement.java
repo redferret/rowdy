@@ -8,7 +8,6 @@ import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.ID;
-import static rowdy.lang.RowdyGrammarConstants.STMT_BLOCK;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -21,7 +20,7 @@ public class LoopStatement extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     Terminal loopIdTerminal = (Terminal) get(ID).symbol();
     String idName = (loopIdTerminal).getValue();
     Function curFunction = null;
@@ -30,18 +29,18 @@ public class LoopStatement extends BaseNode {
         curFunction = instance.callStack.peek();
         Value curValue = curFunction.getSymbolTable().getValue(idName);
         if (curValue == null) {
-          curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine());
+          curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
         } else {
           throw new RuntimeException("ID '" + idName + "' already in use "
                   + "on line " + getLine());
         }
       } else {
-        instance.allocate(loopIdTerminal, new Value(0, false), this.getLine());
+        instance.allocate(idName, new Value(0, false), this.getLine());
       }
       instance.activeLoops.push(this);
       setSeqActive(true);
       boolean done = false;
-      BaseNode loopStmtList = get(STMT_BLOCK).get(STMT_LIST);
+      BaseNode loopStmtList = get(STMT_LIST);
       while (!done) {
         instance.executeStmt(loopStmtList, this);
         done = !isSeqActive();
@@ -50,6 +49,7 @@ public class LoopStatement extends BaseNode {
         curFunction.getSymbolTable().unset(idName);
       }
     } catch (ConstantReassignmentException | RuntimeException ex) {
+      throw new RuntimeException(ex);
     }
     return null;
   }

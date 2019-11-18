@@ -1,0 +1,8 @@
+
+native func openFileInputStream(fileName)
+native func closeInputStream(inputStream)
+
+native func getBufferedReader(fileInputStream)
+native func closeBufferedReader(bufferedReader)
+
+native func readLine(inputStream)

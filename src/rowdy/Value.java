@@ -15,17 +15,38 @@ public class Value {
   private Object value;
   private Type dataType;
   private boolean isConstant;
+  private boolean isPublic;
 
   public Value() {
-    this(null, false);
+    this(null, false, true);
+  }
+  
+  public Value(Object value) {
+    this(value, false, true);
   }
 
   public Value(Object value, boolean isConstant) {
+    this(value, isConstant, true);
+  }
+  public Value(Object value, boolean isConstant, boolean isPublic) {
     this.value = value;
     this.isConstant = isConstant;
+    this.isPublic = isPublic;
     castValue();
   }
 
+  public void isPublic(boolean isPublic) {
+    this.isPublic = isPublic;
+  }
+  
+  public boolean isPrivate() {
+    return !isPublic;
+  }
+  
+  public boolean isPublic() {
+    return isPublic;
+  }
+  
   private void castValue() {
     if (value != null && value instanceof String) {
       String toCast = value.toString();
@@ -121,6 +142,7 @@ public class Value {
     return hash;
   }
   
+  @Override
   public String toString() {
     if (value == null) {
       return "null";

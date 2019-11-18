@@ -54,15 +54,6 @@ public class AssignStatementTest extends TestCase {
     assertTrue(constValue.isConstant());
   }
   
-  public void testGlobalConstModifier() throws Throwable {
-    String testCode = "const global b = 10";
-    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
-    instance.execute();
-    Value value = rowdyInstance.globalSymbolTable.get("b");
-    assertNotNull(value);
-    assertTrue(value.isConstant());
-  }
-  
   public void testThisConstModifier() throws Throwable {
     String testCode = "const this.B = 10";
     AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
@@ -96,42 +87,42 @@ public class AssignStatementTest extends TestCase {
     String testCode = "this.G = 10";
     AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
     Function function = new Function("Test", new HashMap<>(), 0);
-    RowdyObject parent = new RowdyObject(null);
-    function.setParent(parent);
+    RowdyObject parent = new RowdyObject("Test Class");
+    function.setClassObject(parent);
     rowdyInstance.callStack.push(function);
     instance.execute();
     Value value = function.getSymbolTable().getValue("G");
     assertNull(value);
-    value = function.getParent().getSymbolTable().getValue("G");
+    value = function.getClassObject().getSymbolTable().getValue("G");
     assertNotNull(value);
   }
   
-  public void testIncrementTest() {
-    String testCode = "var1 = 0";
-    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
-    instance.execute();
-    testCode = "var1++";
-    instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
-    instance.execute();
-    Boolean result = isset("var1");
-    assertTrue("The ID 'var1' doesn't exist", result);
-    Integer expected = 1;
-    Integer actual = (Integer) fetch("var1").getValue();
-    assertEquals(expected, actual);
-  }
-  
-  public void testDecrementTest() {
-    String testCode = "var1 = 1";
-    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
-    instance.execute();
-    testCode = "var1--";
-    instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
-    instance.execute();
-    Boolean result = isset("var1");
-    assertTrue("The ID 'var1' doesn't exist", result);
-    Integer expected = 0;
-    Integer actual = (Integer) fetch("var1").getValue();
-    assertEquals(expected, actual);
-  }
+//  public void testIncrementTest() {
+//    String testCode = "var1 = 0";
+//    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+//    instance.execute();
+//    testCode = "var1++";
+//    instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+//    instance.execute();
+//    Boolean result = isset("var1");
+//    assertTrue("The ID 'var1' doesn't exist", result);
+//    Integer expected = 1;
+//    Integer actual = (Integer) fetch("var1").getValue();
+//    assertEquals(expected, actual);
+//  }
+//  
+//  public void testDecrementTest() {
+//    String testCode = "var1 = 1";
+//    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+//    instance.execute();
+//    testCode = "var1--";
+//    instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
+//    instance.execute();
+//    Boolean result = isset("var1");
+//    assertTrue("The ID 'var1' doesn't exist", result);
+//    Integer expected = 0;
+//    Integer actual = (Integer) fetch("var1").getValue();
+//    assertEquals(expected, actual);
+//  }
   
 }

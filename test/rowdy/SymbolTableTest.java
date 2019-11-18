@@ -24,8 +24,8 @@ public class SymbolTableTest extends TestCase {
   }
 
   public void testAllocateWithStringName() throws ConstantReassignmentException {
-    SymbolTable table = new SymbolTable(new HashMap<>());
-    table.allocate("Test", new Value(100, false), 0);
+    SymbolTable table = new SymbolTable(new HashMap<>(), null);
+    table.allocate("Test", new Value(100, false), 0, true);
     assertNotNull(table.getValue("Test"));
     Integer expected = 100;
     Integer actual = (Integer) table.getValue("Test").getValue();
@@ -33,7 +33,7 @@ public class SymbolTableTest extends TestCase {
   }
   
   public void testAllocateWithTerminal() throws ConstantReassignmentException {
-    SymbolTable table = new SymbolTable(new HashMap<>());
+    SymbolTable table = new SymbolTable(new HashMap<>(), null);
     table.allocate(new Terminal("id", ID, "var1"), new Value(100, false), 0);
     assertNotNull(table.getValue("var1"));
     Integer expected = 100;
@@ -42,17 +42,17 @@ public class SymbolTableTest extends TestCase {
   }
   
   public void testConstAllocate(){
-    SymbolTable table = new SymbolTable(new HashMap<>());
+    SymbolTable table = new SymbolTable(new HashMap<>(), null);
     try {
-      table.allocate("var1", new Value(100, true), 0);
-      table.allocate("var1", new Value(100, false), 0);
+      table.allocate("var1", new Value(100, true), 0, true);
+      table.allocate("var1", new Value(100, false), 0, true);
       fail("Expected ConstantReassignmentException to be thrown");
     } catch (ConstantReassignmentException ex) {}
     
   }
   
   public void testAllocateWithHashMap() {
-    SymbolTable table = new SymbolTable(new HashMap<>());
+    SymbolTable table = new SymbolTable(new HashMap<>(), null);
     HashMap<String, Value> testMap = new HashMap<>();
     testMap.put("var1", new Value(100, false));
     testMap.put("var2", new Value(200, false));
@@ -68,19 +68,19 @@ public class SymbolTableTest extends TestCase {
     testMap.put("var1", new Value(100, false));
     testMap.put("var2", new Value(200, false));
     testMap.put("var3", new Value(300, false));
-    SymbolTable table = new SymbolTable(testMap);
+    SymbolTable table = new SymbolTable(testMap, null);
     assertNotNull(table.getValue("var1"));
     assertNotNull(table.getValue("var2"));
     assertNotNull(table.getValue("var3"));
   }
   
   public void testGetValueWithNull() {
-    SymbolTable table = new SymbolTable(new HashMap<>());
+    SymbolTable table = new SymbolTable(new HashMap<>(), null);
     assertNull(table.getValue((Value) null));
   }
   
   public void testFree() {
-    SymbolTable table = new SymbolTable(new HashMap<>());
+    SymbolTable table = new SymbolTable(new HashMap<>(), null);
     HashMap<String, Value> testMap = new HashMap<>();
     testMap.put("var1", new Value(100, false));
     testMap.put("var2", new Value(200, false));

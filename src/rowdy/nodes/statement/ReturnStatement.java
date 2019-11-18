@@ -5,7 +5,6 @@ import growdy.Symbol;
 import rowdy.BaseNode;
 import rowdy.Function;
 import rowdy.Value;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 
 /**
  *
@@ -17,12 +16,12 @@ public class ReturnStatement extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Value execute(Value seqControlWrapper) {
-    BaseNode seqControl = (BaseNode) seqControlWrapper.getValue();
+  public Object execute(Object seqControlWrapper) {
+    BaseNode seqControl = (BaseNode) ((Value)seqControlWrapper).getValue();
     Function functionReturning = instance.callStack.peek();
     seqControl.setSeqActive(false);
-    BaseNode returnExpr = get(EXPRESSION);
-    Value toSet = returnExpr.execute();
+    BaseNode returnExpr = getLeftMost();
+    Value toSet = (Value) returnExpr.execute();
     functionReturning.setReturnValue(toSet);
     return null;
   }

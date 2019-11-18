@@ -1,0 +1,66 @@
+
+import "rowdy.core"
+
+public class Person {
+
+	construct(name) {
+		this.name = name
+	}
+
+	public:
+		func makeFriends(friend) {
+			$add(this.friends, friend)
+			$add(friend.friends, this)
+		}
+		
+		func isFriendsWith(p) {
+			found = false
+			$forLoop(0, $size(this.friends), 1, func(i) {
+				found = $equals(p.name, this.friends[i].name)
+				return found
+			})
+			return found
+		}
+		
+		func rep() {
+			return this.name
+		}
+		
+		func getName() {
+			return this.name
+		}
+		
+		func getFirstFriend() {
+			if ($size(this.friends) > 0) {
+				return this.friends[0]
+			}
+		}
+		
+	private:
+		name = ""
+		friends = []
+}
+
+func main() {
+	p1 = new Person("Rich")
+	p2 = new Person("Hex")
+	p3 = new Person("Dustin")
+	p4 = new Person("JS")
+	
+	$p1.makeFriends(p2)
+	$p2.makeFriends(p3)
+	$p3.makeFriends(p1)
+	
+	$areFriends(p1, p2)
+	$areFriends(p1, p3)
+	$areFriends(p1, p4)
+	
+}
+
+func areFriends(p1, p2) {
+	if $p1.isFriendsWith(p2) {
+		print p1, " is friends with ", p2, ln
+	} else {
+		print p1, " is not friends with ", p2, ln
+	}
+}
