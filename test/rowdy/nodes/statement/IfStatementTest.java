@@ -57,7 +57,7 @@ public class IfStatementTest extends TestCase {
             + "   c = 2"
             + "   break test"
             + " } "
-            + " test++"
+            + " test = test + 1"
             + "}";
     
     LoopStatement instance = (LoopStatement) getTestStatement(testCode, LOOP_STMT);

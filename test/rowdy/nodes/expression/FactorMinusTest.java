@@ -33,7 +33,7 @@ public class FactorMinusTest extends TestCase {
     assertTrue(instance instanceof FactorMinus);
     assertFalse(instance.isCompressable());
     Value expResult = new Value(38, false);
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expResult, result);
   }
   
@@ -42,7 +42,7 @@ public class FactorMinusTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, FACTOR_MINUS);
     assertTrue(instance instanceof FactorMinus);
     Value expResult = new Value(-100, false);
-    Value result = instance.execute();
+    Value result = (Value) instance.execute();
     assertEquals(expResult, result);
   }
 }

@@ -2,8 +2,6 @@
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -20,13 +18,12 @@ public class AtomicFuncCall extends BaseNode {
   }
 
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     try {
       return instance.executeFunc(get(FUNC_CALL));
     } catch (ConstantReassignmentException ex) {
-      Logger.getLogger(AtomicId.class.getName()).log(Level.SEVERE, null, ex);
+      throw new RuntimeException(ex);
     }
-    return null;
   }
 
 }

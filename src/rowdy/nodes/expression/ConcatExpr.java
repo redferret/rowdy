@@ -19,14 +19,15 @@ public class ConcatExpr extends BaseNode {
   }
 
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     StringBuilder concatValue = new StringBuilder();
     
     BaseNode paramsNode = get(PARAMETERS);
-    List<BaseNode> params = (List<BaseNode>) paramsNode.execute(new Value(new ArrayList<>(), false)).getValue();
+    Value listValue = (Value) paramsNode.execute(new Value(new ArrayList<>(), false));
+    List<BaseNode> params = (List<BaseNode>) listValue.getValue();
     
     params.forEach((expression) -> {
-      concatValue.append(expression.execute().getValue().toString());
+      concatValue.append(((Value)expression.execute()).getValue().toString());
     });
     return new Value(concatValue.toString(), false);
   }

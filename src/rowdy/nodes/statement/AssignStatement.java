@@ -2,27 +2,20 @@
 package rowdy.nodes.statement;
 
 import growdy.Symbol;
-import growdy.Terminal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import rowdy.BaseNode;
-import rowdy.Calculator;
 import rowdy.Value;
-import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
-import rowdy.Function;
-import rowdy.SymbolTable;
+import rowdy.exceptions.ConstantReassignmentException;
+
 import static rowdy.lang.RowdyGrammarConstants.ASSIGN_VALUE;
 import static rowdy.lang.RowdyGrammarConstants.BECOMES_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.CONST_OPT;
-import static rowdy.lang.RowdyGrammarConstants.DECREMENT_EXPR;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.GLOBAL_DEF;
-import static rowdy.lang.RowdyGrammarConstants.ID;
-import static rowdy.lang.RowdyGrammarConstants.ID_ACCESS;
 import static rowdy.lang.RowdyGrammarConstants.ID_MODIFIER;
-import static rowdy.lang.RowdyGrammarConstants.INCREMENT_EXPR;
-import static rowdy.lang.RowdyGrammarConstants.THIS_REF;
+import static rowdy.lang.RowdyGrammarConstants.ID;
+import static rowdy.RowdyInstance.ATOMIC_SET;
+import static rowdy.lang.RowdyGrammarConstants.ID_;
+import static rowdy.lang.RowdyGrammarConstants.REF_ACCESS;
 
 /**
  *
@@ -33,65 +26,48 @@ public class AssignStatement extends BaseNode {
   public AssignStatement(Symbol def, int lineNumber) {
     super(def, lineNumber);
   }
+  
   @Override
-  public Value execute(Value leftValue) {
-    try {
-      Terminal idTerminal = (Terminal) get(ID).symbol();
-      BaseNode assignValue = get(ASSIGN_VALUE);
-      Value rightValue = null;
-      switch(assignValue.getLeftMost().symbol().id()) {
-        case INCREMENT_EXPR:
-          rightValue = instance.fetch(instance.getIdAsValue(get(ID)), this);
-          rightValue = Calculator.calculate(rightValue, new Value(1, false), null, Calculator.Operation.ADD);
-          break;
-        case DECREMENT_EXPR:
-          rightValue = instance.fetch(instance.getIdAsValue(get(ID)), this);
-          rightValue = Calculator.calculate(rightValue, new Value(1, false), null, Calculator.Operation.SUBTRACT);
-          break;
-        case BECOMES_EXPR:
-          RowdyNode becomesExpr = (RowdyNode) assignValue.getLeftMost();
-          rightValue = becomesExpr.execute(null);
-          break;
-      }
-      if (rightValue == null) {
-        return null;
-      }
-      if (rightValue.isConstant()) {
-        rightValue.setAsConstant(false);
-      }
-      RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER);
-      if (idModifier.hasSymbols()) {
-        switch (idModifier.getLeftMost().symbol().id()) {
-          case CONST_OPT:
-            rightValue.setAsConstant(true);
-            break;
-            
-        }
-      }
-      
-      RowdyNode idAccess = (RowdyNode) get(ID_ACCESS);
-      if (idAccess.hasSymbols()) {
-        switch(idAccess.getLeftMost().symbol().id()) {
-          case THIS_REF:
-            Function curFunction = instance.callStack.peek();
-            SymbolTable table;
-            if (curFunction.isMemberFunction()) {
-              table = curFunction.getParent().getSymbolTable();
-            } else {
-              table = curFunction.getSymbolTable();
-            }
-            table.allocate(idTerminal, rightValue, getLine());
-            return null;
-          case GLOBAL_DEF:
-            instance.setAsGlobal(idTerminal, rightValue);
-            return null;
-        }
-      }
-      instance.allocate(idTerminal, rightValue, getLine());
-    } catch (ConstantReassignmentException ex) {
-      Logger.getLogger(AssignStatement.class.getName()).log(Level.SEVERE, null, ex);
+  public Object execute(Object leftValue) {
+    BaseNode assignValueNode = get(ASSIGN_VALUE);
+    Value assignValue = new Value();
+    switch(assignValueNode.getLeftMost().symbol().id()) {
+      case BECOMES_EXPR:
+        RowdyNode becomesExpr = (RowdyNode) assignValueNode.getLeftMost();
+        Value v = (Value) becomesExpr.execute();
+        Object val = v.getValue();
+        assignValue.setValue(val);
+        break;
     }
+
+    if (assignValue == null) {
+      return null;
+    }
+
+    RowdyNode idModifier = (RowdyNode) get(ID_MODIFIER);
+    if (idModifier != null && idModifier.hasSymbols()) {
+      switch (idModifier.getLeftMost().symbol().id()) {
+        case CONST_OPT:
+          assignValue.setAsConstant(true);
+          break;
+        case GLOBAL_DEF:
+          BaseNode idNode = get(REF_ACCESS).get(ID_).get(ID);
+          try {
+            instance.setAsGlobal(idNode.symbol().toString(), assignValue);
+          } catch (ConstantReassignmentException ex) {
+            throw new RuntimeException(ex);
+          }
+          return null;
+      }
+    } else {
+      assignValue.setAsConstant(false);
+    }
+     
+    
+    
+    instance.atomicAccess(this, assignValue, ATOMIC_SET);
+    
     return null;
   }
-  
+
 }

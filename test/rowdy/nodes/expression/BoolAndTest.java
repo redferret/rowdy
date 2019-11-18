@@ -38,7 +38,7 @@ public class BoolAndTest {
     BaseNode instance = getTestStatement(testCode, BOOL_FACTOR_TAIL);
     assertTrue(instance instanceof BoolAnd);
     assertFalse(instance.isCompressable());
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }
   

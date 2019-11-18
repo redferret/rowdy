@@ -15,20 +15,20 @@ public class RelEqual extends BaseNode  {
     super(symbol, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     BaseNode arithmExpr = getLeftMost();
     if (arithmExpr == null) {
-      return instance.fetch(leftValue, this);
+      return instance.fetch((Value) leftValue, this);
     }
-    leftValue = instance.fetch(leftValue, this);
-    Value rightValue = arithmExpr.execute(leftValue);
+    leftValue = instance.fetch((Value) leftValue, this);
+    Value rightValue = (Value) arithmExpr.execute(leftValue);
     Number left, right;
-    if (leftValue.getValue() instanceof Boolean) {
-      left = (boolean) leftValue.getValue() ? 1 : 0;
-    } else if (leftValue.getValue() instanceof String) {
+    if (((Value)leftValue).getValue() instanceof Boolean) {
+      left = (boolean) ((Value)leftValue).getValue() ? 1 : 0;
+    } else if (((Value)leftValue).getValue() instanceof String) {
       return new Value(false, false);
     } else {
-      left = (Number) leftValue.getValue();
+      left = (Number) ((Value)leftValue).getValue();
     }
     if (rightValue.getValue() instanceof Boolean) {
       right = (boolean) rightValue.getValue() ? 1 : 0;

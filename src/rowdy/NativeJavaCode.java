@@ -5,6 +5,6 @@ package rowdy;
  *
  * @author Richard
  */
-public interface NativeJava {
+public interface NativeJavaCode {
   public Object execute(RowdyInstance instance, Object ... parameters);
 }

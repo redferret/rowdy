@@ -37,7 +37,7 @@ public class RelLessTest {
     BaseNode instance = getTestStatement(testCode, ARITHM_LESS);
     assertTrue(instance instanceof RelLess);
     assertFalse(instance.isCompressable());
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expectedResult, result);
   }
   // Provide data

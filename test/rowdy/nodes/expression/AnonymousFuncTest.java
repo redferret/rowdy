@@ -29,7 +29,7 @@ public class AnonymousFuncTest extends TestCase {
     String testCode = "func() {}";
     BaseNode func = getTestStatement(testCode, ANONYMOUS_FUNC);
     assertTrue(func instanceof AnonymousFunc);
-    Value funcValue = func.execute();
+    Value funcValue = (Value) func.execute();
     assertNotNull(funcValue);
     assertFalse(funcValue.isConstant());
   }

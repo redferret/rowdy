@@ -1,17 +1,11 @@
 package rowdy.nodes.expression;
 
-import growdy.Node;
 import growdy.Symbol;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_BODY;
-import static rowdy.lang.RowdyGrammarConstants.ARRAY_KEY_VALUE_BODY;
-import static rowdy.lang.RowdyGrammarConstants.ARRAY_KEY_VALUE_BODY_TAIL;
-import static rowdy.lang.RowdyGrammarConstants.ARRAY_LINEAR_BODY;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 
 /**
  *
@@ -24,57 +18,34 @@ public class ArrayExpression extends BaseNode {
   }
 
   @Override
-  public Value execute(Value leftValue){
-    Expression arrayExpression = (Expression) get(EXPRESSION);
-    Value firstValue = arrayExpression.execute();
-    Node arrayBody = get(ARRAY_BODY);
-
-    Node bodyType = arrayBody.get(ARRAY_LINEAR_BODY, false);
-    if (bodyType == null) {
-      bodyType = arrayBody.get(ARRAY_KEY_VALUE_BODY, false);
-
-      if (bodyType == null) {
-        List<Object> arrayList = new ArrayList<>();
-        if (firstValue != null) {
-          arrayList.add(firstValue.getValue());
-        }
-        return new Value(arrayList, false);
-      }
-
-      HashMap<String, Object> keypairArray = new HashMap<>();
-      Value key = firstValue;
-      Expression bodyTypeExpr = (Expression) bodyType.get(EXPRESSION);
-      Value keyValue = bodyTypeExpr.execute();
-      keypairArray.put(key.getValue().toString(), keyValue.getValue());
-      arrayBody = bodyType;
-      Node bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-      arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-      while (arrayBody != null && bodyType != null) {
-        Expression keyExpr = (Expression) bodyTail.get(EXPRESSION);
-        key = keyExpr.execute();
-        bodyTypeExpr = (Expression) arrayBody.get(EXPRESSION); 
-        keyValue = bodyTypeExpr.execute();
-        keypairArray.put(key.getValue().toString(), keyValue.getValue());
-        bodyTail = arrayBody.get(ARRAY_KEY_VALUE_BODY_TAIL, false);
-        arrayBody = bodyTail.get(ARRAY_KEY_VALUE_BODY, false);
-      }
-      return new Value(keypairArray, false);
-
-    } else {
-      List<Object> array = new ArrayList<>();
-      Value arrayValue = firstValue;
-      arrayBody = bodyType;
-      while (arrayValue != null) {
-        array.add(arrayValue.getValue());
-        arrayValue = null;
-        if (arrayBody != null && arrayBody.hasSymbols()) {
-          Expression bodyTypeExpr = (Expression) arrayBody.get(EXPRESSION);
-          arrayValue = bodyTypeExpr.execute();
-          arrayBody = arrayBody.get(ARRAY_LINEAR_BODY, false);
-        }
-      }
-      return new Value(array, false);
+  public Object execute(Object leftValue){
+    BaseNode firstValueNode = getLeftMost();
+    
+    if (firstValueNode == null) {
+      return new Value(new ArrayList<>(), false);
     }
+    
+    Value firstValue = (Value) firstValueNode.execute();
+    BaseNode arrayBody = get(ARRAY_BODY);
+
+    if (arrayBody == null) {
+      List<Object> arrayList = new ArrayList<>();
+      arrayList.add(firstValue.getValue());
+      return new Value(arrayList, false);
+    }
+    
+    List<Object> array = new ArrayList<>();
+    Value arrayValue = firstValue;
+    while (arrayValue != null) {
+      array.add(arrayValue.getValue());
+      arrayValue = null;
+      if (arrayBody != null && arrayBody.hasSymbols()) {
+        BaseNode bodyTypeExpr = arrayBody.getLeftMost();
+        arrayValue = (Value) bodyTypeExpr.execute();
+        arrayBody = arrayBody.get(ARRAY_BODY, false);
+      }
+    }
+    return new Value(array, false);
   }
 
 }

@@ -1,34 +1,24 @@
 package rowdy;
 
 
-import growdy.GRBuilder;
+import growdy.Grammar;
 import growdy.GRowdy;
-import growdy.Node;
-import growdy.Terminal;
 import growdy.exceptions.AmbiguousGrammarException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+
 import rowdy.nodes.RowdyNode;
 import rowdy.nodes.RowdyNodeFactory;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.exceptions.MainNotFoundException;
-import java.io.File;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
-import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -38,6 +28,8 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
  * @author Richard DeSilvey
  */
 public class Rowdy {
+  
+  private final Linker linker;
   public static final RowdyNodeFactory nodeFactory = new RowdyNodeFactory();
   private final RowdyInstance rowdyInstance;
   private final GRowdy growdy;
@@ -48,10 +40,12 @@ public class Rowdy {
   public Rowdy(String[] args) {
     rowdyInstance = new RowdyInstance();
     this.args = args;
-    GRBuilder grBuilder = getBuilder();
+    Grammar grBuilder = getBuilder();
     RowdyNode.initRunner(rowdyInstance);
     growdy = GRowdy.getInstance(grBuilder, nodeFactory);
+    linker = new Linker(growdy, rowdyInstance);
     programFileName = "";
+    verbose = false;
     if (args.length > 1) {
       verbose = args[args.length - 1].equalsIgnoreCase("-verbose");
       programFileName = args[0];
@@ -65,31 +59,31 @@ public class Rowdy {
   
   public void run() {
     if (!programFileName.isEmpty()) {
-      List<BaseNode> programTrees = new ArrayList<>();
-      RowdyNode mainProgram;
+      List<BaseNode> importTrees = new ArrayList<>();
+      RowdyNode mainProgram = null;
       try {
         growdy.buildFromSource(programFileName);
         mainProgram = (RowdyNode) growdy.getProgram();
         rowdyInstance.initialize(mainProgram);
-        loadImports((BaseNode) growdy.getProgram(), programTrees);
-        programTrees.forEach(tree -> {
+        linker.loadImports((BaseNode) mainProgram, importTrees);
+        importTrees.forEach(tree -> {
           try {
             rowdyInstance.optimizeProgram(tree);
             rowdyInstance.declareGlobals(tree);
           } catch (ConstantReassignmentException ex) {
-            handleException(ex);
+            rowdyInstance.handleException(ex, verbose);
           }
         });
         try {
-          loadJarLibs("bin/");
+          linker.loadJarLibs("bin/");
         } catch (IOException | ClassNotFoundException | URISyntaxException | 
                 IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-          handleException(ex);
+          rowdyInstance.handleException(ex, verbose);
         }
         
       } catch (IOException | SyntaxException | ParseException | 
               AmbiguousGrammarException e) {
-        handleException(e);
+        rowdyInstance.handleException(e, verbose);
         System.exit(500);
       }
 
@@ -101,25 +95,27 @@ public class Rowdy {
         }
         
         rowdyInstance.execute(programParameters);
-      } catch (NumberFormatException | MainNotFoundException
-              | ConstantReassignmentException e) {
-        handleException(e);
+      } catch (Throwable e) {
+        rowdyInstance.handleException(e, verbose);
       }
     } else {
       List<BaseNode> compiledImports = new ArrayList<>();
       try {
-        growdy.buildFromSource("bin/core/rowdy");
+        growdy.buildFromSource("bin/rowdy/core");
         compiledImports.add((BaseNode) growdy.getProgram());
-        loadImports((BaseNode) growdy.getProgram(), compiledImports);
+        linker.loadImports((BaseNode) growdy.getProgram(), compiledImports);
         compiledImports.forEach(compiledImport -> {
           try {
             rowdyInstance.optimizeProgram(compiledImport);
             rowdyInstance.declareGlobals(compiledImport);
           } catch (ConstantReassignmentException ex) {
+            rowdyInstance.handleException(ex, verbose);
           }
         });
-        loadJarLibs("bin/");
-      } catch (Throwable ex) {}
+        linker.loadJarLibs("bin/");
+      } catch (Throwable ex) {
+        rowdyInstance.handleException(ex, verbose);
+      }
       
       Scanner keys = new Scanner(System.in);
       String line;
@@ -151,147 +147,36 @@ public class Rowdy {
           // Check for a single line import
           String importPath = rowdyInstance.getNextImport();
           if (importPath != null) {
-            loadImport(importPath);
+            linker.loadImport(importPath);
+            linker.loadJarLibs("bin/");
           }
-        } catch (ParseException | SyntaxException | AmbiguousGrammarException | 
-                ConstantReassignmentException e) {
-          handleException(e);
+        } catch (Throwable e) {
+          rowdyInstance.handleException(e, verbose);
         }
       } while (true);
     }
   }
   
-  public void loadImport(String importPath) {
-    try {
-      growdy.buildFromSource("bin/" + importPath);
-      BaseNode compiledImport = (BaseNode) growdy.getProgram();
-      rowdyInstance.optimizeProgram(compiledImport);
-      rowdyInstance.declareGlobals(compiledImport);
-    } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
-      handleException(ex);
-    } catch (ConstantReassignmentException cex) {
-      // ignore
-    }
-  }
-  
-  public void loadImports(BaseNode program, List<BaseNode> compiledImports) {
-    List<String> localImports = getImports(program);
-    localImports.forEach(localImport -> {
-      String importPath = "bin/" + localImport;
-      try {
-        growdy.buildFromSource(importPath);
-        BaseNode compliedImport = (BaseNode) growdy.getProgram();
-        compiledImports.add(compliedImport);
-        loadImports(compliedImport, compiledImports);
-      } catch (IOException | ParseException | SyntaxException | AmbiguousGrammarException ex) {
-        handleException(ex);
-      }
-    });
-  }
-  
-  public List<String> getImports(BaseNode root) {
-    BaseNode importTreeNodes;
-    ArrayList<BaseNode> children = root.getAll();
-    int currentID;
-    List<String> importPaths = new ArrayList<>();
-    for (int i = 0; i < children.size(); i++) {
-      importTreeNodes = children.get(i);
-      currentID = importTreeNodes.symbol().id();
-      switch (currentID) {
-        case IMPORTS:
-          Node importConstant = importTreeNodes.get(CONSTANT, false);
-          if (importConstant != null) {
-            String importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
-            importPaths.add(importPath);
-            Node nextImport = importTreeNodes.get(IMPORTS);
-            while (nextImport.hasSymbols()) {
-              importConstant = nextImport.get(CONSTANT);
-              importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
-              importPaths.add(importPath);
-              nextImport = nextImport.get(IMPORTS);
-            }
-          }
-      }
-    }
-    return importPaths;
-  }
-  
-  public static GRBuilder getBuilder() {
-    GRBuilder grBuilder = null;
+  public static Grammar getBuilder() {
+    Grammar grBuilder = null;
     try {
       try (InputStream inputStream = Rowdy.class.getResourceAsStream("lang/Rowdy.gr");
               ObjectInputStream in = new ObjectInputStream(inputStream)) {
-        grBuilder = (GRBuilder) in.readObject();
+        grBuilder = (Grammar) in.readObject();
       }
     } catch (IOException | ClassNotFoundException i) {
-      throw new RuntimeException("There was a problem loading the Grammar: " + i.getLocalizedMessage());
+      throw new RuntimeException("There was a problem loading the Grammar: " + i.getMessage());
     }
 
     return grBuilder;
   }
 
-  public void loadNativeJava(Class c) throws IllegalAccessException, 
-          IllegalArgumentException, InvocationTargetException {
-    for (Method method : c.getMethods()) {
-      if (method.isAnnotationPresent(JavaHookin.class)) {
-        NativeJava hookin = (NativeJava) method.invoke(null);
-        rowdyInstance.allocateIfExists(method.getName(), new Value(hookin, true));
-      }
-    }
-  }
-  
-  public List<String> getJarFileNames(String path) {
-    File[] files = new File(path)
-            .listFiles((File dir, String name) -> name.endsWith(".jar"));
-    List<String> fileNames = new ArrayList<>();
-    for (File file : files) {
-      fileNames.add(file.getName());
-    }
-    return fileNames;
-  }
-
-  public void loadJarLibs(String pathToJars) throws IOException, 
-          ClassNotFoundException, URISyntaxException, IllegalAccessException, 
-          IllegalArgumentException, InvocationTargetException {
-    
-    List<String> jarFileNames = getJarFileNames(pathToJars);
-    
-    for (String jarName : jarFileNames ) {
-      String pathToJar = pathToJars + jarName;
-      try (JarFile jarFile = new JarFile(pathToJar)) {
-        Enumeration<JarEntry> e = jarFile.entries();
-
-        URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-        URLClassLoader cl = URLClassLoader.newInstance(urls);
-
-        while (e.hasMoreElements()) {
-          JarEntry je = e.nextElement();
-          if (je.isDirectory() || !je.getName().endsWith(".class")) {
-            continue;
-          }
-          String className = je.getName().substring(0, je.getName().length() - 6);
-          className = className.replace('/', '.');
-          Class c = cl.loadClass(className);
-          loadNativeJava(c);
-        }
-      }
-    }
-  }
-  
   /**
    * @param args the command line arguments
    */
   public static void main(String[] args) {
     Rowdy rowdy = new Rowdy(args);
     rowdy.run();
-  }
-
-  public void handleException(Throwable e) {
-    System.out.println(e.getClass().getCanonicalName() + ": " + e.getLocalizedMessage());
-    rowdyInstance.dumpCallStack();
-    if (verbose) {
-      e.printStackTrace();
-    }
   }
   
 }

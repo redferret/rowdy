@@ -17,7 +17,7 @@ public class IssetExpr extends BaseNode {
   }
 
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     Value idTerm = instance.getIdAsValue(get(ID));
     Value resultBoolean = new Value(instance.isset(idTerm), false);
     return resultBoolean;

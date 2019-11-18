@@ -32,7 +32,7 @@ public class FactorMulTest extends TestCase {
     assertTrue(instance instanceof FactorMul);
     assertFalse(instance.isCompressable());
     Value expResult = new Value(20, false);
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expResult, result);
   }
   

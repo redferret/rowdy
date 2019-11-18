@@ -16,13 +16,13 @@ public class RelGreaterEqual extends BaseNode  {
     super(symbol, lineNumber);
   }
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     BaseNode leftNode = getLeftMost();
     if (leftNode == null) {
-      return instance.fetch(leftValue, this);
+      return instance.fetch((Value) leftValue, this);
     }
-    leftValue = instance.fetch(leftValue, this);
-    Value rightValue = leftNode.execute(leftValue);
-    return Calculator.calculate(leftValue, rightValue, null, Calculator.Operation.GREATEREQUAL);
+    leftValue = instance.fetch((Value) leftValue, this);
+    Value rightValue = (Value) leftNode.execute(leftValue);
+    return Calculator.calculate((Value)leftValue, rightValue, null, Calculator.Operation.GREATEREQUAL);
   }
 }

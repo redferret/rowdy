@@ -99,7 +99,7 @@ public class Calculator {
     }
     
     if (tailNode != null) {
-      return tailNode.execute(value);
+      return (Value) tailNode.execute(value);
     } else {
       return value;
     }

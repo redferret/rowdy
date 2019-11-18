@@ -35,9 +35,9 @@ public class RoundExprTest extends TestCase {
     String testCode = "round a, 1";
     BaseNode instance = getTestStatement(testCode, ROUND_EXPR);
     assertTrue(instance instanceof RoundExpr);
-    rowdyInstance.allocate((Terminal) instance.get(ID).symbol(), new Value(123.87, false), 0);
+    rowdyInstance.allocate("a", new Value(123.87, false), 0);
     Value expResult = new Value(123.9, false);
-    Value result = instance.execute();
+    Value result = (Value) instance.execute();
     assertEquals(expResult, result);
   }
   

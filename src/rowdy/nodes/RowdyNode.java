@@ -5,7 +5,6 @@ import growdy.NonTerminal;
 import growdy.Symbol;
 import rowdy.BaseNode;
 import rowdy.RowdyInstance;
-import rowdy.Value;
 
 
 /**
@@ -28,7 +27,7 @@ public class RowdyNode extends BaseNode {
    * @return
    */
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     for (BaseNode node : children) {
       if (node.symbol() instanceof NonTerminal) {
         if (node instanceof RowdyNode) {

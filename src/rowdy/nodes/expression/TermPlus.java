@@ -17,18 +17,18 @@ public class TermPlus extends BaseNode {
   }
   
   @Override
-  public Value execute(Value leftValue) {
+  public Object execute(Object leftValue) {
     BaseNode leftNode = getLeftMost();
     if (leftNode == null) {
-      return instance.fetch(leftValue, this);
+      return instance.fetch((Value) leftValue, this);
     }
     BaseNode tailNode = null;
-    if (children.size() > 2) {
-      tailNode = children.get(2);
+    if (children.size() > 1) {
+      tailNode = children.get(1);
     }
-    leftValue = instance.fetch(leftValue, leftNode);
-    Value rightValue = leftNode.execute(leftValue);
-    return Calculator.calculate(leftValue, rightValue, tailNode, Calculator.Operation.ADD);
+    leftValue = instance.fetch((Value) leftValue, leftNode);
+    Value rightValue = (Value) leftNode.execute(leftValue);
+    return Calculator.calculate((Value) leftValue, rightValue, tailNode, Calculator.Operation.ADD);
 
   }
 

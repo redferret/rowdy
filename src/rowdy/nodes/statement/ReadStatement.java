@@ -24,18 +24,18 @@ public class ReadStatement extends BaseNode {
   }
 
   @Override
-  public Value execute(Value inputStreamWrapper) {
+  public Object execute(Object inputStreamWrapper) {
     try {
-      Scanner keys = new Scanner((InputStream) inputStreamWrapper.getValue());
+      Scanner keys = new Scanner((InputStream) ((Value) inputStreamWrapper).getValue());
       BaseNode firstID = get(ID);
       Terminal t = (Terminal) firstID.symbol();
-      instance.allocate(t, new Value(keys.nextLine(), false), this.getLine());
+      instance.allocate(t.getValue(), new Value(keys.nextLine(), false), this.getLine());
       if (hasSymbols()) {
         BaseNode paramsTail = get(PARAMS_TAIL);
-        while (paramsTail.hasSymbols()) {
+        while (paramsTail != null && paramsTail.hasSymbols()) {
           BaseNode idNode = paramsTail.get(ID);
           t = (Terminal) idNode.symbol();
-          instance.allocate(t, new Value(keys.nextLine(), false), this.getLine());
+          instance.allocate(t.getValue(), new Value(keys.nextLine(), false), this.getLine());
           paramsTail = paramsTail.get(PARAMS_TAIL);
         }
       }

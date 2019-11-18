@@ -32,7 +32,7 @@ public class TermMinusTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, TERM_MINUS);
     assertTrue(instance instanceof TermMinus);
     Value expResult = new Value(0, false);
-    Value result = instance.execute(leftValue);
+    Value result = (Value) instance.execute(leftValue);
     assertEquals(expResult, result);
   }
   
@@ -41,7 +41,7 @@ public class TermMinusTest extends TestCase {
     BaseNode instance = getTestStatement(testCode, TERM_MINUS);
     assertTrue(instance instanceof TermMinus);
     Value expResult = new Value(-100, false);
-    Value result = instance.execute();
+    Value result = (Value) instance.execute();
     assertEquals(expResult, result);
   }
 }
