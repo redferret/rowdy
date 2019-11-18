@@ -15,8 +15,8 @@
     <copy todir="./test/rowdy/testlang/lang">
       <fileset dir="./src/rowdy/lang"/>
     </copy> 
-    <copy todir="./dist/bin/core">
-      <fileset dir="bin/core"/>
+    <copy todir="./dist/bin/rowdy">
+      <fileset dir="bin/rowdy"/>
     </copy>      
     <copy todir="./dist/bin/">
       <fileset dir="bin/"/>
