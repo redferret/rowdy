@@ -6,7 +6,7 @@ func main() {
 	oBoard = 0
 	playBoard = 0
 	
-	$println("For help, type 'help'")
+	print "For help, type 'help'", ln
 	$showHelp()
 	
   xPlays = $getFirstPlayer()
@@ -17,7 +17,7 @@ func main() {
 	loop game: {
 		read input
 		if $equals(input, "exit") {
-			$println("Goodbye")
+			print "Goodbye", ln
 			break
 		} else if $equals(input, "help") {
 			$showHelp()
@@ -28,7 +28,7 @@ func main() {
 		} else if $isNumber(input){
 			$makeMove()
 		} else if $isNotEmpty(input) {
-			$println("Invalid input")
+			print "Invalid input", ln
 		}
 		
 	}
@@ -36,8 +36,8 @@ func main() {
 }
 
 func showHelp() {
-	$println("Type 'reset' to start a new game")
-	$println("To make a move, enter the index of the cell. To exit, type 'exit'")
+	print "Type 'reset' to start a new game", ln
+	print "To make a move, enter the index of the cell. To exit, type 'exit'", ln
 }
 
 dynamic func makeMove() {
@@ -55,13 +55,13 @@ dynamic func makeMove() {
 			role = "O"
 		}
 		
-		this.row = $get(board, xPos)
-		this.space = $get(playBoard, index)
-		if $get(row, yPos) == 1 or $equals(space, "X") or $equals(space, "O") {
-			$println("Space is taken!")
+		this.row = board[xPos]
+		this.space = playBoard[index]
+		if row[yPos] == 1 or $equals(space, "X") or $equals(space, "O") {
+			print "Space is taken!", ln
 		} else {
-			$set(row, yPos, 1)
-			$set(playBoard, index, role)
+			row[yPos] = 1
+			playBoard[index] = role
 			
 			// Place game logic here to check for a win or a tie
 			
@@ -70,24 +70,24 @@ dynamic func makeMove() {
 			$promptTurn()
 		}
 	} else {
-		$println("Invalid index, try again")
+		print "Invalid index, try again", ln
 	}
 }
 
 dynamic func printBoard() {
-	$println()
-	$println(concat $get(playBoard, 0)," | ",$get(playBoard, 1), " | ",$get(playBoard, 2))
-	$println("----------")
-	$println(concat $get(playBoard, 3)," | ",$get(playBoard, 4), " | ",$get(playBoard, 5))
-	$println("----------")
-	$println(concat $get(playBoard, 6)," | ",$get(playBoard, 7), " | ",$get(playBoard, 8))
+	print ln
+	print " ", playBoard[0]," | ",playBoard[1], " | ",playBoard[2], "	", " 0 | 1 | 2 ", ln
+	print " ----------	 ----------", ln
+	print " ", playBoard[3]," | ",playBoard[4], " | ",playBoard[5], "	", " 3 | 4 | 5 ", ln
+	print " ----------	 ----------", ln
+	print " ", playBoard[6]," | ",playBoard[7], " | ",playBoard[8], "	", " 6 | 7 | 8 ", ln
 }
 
 dynamic func promptTurn() {
 	if xPlays {
-		$println("X Goes")
+		print "X Goes", ln
 	} else {
-		$println("O Goes")
+		print "O Goes", ln
 	}
 }
 func getFirstPlayer() {
@@ -95,15 +95,7 @@ func getFirstPlayer() {
 }
 
 dynamic func initGame() {
-	playBoard = array("0", "1", "2", "3", "4", "5", "6", "7", "8")
-	xBoard = array(
-		array(0, 0, 0),
-		array(0, 0, 0),
-		array(0, 0, 0)
-	)
-	oBoard = array(
-		array(0, 0, 0),
-		array(0, 0, 0),
-		array(0, 0, 0)
-	)
+	playBoard = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
+	xBoard = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+	oBoard = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 }

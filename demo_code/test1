@@ -1,63 +1,9 @@
 
-	// THIS FILE WILL NOT RUN PROPERLY
-	// This file is used for planning and working out new features
+import "core.rowdy"
+import "core.fileReader"
 
-	func main() {
-
-		Person = func (name, customerType) {
-			getCustomerType = func() {
-				return this.customerType;
-			}
-			getName = func(){
-				return this.name;
-			}
-			toString = func() {
-				return concat "Customer Type: ", this.customerType, "; Name: ", this.name;
-			}
-		}
-		
-		myObj = new Person("Name", "Patient");// Value(RowdyObject)
-		print @myObj.toString();
-		
-		
-		Tree = func (data, leftChild, rightChild) {
-			setData = func(data) {
-				this.data = data;
-			}
-			setTree = func(left, right) {
-				leftChild = left;
-				rightChild = right;
-			}
-			isLeaf = func() {
-				return data != null;
-			}
-			getLeft = func() {
-				return leftChild;
-			}
-			getRight = func() {
-				return rightChild;
-			}
-		}
-		
-		root = new Tree();// By default, passing no values to certain members initializes them to null
-		
-		leftC = new Tree("C");
-		leftA = new Tree("A", leftC, new Tree("D"));
-		rightB = new Tree("B");
-		
-		@root.setTree(null, leftA, rightB);
-		
-		rightD = @root.getLeft().getRight();
-		
-f = func() {
- a = func() {print "A\n";}
- g = func() {
-  h = func() {
-   $a();
-  }
-  $h();
- }
- $g();
+func main(fileName) {
+	fileReader = new FileReader(fileName)
+	$fileReader.printFile()
+	$fileReader.close()
 }
-	}
-	

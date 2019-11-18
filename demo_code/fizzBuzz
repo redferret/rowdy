@@ -1,0 +1,34 @@
+
+import "rowdy.core"
+
+func main(limit) {
+	$forLoop(0, limit, 1, func(i) {
+		print $fizzBuzz(i), ln
+	})
+	
+	//$forLoop(0, limit, 1, fizzBuzzPrint)
+}
+
+func fizzBuzzPrint(n) {
+	if (n % 3 == 0 and n % 5 == 0) {
+		print "Fizz Buzz", ln
+	} else if (n % 3 == 0) {
+		print "Fizz", ln
+	} else if (n % 5 == 0) {
+		print "Buzz", ln
+	} else {
+		print n, ln
+	}
+}
+
+func fizzBuzz(n) {
+	if (n % 3 == 0 and n % 5 == 0) {
+		return "Fizz Buzz"
+	} else if (n % 3 == 0) {
+		return "Fizz"
+	} else if (n % 5 == 0) {
+		return "Buzz"
+	} else {
+		return n
+	}
+}

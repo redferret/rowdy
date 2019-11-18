@@ -1,4 +1,4 @@
-import "core.rowdy"
+import "rowdy.core"
 func main() {
 	p = func() {
 		list = $List()

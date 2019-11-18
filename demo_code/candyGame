@@ -1,0 +1,42 @@
+import "rowdy.core"
+
+func main(total) {
+
+	if $not(isset total) {
+		print "Please enter a total number of candies to start with", ln
+		return 1
+	}
+
+	print "There are a total of ", total, " candies. The first one to reach 0 candies wins", ln
+	loop game: {
+		N = total % 3
+		if N > 0 {
+			total = total - N
+		} else {
+			total = total - 1
+		}
+		print "Computer takes a turn...", ln
+		print "The total is now ", total, ln
+		if total == 0 {
+			print "Computer wins", ln
+			break
+		}
+		
+		print "Enter the number of candies (1 or 2) to subtract: "
+		read input
+		loop inputError: {
+			if $not($isNumber(input)) or (input < 1 or input > 2) {
+				print "Invalid entry, Enter 1 or 2: "
+				read input
+			} else {
+				break
+			}
+		}
+		total = total - input
+		print "The total is now ", total, ln
+		if total <= 0 {
+			print "You win", ln
+			break
+		}
+	}
+}
