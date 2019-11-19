@@ -620,9 +620,18 @@ public class RowdyInstance {
         // This manupulation is neccessary for performing multiple dot operations
         // on both objects and objects stored in arrays.
         Object tempStorage = funcVal.getValue();
-        arrayAccess(functionCode.get(ATOMIC_ID).get(ARRAY_ACCESS), funcVal, funcVal, funcName, ATOMIC_GET);
-        Value returnVal = objectFuncReference(funcVal, functionCode, parameterValues);
-        funcVal.setValue(tempStorage);
+        
+        Value returnVal = null;
+        try {
+          arrayAccess(functionCode.get(ATOMIC_ID).get(ARRAY_ACCESS), funcVal, funcVal, funcName, ATOMIC_GET);
+          if (funcVal.getValue() instanceof RowdyObject) {
+            returnVal = objectFuncReference(funcVal, functionCode, parameterValues);
+          } else {
+            returnVal = executeFunc("func-call", (BaseNode) funcVal.getValue(), parameterValues);
+          }
+        } finally {
+          funcVal.setValue(tempStorage);
+        }
         
         return returnVal;
       }
