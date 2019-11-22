@@ -77,8 +77,8 @@ public abstract class BaseNode extends Node<BaseNode, Object>{
     
     return copy;
   }
-  @Override
-  public String toString() {
-    return symbol.toString();
-  }
+//  @Override
+//  public String toString() {
+//    return symbol.toString();
+//  }
 }

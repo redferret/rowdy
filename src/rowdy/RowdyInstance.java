@@ -858,13 +858,18 @@ public class RowdyInstance {
     }
   }
 
+  public Value fetch(Value value, Node curSeq) {
+    return fetch(value, curSeq, true);
+  }
+  
   /**
    * Performs a fetch of a variable in the call stack
    * @param value
    * @param curSeq
+   * @param throwNotFoundException
    * @return 
    */
-  public Value fetch(Value value, Node curSeq) {
+  public Value fetch(Value value, Node curSeq, boolean throwNotFoundException) {
     if (value == null) {
       return null;
     }
@@ -876,7 +881,7 @@ public class RowdyInstance {
         }
         String fetchIdName = ((Terminal) value.getValue()).getValue();
         Value val = globalSymbolTable.get(fetchIdName);
-        if (val == null) {
+        if (val == null && throwNotFoundException) {
           throw new RuntimeException("The ID '" + value + "' doesn't exist "
                   + "on line " + curSeq.getLine());
         }
@@ -922,6 +927,10 @@ public class RowdyInstance {
     return null;
   }
 
+  public Value atomicAccess(BaseNode root, Value value, int action) {
+    return atomicAccess(root, value, action, true);
+  } 
+  
   /**
    * Performs a dot operation on a variable based on the context and
    * scope. The action is the action of either ATOMIC_GET or ATOMIC_SET.
@@ -937,9 +946,10 @@ public class RowdyInstance {
    * @param root The code that will be used to access a variable
    * @param value The value used for getting or setting
    * @param action The action this method should perform
+   * @param throwNotFoundException Throws an exception if the ID is not found
    * @return The value that is set or fetched from a variable
    */
-  public Value atomicAccess(BaseNode root, Value value, int action) {
+  public Value atomicAccess(BaseNode root, Value value, int action, boolean throwNotFoundException) {
     BaseNode id;
     BaseNode refAccess = root.get(REF_ACCESS);
     BaseNode arrayAccess = null;
@@ -958,7 +968,7 @@ public class RowdyInstance {
             Value v = instance.getFromContext(id);
             RowdyObject objectRef;
             if (v == null) {
-              objectRef = (RowdyObject) fetch(new Value(id.symbol()), root).getValue();
+              objectRef = (RowdyObject) fetch(new Value(id.symbol()), root, throwNotFoundException).getValue();
             } else {
               objectRef = (RowdyObject) v.getValue();
             }
@@ -999,9 +1009,6 @@ public class RowdyInstance {
       
     } else {
       id = root.get(ID);
-      if (id == null) {
-        int i = 0;
-      }
       searchValue = new Value(id.symbol());
       idName = id.symbol().toString();
     }
@@ -1020,24 +1027,30 @@ public class RowdyInstance {
               break;
             case ATOMIC_GET:
               Value returnValue = contextTable.getValue(idName);
-              if (returnValue == null) {
+              if (returnValue == null && throwNotFoundException) {
                 throw new RuntimeException("The ID '" + idName + "' doesn't exist "
                         + "on line " + root.getLine());
+              } else if (returnValue == null && !throwNotFoundException) {
+                value.setValue(null);
+              }else {
+                value.setValue(returnValue.getValue());
               }
-              value.setValue(returnValue.getValue());
           }
           
         }
       } else {
         if (arrayAccess != null && arrayAccess.hasSymbols()) {
-          arrayAccess(arrayAccess, fetch(searchValue, root), value, idName, action);
+          arrayAccess(arrayAccess, fetch(searchValue, root, throwNotFoundException), value, idName, action);
         } else {
           switch(action) {
             case ATOMIC_SET:
               allocate(idName, value, root.getLine());
               break;
             case ATOMIC_GET:
-              Value returnValue = fetch(searchValue, root);
+              Value returnValue = fetch(searchValue, root, throwNotFoundException);
+              if (returnValue == null) {
+                return null;
+              }
               value.setValue(returnValue.getValue());
           }
         }

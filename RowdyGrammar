@@ -70,8 +70,9 @@ TEMP				=> "temp";
 NEW					=> "new";
 DOT					=> ".";
 AT					=> "&";
+QUESTION		=> "?";
 
-<SPECIAL> 	=> ". ( ) ; + - * / != = >= <= < > : == , ^ % $ { } [ ] & ++ --";
+<SPECIAL> 	=> ". ( ) ; + - * / != = >= <= < > : == , ^ % $ { } [ ] & ++ -- ?";
 
 <BEGIN>
 
@@ -167,13 +168,13 @@ NEW_OBJ(NEW)							  		=> NEW OBJ_OR_ARRAY FUNC_BODY_EXPR;
 OBJ_OR_ARRAY(ID LCURLY LSQUARE) => ID_* | ARRAY_EXPR* | MAP_EXPR*;
 // ********************************************* Expressions **********************************************
 
-EXPRESSION(ID THIS MINUS OPENPAREN CONSTANT AS NEW
+EXPRESSION(ID THIS MINUS OPENPAREN CONSTANT AS NEW IS
 			CONCAT CALL FUNC ISSET LSQUARE ROUND)	=>  EXPRESSIONS CAST_AS;
 												
-EXPRESSIONS(ID THIS MINUS OPENPAREN CONSTANT ISSET NEW
+EXPRESSIONS(ID THIS MINUS OPENPAREN CONSTANT ISSET NEW IS
 					CONCAT CALL FUNC LSQUARE ROUND)		=>  BOOL_EXPR* | CONCAT_EXPR* | 
-																													ANONYMOUS_FUNC* | ISSET_EXPR* |
-																													ROUND_EXPR* | NEW_OBJ*;
+																								ANONYMOUS_FUNC* | ISSET_EXPR* |
+																								ROUND_EXPR* | NEW_OBJ* | NULL_DEFAULT*;
 
 CAST_AS(AS)													=> AS CAST_OPT;
 CAST_OPT(CAST_STR CAST_INT CAST_DBL 
@@ -192,6 +193,7 @@ CAST_LNG_OPT(CAST_LNG)							=> CAST_LNG;
 
 EXPR_LIST(COMMA)										=> COMMA EXPRESSION EXPR_LIST;
 
+NULL_DEFAULT(IS)																				 => IS ATOMIC_ID QUESTION EXPRESSION;
 BOOL_EXPR(ID THIS MINUS OPENPAREN CONSTANT CALL LSQUARE) => BOOL_TERM BOOL_TERM_TAIL;													
 ROUND_EXPR(ROUND)																				 => ROUND ID COMMA ARITHM_EXPR;
 CONCAT_EXPR(CONCAT)																			 => CONCAT EXPRESSION EXPR_LIST;

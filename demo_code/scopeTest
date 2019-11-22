@@ -4,7 +4,7 @@ import "rowdy.core"
 public class Person {
 
 	construct(name) {
-		this.name = name
+		this.name = is name? "No Name"
 	}
 
 	public:
@@ -38,7 +38,7 @@ public class Person {
 		
 	private:
 		name = ""
-		friends = []
+		friends = new []
 }
 
 func main() {

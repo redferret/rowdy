@@ -36,11 +36,7 @@ public class RowdyNodeFactory implements NodeFactory {
       case PUBLIC:
       case PRIVATE:
       case BREAK:
-      case AS:
-      case IS:
-      case TEMP:
-      case NEW:
-      case AT:
+      case THIS_:
       case FUNCTION_BODY:
       case ARRAY_ACCESS:
       case FUNC_BODY_EXPR:
@@ -51,6 +47,10 @@ public class RowdyNodeFactory implements NodeFactory {
         terminal.setAsNonCompressable();
         terminal.setAsCriticalTerminal();
         return terminal;
+      case NULL_DEFAULT:
+        NullDefault nullDefault = new NullDefault(symbol, line);
+        nullDefault.setAsNonCompressable();
+        return nullDefault;
       case NEW_OBJ:
         NewObject newObject = new NewObject(symbol, line);
         newObject.setAsNonCompressable();

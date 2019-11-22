@@ -63,8 +63,6 @@ public class AssignStatement extends BaseNode {
       assignValue.setAsConstant(false);
     }
      
-    
-    
     instance.atomicAccess(this, assignValue, ATOMIC_SET);
     
     return null;
