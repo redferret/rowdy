@@ -19,8 +19,8 @@ public class PrintStatement extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Object execute(Object printStreamWrapper) {
-    PrintStream stream = (PrintStream) ((Value) printStreamWrapper).getValue();
+  public Object execute(Object printStream) {
+    PrintStream stream = (PrintStream) printStream;
     StringBuilder printValue = new StringBuilder();
     
     BaseNode paramsNode = get(PARAMETERS);

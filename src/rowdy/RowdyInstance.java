@@ -58,14 +58,8 @@ public class RowdyInstance {
   private String nextImport;
   private InputStream inputStream;
   private OutputStream outputStream;
-  private static final Value inputStreamWrapper;
-  private static final Value outputStreamWrapper;
   public static final int ATOMIC_SET = 0, ATOMIC_GET = 1;
 
-  static {
-    inputStreamWrapper = new Value();
-    outputStreamWrapper = new Value();
-  }
   
   public RowdyInstance() {
     this.root = null;
@@ -77,8 +71,6 @@ public class RowdyInstance {
     runningList = new ArrayList<>(50);
     inputStream = System.in;
     outputStream = System.out;
-    inputStreamWrapper.setValue(inputStream);
-    outputStreamWrapper.setValue(outputStream);
   }
   
   public void initialize(RowdyNode program) {
@@ -496,19 +488,19 @@ public class RowdyInstance {
           currentNode.execute(null);
           break;
         case IF_STMT:
-          ((IfStatement) currentNode).execute(new Value(seqControl, false));
+          ((IfStatement) currentNode).execute(seqControl);
           break;
         case READ_STMT:
-          ((ReadStatement) currentNode).execute(inputStreamWrapper);
+          ((ReadStatement) currentNode).execute(inputStream);
           break;
         case FUNC_CALL:
           executeFunc(currentNode);
           break;
         case RETURN_STMT:
-          ((ReturnStatement) currentNode).execute(new Value(seqControl, false));
+          ((ReturnStatement) currentNode).execute(seqControl);
           break;
         case PRINT_STMT:
-          ((PrintStatement) currentNode).execute(outputStreamWrapper);
+          ((PrintStatement) currentNode).execute(outputStream);
           break;
         case IMPORT_SINGLE:
           Node importConstant = currentNode.get(CONSTANT, false);
@@ -874,7 +866,6 @@ public class RowdyInstance {
       return null;
     }
     if (value.getValue() instanceof Terminal) {
-        // Look in the functions first
         Value foundValue = fetchInCallStack(value);
         if (foundValue != null){
           return foundValue;
@@ -1090,7 +1081,7 @@ public class RowdyInstance {
    * otherwise the current function's symbol table is returned.
    * @return 
    */
-  public SymbolTable mostRecentContext() {
+  public SymbolTable topLevelContext() {
     if (callStack.isEmpty()) {
       return null;
     }

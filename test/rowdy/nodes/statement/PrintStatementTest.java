@@ -38,7 +38,7 @@ public class PrintStatementTest extends TestCase {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     
     try (PrintStream printStream = new PrintStream(baos, true, "utf-8")) {
-      instance.execute(new Value(printStream, false));
+      instance.execute(printStream);
       String result = new String(baos.toByteArray(), StandardCharsets.UTF_8);
       String expected = "Hello World!4";
       assertEquals(expected, result);
