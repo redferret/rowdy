@@ -14,6 +14,8 @@ native func next(iterator)
 native func Iterator(collection)
 
 dynamic func apply(list, applier) {
+	list = is list? (new [])
+	applier = is applier? func(){}
 	this.nlist = new []
 	$forEach(list, func(i) { 
 		this.val = $applier(i)

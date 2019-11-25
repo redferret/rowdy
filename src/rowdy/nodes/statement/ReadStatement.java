@@ -24,9 +24,9 @@ public class ReadStatement extends BaseNode {
   }
 
   @Override
-  public Object execute(Object inputStreamWrapper) {
+  public Object execute(Object inputStream) {
     try {
-      Scanner keys = new Scanner((InputStream) ((Value) inputStreamWrapper).getValue());
+      Scanner keys = new Scanner((InputStream) inputStream);
       BaseNode firstID = get(ID);
       Terminal t = (Terminal) firstID.symbol();
       instance.allocate(t.getValue(), new Value(keys.nextLine(), false), this.getLine());

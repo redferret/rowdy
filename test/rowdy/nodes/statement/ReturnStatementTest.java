@@ -42,9 +42,8 @@ public class ReturnStatementTest extends TestCase {
     rowdyInstance.callStack.push(testFunction);
     BaseNode seqControl = new RowdyNode(null, 0);
     seqControl.setSeqActive(true);
-    Value seqControlWrapper = new Value(seqControl, false);
     
-    returnStmt.execute(seqControlWrapper);
+    returnStmt.execute(seqControl);
     Boolean actual = seqControl.isSeqActive();
     assertFalse("Sequence Control is still active", actual);
     

@@ -39,7 +39,7 @@ public class ReadStatementTest extends TestCase {
     
     String inputString = "56\n50\n42\n";
     InputStream stream = new ByteArrayInputStream(inputString.getBytes(StandardCharsets.UTF_8));
-    instance.execute(new Value(stream, false));
+    instance.execute(stream);
     
     String[] varsList = {"v1", "v2", "v3"};
     Integer[] vals = {56, 50, 42};

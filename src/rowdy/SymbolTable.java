@@ -74,6 +74,11 @@ public class SymbolTable {
   
   private void checkScope(String idName) {
     if (instance instanceof RowdyObject) {
+      
+      if (BaseNode.instance.callStack.isEmpty()) {
+        throw new RuntimeException("Can't assign new variable '" + idName + "' to existing instance");
+      }
+      
       Function topLevelFunc = BaseNode.instance.callStack.peek();
 
       if (topLevelFunc == null) {

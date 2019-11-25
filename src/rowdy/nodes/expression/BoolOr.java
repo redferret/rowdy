@@ -20,10 +20,10 @@ public class BoolOr extends BaseNode {
   @Override
   public Object execute(Object leftValue) {
     ArrayList<BaseNode> boolChildren = getAll();
-    if (boolChildren.isEmpty()) {
-      return instance.fetch((Value) leftValue, this);
-    }
     leftValue = instance.fetch((Value) leftValue, this);
+    if (boolChildren.isEmpty()) {
+      return leftValue;
+    }
     boolean bLeft = (boolean)((Value)leftValue).getValue();
     
     if (bLeft == true) {

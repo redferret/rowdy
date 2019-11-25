@@ -58,14 +58,8 @@ public class RowdyInstance {
   private String nextImport;
   private InputStream inputStream;
   private OutputStream outputStream;
-  private static final Value inputStreamWrapper;
-  private static final Value outputStreamWrapper;
   public static final int ATOMIC_SET = 0, ATOMIC_GET = 1;
 
-  static {
-    inputStreamWrapper = new Value();
-    outputStreamWrapper = new Value();
-  }
   
   public RowdyInstance() {
     this.root = null;
@@ -77,8 +71,6 @@ public class RowdyInstance {
     runningList = new ArrayList<>(50);
     inputStream = System.in;
     outputStream = System.out;
-    inputStreamWrapper.setValue(inputStream);
-    outputStreamWrapper.setValue(outputStream);
   }
   
   public void initialize(RowdyNode program) {
@@ -496,19 +488,19 @@ public class RowdyInstance {
           currentNode.execute(null);
           break;
         case IF_STMT:
-          ((IfStatement) currentNode).execute(new Value(seqControl, false));
+          ((IfStatement) currentNode).execute(seqControl);
           break;
         case READ_STMT:
-          ((ReadStatement) currentNode).execute(inputStreamWrapper);
+          ((ReadStatement) currentNode).execute(inputStream);
           break;
         case FUNC_CALL:
           executeFunc(currentNode);
           break;
         case RETURN_STMT:
-          ((ReturnStatement) currentNode).execute(new Value(seqControl, false));
+          ((ReturnStatement) currentNode).execute(seqControl);
           break;
         case PRINT_STMT:
-          ((PrintStatement) currentNode).execute(outputStreamWrapper);
+          ((PrintStatement) currentNode).execute(outputStream);
           break;
         case IMPORT_SINGLE:
           Node importConstant = currentNode.get(CONSTANT, false);
@@ -678,7 +670,7 @@ public class RowdyInstance {
    * @throws ConstantReassignmentException 
    */
   public Value executeFunc(String funcName, BaseNode functionNode, List<Value> parameterValues) throws ConstantReassignmentException {
-    SymbolTable mostRecentContext = mostRecentContext();
+    SymbolTable mostRecentContext = topLevelContext();
     if (mostRecentContext != null && mostRecentContext.getInstanceObject() instanceof RowdyObject) {
       return executeFunc(funcName, functionNode, parameterValues, (RowdyObject) mostRecentContext.getInstanceObject());
     } else {
@@ -780,8 +772,8 @@ public class RowdyInstance {
    * If the variable is not a global variable it
    * will allocate the variable to the current function if it doesn't exist.
    * If the variable exists the value passed in will overwrite the current value.
-   * This is a soft allocation unlike the method atomicAccess which performs a
-   * more complex allocation using dot operators.
+ This is a soft allocation unlike the method RAMAccess which performs a
+ more complex allocation using dot operators.
    * @param idName The variable to allocate or change
    * @param value The Value being allocated or changed
    * @param line The line number that allocation takes place
@@ -858,25 +850,29 @@ public class RowdyInstance {
     }
   }
 
+  public Value fetch(Value value, Node curSeq) {
+    return fetch(value, curSeq, true);
+  }
+  
   /**
    * Performs a fetch of a variable in the call stack
    * @param value
    * @param curSeq
+   * @param throwNotFoundException
    * @return 
    */
-  public Value fetch(Value value, Node curSeq) {
+  public Value fetch(Value value, Node curSeq, boolean throwNotFoundException) {
     if (value == null) {
       return null;
     }
     if (value.getValue() instanceof Terminal) {
-        // Look in the functions first
         Value foundValue = fetchInCallStack(value);
         if (foundValue != null){
           return foundValue;
         }
         String fetchIdName = ((Terminal) value.getValue()).getValue();
         Value val = globalSymbolTable.get(fetchIdName);
-        if (val == null) {
+        if (val == null && throwNotFoundException) {
           throw new RuntimeException("The ID '" + value + "' doesn't exist "
                   + "on line " + curSeq.getLine());
         }
@@ -922,24 +918,29 @@ public class RowdyInstance {
     return null;
   }
 
+  public Value RAMAccess(BaseNode root, Value value, int action) {
+    return RowdyInstance.this.RAMAccess(root, value, action, true);
+  } 
+  
   /**
    * Performs a dot operation on a variable based on the context and
    * scope. The action is the action of either ATOMIC_GET or ATOMIC_SET.
-   * <code>atomicAccess(root, new Value(), ATOMIC_GET)</code> will return the
+   * <code>RAMAccess(root, new Value(), ATOMIC_GET)</code> will return the
    * value to the caller and also wrapped in <code>new Value()</code>.
    *
    * If the method is enabled for setting a value, the Value passed in is what
    * will be allocated to the variable, 
-   * <code>atomicAccess(root, new Value(10, false), ATOMIC_GET)</code>
+   * <code>RAMAccess(root, new Value(10, false), ATOMIC_SET)</code>
    * will assign the value 10 based on the code given to this method.
    * that is being set as well.
    *
    * @param root The code that will be used to access a variable
    * @param value The value used for getting or setting
    * @param action The action this method should perform
+   * @param throwNotFoundException Throws an exception if the ID is not found
    * @return The value that is set or fetched from a variable
    */
-  public Value atomicAccess(BaseNode root, Value value, int action) {
+  public Value RAMAccess(BaseNode root, Value value, int action, boolean throwNotFoundException) {
     BaseNode id;
     BaseNode refAccess = root.get(REF_ACCESS);
     BaseNode arrayAccess = null;
@@ -955,20 +956,35 @@ public class RowdyInstance {
           id = refAccess.getLeftMost().get(ID);
           objAtomic = root.get(DOT_ATOMIC);
           if (objAtomic != null && objAtomic.hasSymbols()) {
-            Value v = instance.getFromContext(id);
+            Value valueContext = instance.getIdFromTopLevelContext(id);
+            Value refValue = fetch(new Value(id.symbol()), root, throwNotFoundException);
             RowdyObject objectRef;
-            if (v == null) {
-              objectRef = (RowdyObject) fetch(new Value(id.symbol()), root).getValue();
+            if (refValue.getValue() instanceof RowdyObject) {
+              if (valueContext == null) {
+                objectRef = (RowdyObject) fetch(new Value(id.symbol()), root, throwNotFoundException).getValue();
+              } else {
+                objectRef = (RowdyObject) valueContext.getValue();
+              }
+              context = (SymbolTable) atomicReference(objAtomic, objectRef.getSymbolTable(), REF_ACCESS);
+              id = (BaseNode) atomicReference(objAtomic, objectRef.getSymbolTable(), ATOMIC_ID);
+              arrayAccess = id.get(ARRAY_ACCESS);
+            } else if (refValue.getValue() instanceof List || refValue.getValue() instanceof HashMap) {
+              arrayAccess = root.get(ARRAY_ACCESS);
+              BaseNode idNode = refAccess.getLeftMost().get(ID);
+              idName = idNode.symbol().toString();
+              
+              Value objectRefValue = new Value();
+              arrayAccess(arrayAccess, refValue, objectRefValue, idName, ATOMIC_GET);
+              objectRef = (RowdyObject) objectRefValue.getValue();
+              context = (SymbolTable) atomicReference(objAtomic, objectRef.getSymbolTable(), REF_ACCESS);
+              id = (BaseNode) atomicReference(objAtomic, objectRef.getSymbolTable(), ATOMIC_ID);
+              arrayAccess = null;
             } else {
-              objectRef = (RowdyObject) v.getValue();
+              throw new RuntimeException("Unsupported " + root.getLine());
             }
-            context = (SymbolTable) atomicReference(objAtomic, objectRef.getSymbolTable(), REF_ACCESS);
-            id = (BaseNode) atomicReference(objAtomic, objectRef.getSymbolTable(), ATOMIC_ID);
-            
             refAccess = id.get(REF_ACCESS);
             BaseNode idNode = refAccess.getLeftMost().get(ID);
             idName = idNode.symbol().toString();
-            arrayAccess = id.get(ARRAY_ACCESS);
             searchValue = new Value(idNode.symbol());
           } else {
             arrayAccess = root.get(ARRAY_ACCESS);
@@ -980,11 +996,11 @@ public class RowdyInstance {
           objAtomic = root.get(DOT_ATOMIC);
           
           if (objAtomic == null) {
-            value.setValue(mostRecentContext().getInstanceObject());
+            value.setValue(topLevelContext().getInstanceObject());
             return value;
           } else {
-            context = (SymbolTable) atomicReference(objAtomic, mostRecentContext(), REF_ACCESS);
-            id = (BaseNode) atomicReference(objAtomic, mostRecentContext(), ATOMIC_ID);
+            context = (SymbolTable) atomicReference(objAtomic, topLevelContext(), REF_ACCESS);
+            id = (BaseNode) atomicReference(objAtomic, topLevelContext(), ATOMIC_ID);
           }
           
           refAccess = id.get(REF_ACCESS);
@@ -999,9 +1015,6 @@ public class RowdyInstance {
       
     } else {
       id = root.get(ID);
-      if (id == null) {
-        int i = 0;
-      }
       searchValue = new Value(id.symbol());
       idName = id.symbol().toString();
     }
@@ -1011,8 +1024,8 @@ public class RowdyInstance {
         SymbolTable contextTable = (SymbolTable) context;
         
         if (arrayAccess != null && arrayAccess.hasSymbols()) {
-          Value obj = contextTable.getValue(idName);
-          arrayAccess(arrayAccess, obj, value, idName, action);
+          Value objs = contextTable.getValue(idName);
+          arrayAccess(arrayAccess, objs, value, idName, action);
         } else {
           switch(action) {
             case ATOMIC_SET:
@@ -1020,24 +1033,30 @@ public class RowdyInstance {
               break;
             case ATOMIC_GET:
               Value returnValue = contextTable.getValue(idName);
-              if (returnValue == null) {
+              if (returnValue == null && throwNotFoundException) {
                 throw new RuntimeException("The ID '" + idName + "' doesn't exist "
                         + "on line " + root.getLine());
+              } else if (returnValue == null && !throwNotFoundException) {
+                value.setValue(null);
+              }else {
+                value.setValue(returnValue.getValue());
               }
-              value.setValue(returnValue.getValue());
           }
           
         }
       } else {
         if (arrayAccess != null && arrayAccess.hasSymbols()) {
-          arrayAccess(arrayAccess, fetch(searchValue, root), value, idName, action);
+          arrayAccess(arrayAccess, fetch(searchValue, root, throwNotFoundException), value, idName, action);
         } else {
           switch(action) {
             case ATOMIC_SET:
               allocate(idName, value, root.getLine());
               break;
             case ATOMIC_GET:
-              Value returnValue = fetch(searchValue, root);
+              Value returnValue = fetch(searchValue, root, throwNotFoundException);
+              if (returnValue == null) {
+                return null;
+              }
               value.setValue(returnValue.getValue());
           }
         }
@@ -1050,15 +1069,17 @@ public class RowdyInstance {
   }
   
   /**
-   * Returns the value stored for the given variable based on the current 
-   * function whether it is dynamic, a member function, or an ordinary function
-   * and the call stack.
+   * Searches using the supplied id node to look a value up in the current
+   * context and the scope of the call stack.
+   * If the function on the top of the call stack is a member function that
+   * object's context (symbol table) is used to look the given id up
+   * If there is no object being referenced
    * @param id
    * @return 
    */
-  public Value getFromContext(BaseNode id) {
+  public Value getIdFromTopLevelContext(BaseNode id) {
     Value val;
-    SymbolTable table = mostRecentContext();
+    SymbolTable table = topLevelContext();
     if (table == null) {
       val = fetchInCallStack(new Value(id.symbol()));
     } else {
@@ -1075,7 +1096,7 @@ public class RowdyInstance {
    * otherwise the current function's symbol table is returned.
    * @return 
    */
-  public SymbolTable mostRecentContext() {
+  public SymbolTable topLevelContext() {
     if (callStack.isEmpty()) {
       return null;
     }

@@ -21,6 +21,7 @@ public class ExpressionSuite extends TestCase {
   
   public static Test suite() {
     TestSuite suite = new TestSuite("ExpressionSuite");
+    suite.addTest(NullDefaultTest.suite());
     suite.addTest(FactorPowTest.suite());
     suite.addTest(TermMinusTest.suite());
     suite.addTest(IssetExprTest.suite());

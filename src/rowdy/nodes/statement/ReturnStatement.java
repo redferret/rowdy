@@ -16,10 +16,9 @@ public class ReturnStatement extends BaseNode {
     super(def, lineNumber);
   }
   @Override
-  public Object execute(Object seqControlWrapper) {
-    BaseNode seqControl = (BaseNode) ((Value)seqControlWrapper).getValue();
+  public Object execute(Object seqControl) {
     Function functionReturning = instance.callStack.peek();
-    seqControl.setSeqActive(false);
+    ((BaseNode) seqControl).setSeqActive(false);
     BaseNode returnExpr = getLeftMost();
     Value toSet = (Value) returnExpr.execute();
     functionReturning.setReturnValue(toSet);

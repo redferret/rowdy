@@ -7,6 +7,7 @@ package rowdy.nodes.expression;
 
 import growdy.Symbol;
 import rowdy.BaseNode;
+import rowdy.RowdyObject;
 import rowdy.Value;
 
 /**
@@ -31,12 +32,16 @@ public class RelNotEqual extends BaseNode {
       left = (boolean) ((Value)leftValue).getValue() ? 1 : 0;
     } else if (((Value)leftValue).getValue() instanceof String) {
       return new Value(true, false);
+    } else if (((Value)leftValue).getValue() instanceof RowdyObject){
+      return new Value(true, false);
     } else {
       left = (Number) ((Value)leftValue).getValue();
     }
     if (rightValue.getValue() instanceof Boolean) {
       right = (boolean) rightValue.getValue() ? 1 : 0;
     } else if (rightValue.getValue() instanceof String) {
+      return new Value(true, false);
+    } else if (((Value)rightValue).getValue() instanceof RowdyObject){
       return new Value(true, false);
     } else {
       right = (Number) rightValue.getValue();

@@ -18,7 +18,7 @@ public class AtomicId extends BaseNode {
 
   @Override
   public Object execute(Object leftValue) {
-    return instance.atomicAccess(this, new Value(leftValue, false), ATOMIC_GET);
+    return instance.RAMAccess(this, new Value(leftValue, false), ATOMIC_GET);
   }
   
 }

@@ -35,8 +35,7 @@ public class IfStatementTest extends TestCase {
     
     IfStatement instance = (IfStatement) getTestStatement(testCode, IF_STMT);
     
-    Value seqControlWrapper = new Value(null, false);
-    instance.execute(seqControlWrapper);
+    instance.execute(null);
     
     assertTrue("The ID 'a' doesn't exist", isset("a"));
     

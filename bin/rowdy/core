@@ -29,6 +29,14 @@ native func tan(a)
 native func rand()
 native func type(var)
 
+func abs(n) {
+	if n < 0 {
+		return -n
+	} else {
+		return n
+	}
+}
+
 func isFunction(var) {
 	return $equals($type(var), "rowdy.nodes.expression.AnonymousFunc")
 					or $equals($type(var), "rowdy.nodes.RowdyNode")
