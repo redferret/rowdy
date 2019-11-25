@@ -678,7 +678,7 @@ public class RowdyInstance {
    * @throws ConstantReassignmentException 
    */
   public Value executeFunc(String funcName, BaseNode functionNode, List<Value> parameterValues) throws ConstantReassignmentException {
-    SymbolTable mostRecentContext = mostRecentContext();
+    SymbolTable mostRecentContext = topLevelContext();
     if (mostRecentContext != null && mostRecentContext.getInstanceObject() instanceof RowdyObject) {
       return executeFunc(funcName, functionNode, parameterValues, (RowdyObject) mostRecentContext.getInstanceObject());
     } else {
@@ -780,8 +780,8 @@ public class RowdyInstance {
    * If the variable is not a global variable it
    * will allocate the variable to the current function if it doesn't exist.
    * If the variable exists the value passed in will overwrite the current value.
-   * This is a soft allocation unlike the method atomicAccess which performs a
-   * more complex allocation using dot operators.
+ This is a soft allocation unlike the method RAMAccess which performs a
+ more complex allocation using dot operators.
    * @param idName The variable to allocate or change
    * @param value The Value being allocated or changed
    * @param line The line number that allocation takes place
@@ -927,19 +927,19 @@ public class RowdyInstance {
     return null;
   }
 
-  public Value atomicAccess(BaseNode root, Value value, int action) {
-    return atomicAccess(root, value, action, true);
+  public Value RAMAccess(BaseNode root, Value value, int action) {
+    return RowdyInstance.this.RAMAccess(root, value, action, true);
   } 
   
   /**
    * Performs a dot operation on a variable based on the context and
    * scope. The action is the action of either ATOMIC_GET or ATOMIC_SET.
-   * <code>atomicAccess(root, new Value(), ATOMIC_GET)</code> will return the
+   * <code>RAMAccess(root, new Value(), ATOMIC_GET)</code> will return the
    * value to the caller and also wrapped in <code>new Value()</code>.
    *
    * If the method is enabled for setting a value, the Value passed in is what
    * will be allocated to the variable, 
-   * <code>atomicAccess(root, new Value(10, false), ATOMIC_GET)</code>
+   * <code>RAMAccess(root, new Value(10, false), ATOMIC_SET)</code>
    * will assign the value 10 based on the code given to this method.
    * that is being set as well.
    *
@@ -949,7 +949,7 @@ public class RowdyInstance {
    * @param throwNotFoundException Throws an exception if the ID is not found
    * @return The value that is set or fetched from a variable
    */
-  public Value atomicAccess(BaseNode root, Value value, int action, boolean throwNotFoundException) {
+  public Value RAMAccess(BaseNode root, Value value, int action, boolean throwNotFoundException) {
     BaseNode id;
     BaseNode refAccess = root.get(REF_ACCESS);
     BaseNode arrayAccess = null;
@@ -990,11 +990,11 @@ public class RowdyInstance {
           objAtomic = root.get(DOT_ATOMIC);
           
           if (objAtomic == null) {
-            value.setValue(mostRecentContext().getInstanceObject());
+            value.setValue(topLevelContext().getInstanceObject());
             return value;
           } else {
-            context = (SymbolTable) atomicReference(objAtomic, mostRecentContext(), REF_ACCESS);
-            id = (BaseNode) atomicReference(objAtomic, mostRecentContext(), ATOMIC_ID);
+            context = (SymbolTable) atomicReference(objAtomic, topLevelContext(), REF_ACCESS);
+            id = (BaseNode) atomicReference(objAtomic, topLevelContext(), ATOMIC_ID);
           }
           
           refAccess = id.get(REF_ACCESS);
@@ -1018,8 +1018,8 @@ public class RowdyInstance {
         SymbolTable contextTable = (SymbolTable) context;
         
         if (arrayAccess != null && arrayAccess.hasSymbols()) {
-          Value obj = contextTable.getValue(idName);
-          arrayAccess(arrayAccess, obj, value, idName, action);
+          Value objs = contextTable.getValue(idName);
+          arrayAccess(arrayAccess, objs, value, idName, action);
         } else {
           switch(action) {
             case ATOMIC_SET:
@@ -1063,15 +1063,17 @@ public class RowdyInstance {
   }
   
   /**
-   * Returns the value stored for the given variable based on the current 
-   * function whether it is dynamic, a member function, or an ordinary function
-   * and the call stack.
+   * Searches using the supplied id node to look a value up in the current
+   * context and the scope of the call stack.
+   * If the function on the top of the call stack is a member function that
+   * object's context (symbol table) is used to look the given id up
+   * If there is no object being referenced
    * @param id
    * @return 
    */
-  public Value getFromContext(BaseNode id) {
+  public Value getIdFromTopLevelContext(BaseNode id) {
     Value val;
-    SymbolTable table = mostRecentContext();
+    SymbolTable table = topLevelContext();
     if (table == null) {
       val = fetchInCallStack(new Value(id.symbol()));
     } else {
