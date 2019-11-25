@@ -6,8 +6,6 @@ import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.ELSE_IF_PART;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
-import static rowdy.lang.RowdyGrammarConstants.STMT_BLOCK;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -21,16 +19,15 @@ public class IfStatement extends BaseNode {
   }
 
   @Override
-  public Object execute(Object seqControlWrapper) {
-    BaseNode seqControl = (BaseNode) ((Value)seqControlWrapper).getValue();
+  public Object execute(Object seqControl) {
     BaseNode ifExpr = getLeftMost();
     Value ifExprValue = (Value) ifExpr.execute();
     try {
       if ((boolean) ifExprValue.getValue()) {
         BaseNode ifStmtList = get(STMT_LIST);
-        instance.executeStmt(ifStmtList, seqControl);
+        instance.executeStmt(ifStmtList, (BaseNode) seqControl);
       } else {
-        instance.executeStmt(get(ELSE_IF_PART), seqControl);
+        instance.executeStmt(get(ELSE_IF_PART), (BaseNode) seqControl);
       }
     } catch (ConstantReassignmentException ex) {
       ex.printStackTrace();

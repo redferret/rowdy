@@ -9,9 +9,11 @@ import static rowdy.lang.RowdyGrammarConstants.ASSIGN_VALUE;
 import static rowdy.lang.RowdyGrammarConstants.CLASS_BODY;
 import static rowdy.lang.RowdyGrammarConstants.CLASS_DEFS;
 import static rowdy.lang.RowdyGrammarConstants.CONSTRUCTOR_METHOD;
+import static rowdy.lang.RowdyGrammarConstants.CONST_OPT;
 import static rowdy.lang.RowdyGrammarConstants.FUNCTION;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.ID_;
+import static rowdy.lang.RowdyGrammarConstants.ID_MODIFIER;
 import static rowdy.lang.RowdyGrammarConstants.REF_ACCESS;
 import static rowdy.lang.RowdyGrammarConstants.INHERIT_OPT;
 import static rowdy.lang.RowdyGrammarConstants.PRIVATE_MEMBERS;
@@ -52,14 +54,8 @@ public class RowdyClass {
   
   public RowdyObject getInstance(String nameOfObject, List<Value> constructorParams){
     RowdyObject newInstance = new RowdyObject(nameOfObject);
-    // access symbol table declaring all the public and private functions/vars
-    // X 1) declare member variables and functions, if a member variable
-    //    is being assigned a default value store that value otherwise store null
-    // 2) call the constructor
-    //    a) if no constructor is found do nothing
-    // 3) return the new instance of the object
-    
     SymbolTable instanceTable = newInstance.getSymbolTable();
+    
     if (publicMembers != null) {
       allocateMembers(publicMembers.get(CLASS_DEFS), instanceTable, true);
     }
@@ -96,6 +92,16 @@ public class RowdyClass {
           } else {
             value = new Value();
           }
+          
+          RowdyNode idModifier = (RowdyNode) cur.get(ID_MODIFIER);
+          if (idModifier != null && idModifier.hasSymbols()) {
+            switch (idModifier.getLeftMost().symbol().id()) {
+              case CONST_OPT:
+                value.setAsConstant(true);
+                break;
+            }
+          }
+          
           value.isPublic(isPublic);
           try {
             instanceTable.allocate(id, value, cur.getLine(), true);

@@ -956,20 +956,35 @@ public class RowdyInstance {
           id = refAccess.getLeftMost().get(ID);
           objAtomic = root.get(DOT_ATOMIC);
           if (objAtomic != null && objAtomic.hasSymbols()) {
-            Value v = instance.getFromContext(id);
+            Value valueContext = instance.getIdFromTopLevelContext(id);
+            Value refValue = fetch(new Value(id.symbol()), root, throwNotFoundException);
             RowdyObject objectRef;
-            if (v == null) {
-              objectRef = (RowdyObject) fetch(new Value(id.symbol()), root, throwNotFoundException).getValue();
+            if (refValue.getValue() instanceof RowdyObject) {
+              if (valueContext == null) {
+                objectRef = (RowdyObject) fetch(new Value(id.symbol()), root, throwNotFoundException).getValue();
+              } else {
+                objectRef = (RowdyObject) valueContext.getValue();
+              }
+              context = (SymbolTable) atomicReference(objAtomic, objectRef.getSymbolTable(), REF_ACCESS);
+              id = (BaseNode) atomicReference(objAtomic, objectRef.getSymbolTable(), ATOMIC_ID);
+              arrayAccess = id.get(ARRAY_ACCESS);
+            } else if (refValue.getValue() instanceof List || refValue.getValue() instanceof HashMap) {
+              arrayAccess = root.get(ARRAY_ACCESS);
+              BaseNode idNode = refAccess.getLeftMost().get(ID);
+              idName = idNode.symbol().toString();
+              
+              Value objectRefValue = new Value();
+              arrayAccess(arrayAccess, refValue, objectRefValue, idName, ATOMIC_GET);
+              objectRef = (RowdyObject) objectRefValue.getValue();
+              context = (SymbolTable) atomicReference(objAtomic, objectRef.getSymbolTable(), REF_ACCESS);
+              id = (BaseNode) atomicReference(objAtomic, objectRef.getSymbolTable(), ATOMIC_ID);
+              arrayAccess = null;
             } else {
-              objectRef = (RowdyObject) v.getValue();
+              throw new RuntimeException("Unsupported " + root.getLine());
             }
-            context = (SymbolTable) atomicReference(objAtomic, objectRef.getSymbolTable(), REF_ACCESS);
-            id = (BaseNode) atomicReference(objAtomic, objectRef.getSymbolTable(), ATOMIC_ID);
-            
             refAccess = id.get(REF_ACCESS);
             BaseNode idNode = refAccess.getLeftMost().get(ID);
             idName = idNode.symbol().toString();
-            arrayAccess = id.get(ARRAY_ACCESS);
             searchValue = new Value(idNode.symbol());
           } else {
             arrayAccess = root.get(ARRAY_ACCESS);

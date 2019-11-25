@@ -3,11 +3,10 @@ package rowdy.nodes.expression;
 
 import growdy.Symbol;
 import rowdy.BaseNode;
-import static rowdy.RowdyInstance.ATOMIC_GET;
-import rowdy.SymbolTable;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
-import static rowdy.lang.RowdyGrammarConstants.REF_ACCESS;
+import static rowdy.RowdyInstance.ATOMIC_GET;
+import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 
 /**
  *
@@ -21,15 +20,27 @@ public class NullDefault extends BaseNode {
 
   @Override
   public Object execute(Object leftValue) {
+    int line = this.getLine();
     BaseNode idTestNode = get(ATOMIC_ID);
-    BaseNode defaultValue = get(ATOMIC_ID, 1);
-    Value returnValue = new Value(((Value) defaultValue.execute()).getValue());
-    Value testValue = instance.atomicAccess(idTestNode, new Value(), ATOMIC_GET, false);
-    if (testValue != null && testValue.getValue() != null) {
-      return idTestNode.execute();
+    BaseNode defaultValue = null;
+    if (getAll().size() > 1) {
+      defaultValue = this.getAll().get(1);
     }
-    return returnValue;
+    Value returnValue;
+    Value testValue = instance.RAMAccess(idTestNode, new Value(), ATOMIC_GET, false);
+    if (defaultValue == null) {
+      if (testValue != null && testValue.getValue() != null) {
+        return new Value(false);
+      } else {
+        return new Value(true);
+      }
+    } else {
+      returnValue = new Value(((Value) defaultValue.execute()).getValue());
+      if (testValue != null && testValue.getValue() != null) {
+        return idTestNode.execute();
+      }
+      return returnValue;
+    }
   }
-  
   
 }
