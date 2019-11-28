@@ -13,12 +13,11 @@ native func size(collection)
 native func next(iterator)
 native func Iterator(collection)
 
-dynamic func apply(list, applier) {
-	list = is list? (new [])
-	applier = is applier? func(){}
-	this.nlist = new []
-	$forEach(list, func(i) { 
-		this.val = $applier(i)
+dynamic func apply(list, applier) <nlist> {
+	list = is list? new []
+	nlist = new []
+	$forEach(list, func(i) <val> { 
+		val = $applier(i)
 		if (val != null) {
 			$add(nlist, val)
 		}
@@ -26,9 +25,10 @@ dynamic func apply(list, applier) {
 	return nlist 
 }
 
-func range(from, to) { 
+func range(from, to, inc) { 
+ inc = is inc? 1
  nlist = new []
- $forLoop(from, to, 1, func(i) { 
+ $forLoop(from, to, inc, func(i) { 
   $add(nlist, i)
  })
  return nlist
