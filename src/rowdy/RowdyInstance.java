@@ -52,7 +52,7 @@ public class RowdyInstance {
    * A list of functions currently running to determine if the code of a
    * function needs to be duplicated 
    */
-  private final List<String> runningList;
+  private final List<String> functionCopies;
   private List<Value> programParamValues;
   private boolean firstTimeInitialization;
   private String nextImport;
@@ -68,7 +68,7 @@ public class RowdyInstance {
     activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
     firstTimeInitialization = true;
-    runningList = new ArrayList<>(50);
+    functionCopies = new ArrayList<>(50);
     inputStream = System.in;
     outputStream = System.out;
   }
@@ -234,6 +234,7 @@ public class RowdyInstance {
       simplifyParams(curNode);
       String paramsId;
       switch (curNode.symbol().id()) {
+        case PRIVATE_SCOPE:
         case FUNCTION_BODY:
           List<String> paramsList = new ArrayList<>();
           BaseNode funcParams = curNode.get(PARAMETERS);
@@ -254,8 +255,10 @@ public class RowdyInstance {
             funcParams.setChildren(funcParams.get(PARAMETERS).getAll());
             setAsGlobal(paramsId, new Value(paramsList, true));
           } else {
-            BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), curNode.getLine());
-            funcParams.add(parameters);
+            if (funcParams != null) {
+              BaseNode parameters = new RowdyNode(new NonTerminal("parameters", PARAMETERS), curNode.getLine());
+              funcParams.add(parameters);
+            }
           }
           break;
         case PRINT_STMT:
@@ -607,7 +610,7 @@ public class RowdyInstance {
       return objectFuncReference(funcVal, functionCode, parameterValues);
     } else {
       if (value instanceof ArrayList || value instanceof HashMap) {
-        // Because the funcVal is mutated when arrayAccess is executed,
+        // Because the funcVal is mutated when RAMAccess is executed,
         // there must be a temp storage for the original value in memory.
         // This manupulation is neccessary for performing multiple dot operations
         // on both objects and objects stored in arrays.
@@ -683,18 +686,18 @@ public class RowdyInstance {
    * depending if a RowdyObject is passed in, the code for the function should
    * be present and known.
    * @param funcName The name of the function to execute
-   * @param functionNode The code of the function wrapped inside a Value
+   * @param functionNode The code of the function
    * @param parameterValues The parameters to execute with
-   * @param parent The object the function belongs to
+   * @param parent The object the function belongs to, can be null
    * @return The value the function returns
    * @throws ConstantReassignmentException 
    */
   public Value executeFunc(String funcName, BaseNode functionNode, List<Value> parameterValues, RowdyObject parent) throws ConstantReassignmentException {
 
-    if (runningList.contains(funcName)) {
+    if (functionCopies.contains(funcName)) {
       functionNode = functionNode.copy();
     }
-    runningList.add(funcName);
+    functionCopies.add(funcName);
     // 1. Get the formal parameters
     BaseNode functionBody = functionNode.get(FUNCTION_BODY);
     BaseNode parameters = functionBody.get(PARAMETERS);
@@ -731,6 +734,7 @@ public class RowdyInstance {
         params.put(paramName, parameterValues.get(p));
       }
     }
+    
     // 3. Push the function onto the call stack
     Function function = new Function(funcName, params, functionNode.getLine());
     function.setClassObject(parent);
@@ -747,6 +751,17 @@ public class RowdyInstance {
               + "restricted context '" + parent.getNameOfObject() + "'" + " on line " + functionNode.getLine());
     }
     
+    BaseNode privateScope = funcBody.get(PRIVATE_SCOPE);
+    
+    if (privateScope != null && privateScope.hasSymbols()) {
+      Value privateValue = (Value) privateScope.execute(new Value(new ArrayList<>(), false));
+      List<String> privateValues = (List<String>) privateValue.getValue();
+
+      privateValues.forEach((param) -> {
+        params.put(param, new Value(null));
+      });
+    }
+    
     BaseNode stmtList = funcBody.get(STMT_LIST), seqControl = new RowdyNode(null, 0);
     seqControl.setSeqActive(true);
     
@@ -757,7 +772,7 @@ public class RowdyInstance {
     // it's value.
     function = callStack.pop();
     function.getSymbolTable().free();
-    runningList.remove(funcName);
+    functionCopies.remove(funcName);
     return function.getReturnValue();
   }
 
@@ -767,13 +782,14 @@ public class RowdyInstance {
       globalSymbolTable.replace(idName, value);
     }
   }
-  
+
   /**
-   * If the variable is not a global variable it
-   * will allocate the variable to the current function if it doesn't exist.
-   * If the variable exists the value passed in will overwrite the current value.
- This is a soft allocation unlike the method RAMAccess which performs a
- more complex allocation using dot operators.
+   * If the variable is not a global variable it will allocate the variable to
+   * the current function if it doesn't exist. If the variable exists the value
+   * passed in will overwrite the current value. This is a soft allocation
+   * unlike the method RAMAccess which performs a more complex allocation using
+   * dot operators.
+   *
    * @param idName The variable to allocate or change
    * @param value The Value being allocated or changed
    * @param line The line number that allocation takes place
@@ -855,7 +871,9 @@ public class RowdyInstance {
   }
   
   /**
-   * Performs a fetch of a variable in the call stack
+   * Performs a fetch of a variable in the call stack or returns the value
+   * passed in as is if the value is not a Terminal node. Fetches a variable in
+   * the call stack on functions and halts search on static scopes.
    * @param value
    * @param curSeq
    * @param throwNotFoundException
@@ -891,7 +909,8 @@ public class RowdyInstance {
   }
   
   /**
-   * Fetches a variable in the call stack on functions that are not dynamic
+   * Fetches a variable in the call stack on functions and halts search on
+   * static scopes.
    * @param value
    * @return 
    */
