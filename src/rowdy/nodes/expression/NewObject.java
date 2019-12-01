@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package rowdy.nodes.expression;
 
 import growdy.Symbol;
@@ -37,7 +33,6 @@ public class NewObject extends BaseNode {
         return newType.execute();
       case ID_:
         BaseNode idNode = newType.get(ID);
-        String className = idNode.symbol().toString();
         RowdyClass rowdyClass = (RowdyClass) instance.fetch(instance.getIdAsValue(idNode), this).getValue();
 
         List<Value> constructorParams = new ArrayList<>();
@@ -53,7 +48,7 @@ public class NewObject extends BaseNode {
             constructorParams.add(v);
           });
         }
-        return new Value(rowdyClass.getInstance(className, constructorParams), false);
+        return new Value(rowdyClass.getInstance(constructorParams), false);
       default:
         throw new RuntimeException("Undefined type to be created on line " + getLine());
     }

@@ -487,8 +487,9 @@ public class RowdyInstance {
       switch (curNodeId) {
         case ASSIGN_STMT:
         case LOOP_STMT:
+        case WHILE_LOOP:
         case BREAK_STMT:
-          currentNode.execute(null);
+          currentNode.execute();
           break;
         case IF_STMT:
           ((IfStatement) currentNode).execute(seqControl);
@@ -799,8 +800,6 @@ public class RowdyInstance {
     if (callStack.isEmpty()) {
       setAsGlobal(idName, value);
     } else {
-      try {
-        
         Function[] functions = callStack.toArray(new Function[callStack.size()]);
         boolean found = false;
         for (int i = functions.length - 1; i >= 0; i--) {
@@ -823,7 +822,6 @@ public class RowdyInstance {
             setAsGlobal(idName, value);
           }
         }
-      } catch (EmptyStackException e) {}
     }
   }
 

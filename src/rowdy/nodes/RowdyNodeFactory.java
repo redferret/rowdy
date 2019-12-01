@@ -198,6 +198,10 @@ public class RowdyNodeFactory implements NodeFactory {
         LoopStatement lpstmt = new LoopStatement(symbol, line);
         lpstmt.setAsNonCompressable();
         return lpstmt;
+      case WHILE_LOOP:
+        WhileLoop whileLoop = new WhileLoop(symbol, line);
+        whileLoop.setAsNonCompressable();
+        return whileLoop;
       // STMT_BLOCK shouldn't be both non compressable and reducable
       case STMT_BLOCK:
         RowdyNode stmtBlock = new RowdyNode(symbol, line);

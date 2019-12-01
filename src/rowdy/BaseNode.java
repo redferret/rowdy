@@ -5,8 +5,6 @@ import growdy.Node;
 import growdy.NonTerminal;
 import growdy.Symbol;
 import growdy.Terminal;
-import java.util.HashMap;
-
 /**
  *
  * @author Richard
@@ -77,8 +75,8 @@ public abstract class BaseNode extends Node<BaseNode, Object>{
     
     return copy;
   }
-//  @Override
-//  public String toString() {
-//    return symbol.toString();
-//  }
+  @Override
+  public String toString() {
+    return symbol.toString();
+  }
 }

@@ -4,12 +4,11 @@ import "rowdy.core"
 public class Person {
 
 	construct(name, age) {
-		this.name = name
-		this.age = age
+		this.name = is name? "No Name"
+		this.age = is age? 0
 	}
 
 	public:
-		age = 0
 
 		func getThis() {
 			return this
@@ -37,5 +36,6 @@ public class Person {
 
 func main() {
 	ppl = new [ new Person("Rich", 32)]
+	p1 = new Person(age: 0, name: "Rich")
 	print $ppl[0].getName(), ln
 }

@@ -52,8 +52,8 @@ public class RowdyClass {
     return objectName;
   }
   
-  public RowdyObject getInstance(String nameOfObject, List<Value> constructorParams){
-    RowdyObject newInstance = new RowdyObject(nameOfObject);
+  public RowdyObject getInstance(List<Value> constructorParams){
+    RowdyObject newInstance = new RowdyObject(objectName);
     SymbolTable instanceTable = newInstance.getSymbolTable();
     
     if (publicMembers != null) {
