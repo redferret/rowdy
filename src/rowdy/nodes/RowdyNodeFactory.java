@@ -80,6 +80,7 @@ public class RowdyNodeFactory implements NodeFactory {
       case BOOL_TERM:
       case BOOL_FACTOR:
       case EXPRESSIONS:
+      case COMPOUND_ASSIGN:
       case ATOMIC:
       case STATEMENT:
         return new RowdyNode(symbol, line);
