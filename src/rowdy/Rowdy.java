@@ -30,12 +30,12 @@ import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 public class Rowdy {
   
   private final Linker linker;
-  public static final RowdyNodeFactory nodeFactory = new RowdyNodeFactory();
   private final RowdyInstance rowdyInstance;
   private final GRowdy growdy;
   private final String[] args;
   private String programFileName;
   private boolean verbose;
+  public static final RowdyNodeFactory nodeFactory = new RowdyNodeFactory();
   
   public Rowdy(String[] args) {
     rowdyInstance = new RowdyInstance();
@@ -64,7 +64,6 @@ public class Rowdy {
       try {
         growdy.buildFromSource(programFileName);
         mainProgram = (RowdyNode) growdy.getProgram();
-        rowdyInstance.initialize(mainProgram);
         linker.loadImports((BaseNode) mainProgram, importTrees);
         importTrees.forEach(tree -> {
           try {
@@ -93,7 +92,8 @@ public class Rowdy {
         for (int p = 1; p < args.length; p++) {
           programParameters.add(new Value(args[p], false));
         }
-        
+        rowdyInstance.initialize(mainProgram);
+        rowdyInstance.optimizeProgram(mainProgram);
         rowdyInstance.execute(programParameters);
       } catch (Throwable e) {
         rowdyInstance.handleException(e, verbose);

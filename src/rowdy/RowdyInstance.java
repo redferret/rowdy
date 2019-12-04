@@ -12,7 +12,6 @@ import rowdy.nodes.expression.AtomicId;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -395,7 +394,6 @@ public class RowdyInstance {
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareSystemConstants();
-    optimizeProgram(root);
     declareGlobals();
     if (main == null){
       throw new MainNotFoundException("main method not found");
