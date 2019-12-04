@@ -3,6 +3,8 @@ package rowdy.nodes.statement;
 
 import growdy.Symbol;
 import rowdy.BaseNode;
+import rowdy.Calculator;
+import static rowdy.RowdyInstance.ATOMIC_GET;
 import rowdy.Value;
 import rowdy.nodes.RowdyNode;
 import rowdy.exceptions.ConstantReassignmentException;
@@ -14,7 +16,13 @@ import static rowdy.lang.RowdyGrammarConstants.GLOBAL_DEF;
 import static rowdy.lang.RowdyGrammarConstants.ID_MODIFIER;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.RowdyInstance.ATOMIC_SET;
+import static rowdy.lang.RowdyGrammarConstants.COMP_ADD_;
+import static rowdy.lang.RowdyGrammarConstants.COMP_DIV_;
+import static rowdy.lang.RowdyGrammarConstants.COMP_MUL_;
+import static rowdy.lang.RowdyGrammarConstants.COMP_SUB_;
+import static rowdy.lang.RowdyGrammarConstants.DECREMENT_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.ID_;
+import static rowdy.lang.RowdyGrammarConstants.INCREMENT_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.REF_ACCESS;
 
 /**
@@ -31,12 +39,45 @@ public class AssignStatement extends BaseNode {
   public Object execute(Object leftValue) {
     BaseNode assignValueNode = get(ASSIGN_VALUE);
     Value assignValue = new Value();
-    switch(assignValueNode.getLeftMost().symbol().id()) {
+    BaseNode assignType = assignValueNode.getLeftMost();
+    switch(assignType.symbol().id()) {
       case BECOMES_EXPR:
         RowdyNode becomesExpr = (RowdyNode) assignValueNode.getLeftMost();
         Value v = (Value) becomesExpr.execute();
         Object val = v.getValue();
         assignValue.setValue(val);
+        break;
+      case INCREMENT_EXPR:
+        instance.RAMAccess(this, assignValue, ATOMIC_GET);
+        assignValue = Calculator.calculate(assignValue, new Value(1), null, Calculator.Operation.ADD);
+        break;
+      case DECREMENT_EXPR:
+        instance.RAMAccess(this, assignValue, ATOMIC_GET);
+        assignValue = Calculator.calculate(assignValue, new Value(-1), null, Calculator.Operation.ADD);
+        break;
+      case COMP_ADD_:
+        instance.RAMAccess(this, assignValue, ATOMIC_GET);
+        BaseNode expr = assignType.getLeftMost();
+        Value rightHandValue = (Value) expr.execute();
+        assignValue = Calculator.calculate(assignValue, rightHandValue, null, Calculator.Operation.ADD);
+        break;
+      case COMP_SUB_:
+        instance.RAMAccess(this, assignValue, ATOMIC_GET);
+        expr = assignType.getLeftMost();
+        rightHandValue = (Value) expr.execute();
+        assignValue = Calculator.calculate(assignValue, rightHandValue, null, Calculator.Operation.SUBTRACT);
+        break;
+      case COMP_MUL_:
+        instance.RAMAccess(this, assignValue, ATOMIC_GET);
+        expr = assignType.getLeftMost();
+        rightHandValue = (Value) expr.execute();
+        assignValue = Calculator.calculate(assignValue, rightHandValue, null, Calculator.Operation.MULTIPLY);
+        break;
+      case COMP_DIV_:
+        instance.RAMAccess(this, assignValue, ATOMIC_GET);
+        expr = assignType.getLeftMost();
+        rightHandValue = (Value) expr.execute();
+        assignValue = Calculator.calculate(assignValue, rightHandValue, null, Calculator.Operation.DIVIDE);
         break;
     }
 
@@ -62,7 +103,7 @@ public class AssignStatement extends BaseNode {
     } else {
       assignValue.setAsConstant(false);
     }
-     
+    
     instance.RAMAccess(this, assignValue, ATOMIC_SET);
     
     return null;

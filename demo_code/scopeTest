@@ -47,9 +47,18 @@ func main() {
 	p3 = new Person("Dustin")
 	p4 = new Person("JS")
 	
+	ppl = new [p1, p2, p3, p4]
+	
 	$p1.makeFriends(p2)
 	$p2.makeFriends(p3)
 	$p3.makeFriends(p1)
+	
+	pplout = func(i) {
+		print "- ", ppl[i], ln
+	}
+	
+	print "There are ", $size(ppl), " people\n"
+	$forLoop(0, $size(ppl), 1, pplout)
 	
 	$areFriends(p1, p2)
 	$areFriends(p1, p3)

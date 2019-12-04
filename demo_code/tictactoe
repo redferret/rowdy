@@ -1,33 +1,35 @@
 
-import "core.rowdy"
+import "rowdy.core"
 
 func main() {
-	xBoard = 0
-	oBoard = 0
-	playBoard = 0
+	xBoard = null
+	oBoard = null
+	playBoard = null
+	turnsTaken = 0
+	winner = null
 	
 	print "For help, type 'help'", ln
-	$showHelp()
+	$showHelp
 	
-  xPlays = $getFirstPlayer()
-	$promptTurn()
+  xPlays = $getFirstPlayer
+	$promptTurn
 	
-	$initGame()
-	$printBoard()
-	loop game: {
+	$initGame
+	$printBoard
+	
+	while true {
 		read input
 		if $equals(input, "exit") {
-			print "Goodbye", ln
 			break
 		} else if $equals(input, "help") {
-			$showHelp()
+			$showHelp
 		} else if $equals(input, "reset") {
-			$initGame()
-			$printBoard()
-			$promptTurn()
+			$initGame
+			$printBoard
+			$promptTurn
 		} else if $isNumber(input){
-			$makeMove()
-		} else if $isNotEmpty(input) {
+			$makeMove
+		} else {
 			print "Invalid input", ln
 		}
 		
@@ -40,38 +42,106 @@ func showHelp() {
 	print "To make a move, enter the index of the cell. To exit, type 'exit'", ln
 }
 
-dynamic func makeMove() {
+dynamic func makeMove() <xPos, yPos, board, space, role> {
 	index = input as int
-	if index >= 0 and index <= 8 {
-		this.xPos = (index / 3) as int
-		this.yPos = (index % 3) as int
-		this.role = " "
+	if (index >= 0 and index <= 8) {
+		xPos = (index / 3) as int
+		yPos = (index % 3) as int
 		
 		if xPlays {
-			this.board = xBoard
+			board = xBoard
 			role = "X"
 		} else {
-			this.board = oBoard
+			board = oBoard
 			role = "O"
 		}
 		
-		this.row = board[xPos]
-		this.space = playBoard[index]
-		if row[yPos] == 1 or $equals(space, "X") or $equals(space, "O") {
+		space = playBoard[index]
+		if (board[xPos][yPos] == 1) or ($equals(space, "X") or $equals(space, "O")) {
 			print "Space is taken!", ln
+			$printBoard
 		} else {
-			row[yPos] = 1
+			board[xPos][yPos] = 1
+			turnsTaken++
+			
 			playBoard[index] = role
 			
-			// Place game logic here to check for a win or a tie
+			$checkForWinOrTie
 			
-			$printBoard()
+			$printBoard
 			xPlays = $not(xPlays)
-			$promptTurn()
+			$promptTurn
 		}
 	} else {
 		print "Invalid index, try again", ln
 	}
+}
+
+dynamic func checkForWinOrTie() <count>{
+	if (turnsTaken >= 9) {
+		winner = "TIE"
+		return
+	}
+
+	count = 0
+	
+	$forLoop(0, 3, 1, func(x) {
+		$forLoop(0, 3, 1, func(y) {
+			if (board[x][y] == 1) {
+				count++
+			}
+		})
+		
+		if (count == 3) {
+			winner = role
+			return true
+		}
+		count = 0
+	})
+	
+	if (winner != null) {
+		return
+	}
+	
+	$forLoop(0, 3, 1, func(y) {
+		$forLoop(0, 3, 1, func(x) {
+			if (board[x][y] == 1) {
+				count++
+			}
+		})
+		if (count == 3) {
+			winner = role
+			return true
+		}
+		count = 0
+	})
+	
+	if (winner != null) {
+		return
+	}
+	
+	$forLoop(0, 3, 1, func(x) {
+		if (board[x][x] == 1) {
+			count++
+		}
+	})
+	if (count == 3) {
+		winner = role
+		return
+	}
+	
+	count = 0
+	
+	$forLoop(2, 0, -1, func(x) {
+		if (board[2 - x][x] == 1) {
+			count++
+		}
+		
+		if (count == 3) {
+			winner = role
+			return true
+		}
+	})
 }
 
 dynamic func printBoard() {
@@ -84,6 +154,13 @@ dynamic func printBoard() {
 }
 
 dynamic func promptTurn() {
+	if (winner != null) {
+		print "The winner is ", winner, "!", ln
+		$initGame
+		$printBoard
+	} else {
+		print ln
+	}
 	if xPlays {
 		print "X Goes", ln
 	} else {
@@ -95,7 +172,11 @@ func getFirstPlayer() {
 }
 
 dynamic func initGame() {
-	playBoard = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-	xBoard = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-	oBoard = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+	turnsTaken = 0
+	xCount = 0
+	oCount = 0
+	winner = null
+	playBoard = new [" ", " ", " ", " ", " ", " ", " ", " ", " "]
+	xBoard = new [ new [0, 0, 0], new [0, 0, 0], new [0, 0, 0]]
+	oBoard = new [ new [0, 0, 0], new [0, 0, 0], new [0, 0, 0]]
 }

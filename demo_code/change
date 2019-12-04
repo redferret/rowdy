@@ -26,7 +26,7 @@ public class Change {
 }
 
 func main (price, amt) {
-	if $not(isset price) or $not(isset amt) {
+	if (is price?) or (is amt?) {
 		print "Missing Arguments, the amount due and the amount given are needed", ln
 		return 1
 	}

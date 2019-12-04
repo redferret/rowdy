@@ -5,8 +5,6 @@ import growdy.Node;
 import growdy.NonTerminal;
 import growdy.Symbol;
 import growdy.Terminal;
-import java.util.HashMap;
-
 /**
  *
  * @author Richard

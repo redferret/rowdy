@@ -65,12 +65,8 @@ func radians(degs) {
 	return degs * (PI / 180)
 }
 
-func roundVal(value, p) {
-  if isset p { 
-		return round value, p
-	} else {
-		return round value, 1
-	}
+func roundVal(value, precision) {
+	return round value, (is precision? 1)
 }
 
 func not(bool) {

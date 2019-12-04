@@ -2,18 +2,18 @@ import "rowdy.core"
 
 func main(total) {
 
-	if $not(isset total) {
+	if is total? {
 		print "Please enter a total number of candies to start with", ln
 		return 1
 	}
 
 	print "There are a total of ", total, " candies. The first one to reach 0 candies wins", ln
-	loop game: {
+	while true {
 		N = total % 3
 		if N > 0 {
-			total = total - N
+			total -= N
 		} else {
-			total = total - 1
+			total--
 		}
 		print "Computer takes a turn...", ln
 		print "The total is now ", total, ln
@@ -24,7 +24,7 @@ func main(total) {
 		
 		print "Enter the number of candies (1 or 2) to subtract: "
 		read input
-		loop inputError: {
+		while true {
 			if $not($isNumber(input)) or (input < 1 or input > 2) {
 				print "Invalid entry, Enter 1 or 2: "
 				read input
@@ -32,7 +32,7 @@ func main(total) {
 				break
 			}
 		}
-		total = total - input
+		total -= input
 		print "The total is now ", total, ln
 		if total <= 0 {
 			print "You win", ln

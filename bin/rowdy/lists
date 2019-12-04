@@ -26,10 +26,10 @@ dynamic func apply(list, applier) <nlist> {
 }
 
 func range(from, to, inc) { 
- inc = is inc? 1
- nlist = new []
- $forLoop(from, to, inc, func(i) { 
-  $add(nlist, i)
- })
- return nlist
+	inc = is inc? 1
+	nlist = new []
+	$forLoop(from, to, inc, func(i) { 
+		$add(nlist, i)
+	})
+	return nlist
 }

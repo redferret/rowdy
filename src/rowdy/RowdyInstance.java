@@ -12,7 +12,6 @@ import rowdy.nodes.expression.AtomicId;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -395,7 +394,6 @@ public class RowdyInstance {
   public void execute(List<Value> programParams) throws MainNotFoundException, ConstantReassignmentException {
     this.programParamValues = programParams;
     declareSystemConstants();
-    optimizeProgram(root);
     declareGlobals();
     if (main == null){
       throw new MainNotFoundException("main method not found");
@@ -487,8 +485,9 @@ public class RowdyInstance {
       switch (curNodeId) {
         case ASSIGN_STMT:
         case LOOP_STMT:
+        case WHILE_LOOP:
         case BREAK_STMT:
-          currentNode.execute(null);
+          currentNode.execute();
           break;
         case IF_STMT:
           ((IfStatement) currentNode).execute(seqControl);
@@ -799,8 +798,6 @@ public class RowdyInstance {
     if (callStack.isEmpty()) {
       setAsGlobal(idName, value);
     } else {
-      try {
-        
         Function[] functions = callStack.toArray(new Function[callStack.size()]);
         boolean found = false;
         for (int i = functions.length - 1; i >= 0; i--) {
@@ -823,7 +820,6 @@ public class RowdyInstance {
             setAsGlobal(idName, value);
           }
         }
-      } catch (EmptyStackException e) {}
     }
   }
 

@@ -80,6 +80,7 @@ public class RowdyNodeFactory implements NodeFactory {
       case BOOL_TERM:
       case BOOL_FACTOR:
       case EXPRESSIONS:
+      case COMPOUND_ASSIGN:
       case ATOMIC:
       case STATEMENT:
         return new RowdyNode(symbol, line);
@@ -198,6 +199,10 @@ public class RowdyNodeFactory implements NodeFactory {
         LoopStatement lpstmt = new LoopStatement(symbol, line);
         lpstmt.setAsNonCompressable();
         return lpstmt;
+      case WHILE_LOOP:
+        WhileLoop whileLoop = new WhileLoop(symbol, line);
+        whileLoop.setAsNonCompressable();
+        return whileLoop;
       // STMT_BLOCK shouldn't be both non compressable and reducable
       case STMT_BLOCK:
         RowdyNode stmtBlock = new RowdyNode(symbol, line);
