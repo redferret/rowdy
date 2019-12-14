@@ -1,0 +1,135 @@
+
+public class BinaryTree {
+
+	construct(compare) {
+		this.compare = is compare? func(parentValue, insertedValue) {
+			if parentValue < insertedValue {
+				return 1
+			} else if parentValue > insertedValue {
+				return -1
+			} else {
+				return 0
+			}
+		}
+	}
+	
+	public:
+	
+		// Add to this tree
+		func insert(value) {
+			if (is this.value?) {
+				this.value = value
+				return
+			}
+		
+			direction = $this.compare(this.value, value)
+			
+			if (direction < 0) {
+				if (this.left == null) {
+					this.left = new BinaryTree(value, this.compare)
+				} else {
+					$this.left.insert(value)
+				}
+			} else if (direction > 0) {
+				if (this.right == null) {
+					this.right = new BinaryTree(value, this.compare)
+				} else {
+					$this.right.insert(value)
+				}
+			}
+		}
+		
+		// Remove from this tree
+		func remove(value) {
+
+		}
+		
+		func isNull() {
+			return this.value == null
+		}
+		
+		func contains(value) {
+			compareValue = $this.compare(this.value, value)
+			
+			if (compareValue < 0) {
+				if (this.left != null) {
+					return $this.left.contains(value)
+				} else {
+					return false
+				}
+			} else if (compareValue > 0) {
+				if (this.right != null) {
+					return $this.right.contains(value)
+				} else {
+					return false
+				}
+			} else {
+				return true
+			}
+		}
+		
+		func printInOrder() {
+			if (this.left != null) {
+				$this.left.printInOrder()
+			}
+			print this.value, " "
+			if (this.right != null) {
+				$this.right.printInOrder()
+			}
+		}
+		
+		func printPostOrder() {
+			if (this.left != null) {
+				$this.left.printPostOrder()
+			}
+			if (this.right != null) {
+				$this.right.printPostOrder()
+			}
+			print this.value, " "
+		}
+		
+		func printPreOrder() {
+			print this.value, " "
+			if (this.left != null) {
+				$this.left.printPreOrder()
+			}
+			if (this.right != null) {
+				$this.right.printPreOrder()
+			}
+		}
+		
+	private:
+		left = null 
+		right = null
+		depth = 0
+		
+		// Rotate left on this node
+		func rotateLeft() {
+			
+		}
+		
+		// Rotate right on this node
+		func rotateRight() {
+		
+		}
+}
+
+func main() {
+
+	tree = new BinaryTree()
+	$tree.insert(12)
+	$tree.insert(1)
+	$tree.insert(6)
+	$tree.insert(16)
+	$tree.insert(9)
+	
+	print "In Order\n"
+	$tree.printInOrder
+	print "\nPost Order\n"
+	$tree.printPostOrder
+	print "\nPre Order\n"
+	$tree.printPreOrder
+	print "\n"
+	
+	print $tree.contains(8), "\n"
+}
