@@ -2,6 +2,7 @@ package rowdy;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Stack;
 
 /**
  * A function in Rowdy always returns a value, has it's own symbol table, id
@@ -17,10 +18,12 @@ public class Function {
   private final SymbolTable symbolTable;
   private boolean isDynamic;
   private RowdyObject parent;
+  public Stack<BaseNode> activeLoops;
 
   public Function(String name, HashMap<String, Value> params, int lineCalledOn) {
     this.name = name;
     this.symbolTable = new SymbolTable(params, this);
+    activeLoops = new Stack<>();
     funcReturnValue = null;
     this.lineCalledOn = lineCalledOn;
     parent = null;
