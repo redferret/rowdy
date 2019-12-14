@@ -19,6 +19,7 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -116,7 +117,7 @@ public class Rowdy {
       } catch (Throwable ex) {
         rowdyInstance.handleException(ex, verbose);
       }
-      
+      rowdyInstance.callStack.push(new Function("shell", new HashMap<>(), 0));
       Scanner keys = new Scanner(System.in);
       String line;
       do {
