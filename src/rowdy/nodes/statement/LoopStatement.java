@@ -23,21 +23,17 @@ public class LoopStatement extends BaseNode {
   public Object execute(Object leftValue) {
     Terminal loopIdTerminal = (Terminal) get(ID).symbol();
     String idName = (loopIdTerminal).getValue();
-    Function curFunction = null;
     try {
-      if (!instance.callStack.isEmpty()) {
-        curFunction = instance.callStack.peek();
-        Value curValue = curFunction.getSymbolTable().getValue(idName);
-        if (curValue == null) {
-          curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
-        } else {
-          throw new RuntimeException("ID '" + idName + "' already in use "
-                  + "on line " + getLine());
-        }
+      Function curFunction = instance.callStack.peek();
+      Value curValue = curFunction.getSymbolTable().getValue(idName);
+      if (curValue == null) {
+        curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
       } else {
-        instance.allocate(idName, new Value(0, false), this.getLine());
+        throw new RuntimeException("ID '" + idName + "' already in use "
+                + "on line " + getLine());
       }
-      instance.activeLoops.push(this);
+      
+      curFunction.activeLoops.push(this);
       setSeqActive(true);
       boolean done = false;
       BaseNode loopStmtList = get(STMT_LIST);

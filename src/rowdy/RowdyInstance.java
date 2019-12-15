@@ -31,13 +31,10 @@ public class RowdyInstance {
 
   private BaseNode root;
   /**
-   * Stores the name of each identifier or function
+   * Stores the name of each identifier or function globally
    */
   public final HashMap<String, Value> globalSymbolTable;
-  /**
-   * Keeps track of the level of loops the program is in.
-   */
-  public final Stack<BaseNode> activeLoops;
+  
   /**
    * Keeps track of the functions currently being called.
    */
@@ -65,7 +62,6 @@ public class RowdyInstance {
     this.root = null;
     main = null;
     callStack = new Stack<>();
-    activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
     firstTimeInitialization = true;
     functionCopies = new ArrayList<>(50);
@@ -367,11 +363,10 @@ public class RowdyInstance {
   public void dumpCallStack() {
     if (!callStack.isEmpty()){
       System.out.print("Call Stack:\n");
-      while(!callStack.isEmpty()){
-        Function function = callStack.pop();
+      callStack.forEach(function -> {
         System.out.println("->" + function.getName() + ": line " + 
                 function.getLineCalledOn());
-      }
+      });
     }
   }
 
