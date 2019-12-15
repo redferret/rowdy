@@ -1,0 +1,16 @@
+
+import "rowdy.core"
+
+func main() {
+	$recur(0, 10)
+}
+
+func recur(a, b) {
+	if (a > b) {
+		print ln
+		return
+	} else {
+		print a, " "
+		$recur(a++, b)
+	}
+}

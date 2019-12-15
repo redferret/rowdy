@@ -57,6 +57,7 @@ public class RowdyInstance {
   private String nextImport;
   private InputStream inputStream;
   private OutputStream outputStream;
+  private int currentLine;
   public static final int ATOMIC_SET = 0, ATOMIC_GET = 1;
 
   
@@ -481,6 +482,10 @@ public class RowdyInstance {
       
       currentNode = programNodes.get(i);
       curNodeId = currentNode.symbol().id();
+      
+      if (currentNode.symbol().id() != STMT_LIST) {
+        currentLine = currentNode.getLine();
+      }
       
       switch (curNodeId) {
         case ASSIGN_STMT:

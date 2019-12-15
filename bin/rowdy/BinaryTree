@@ -1,7 +1,8 @@
 
 public class BinaryTree {
 
-	construct(compare) {
+	construct(compare, value) {
+		this.value = value
 		this.compare = is compare? func(parentValue, insertedValue) {
 			if parentValue < insertedValue {
 				return 1
@@ -26,13 +27,13 @@ public class BinaryTree {
 			
 			if (direction < 0) {
 				if (this.left == null) {
-					this.left = new BinaryTree(value, this.compare)
+					this.left = new BinaryTree(this.compare, value)
 				} else {
 					$this.left.insert(value)
 				}
 			} else if (direction > 0) {
 				if (this.right == null) {
-					this.right = new BinaryTree(value, this.compare)
+					this.right = new BinaryTree(this.compare, value)
 				} else {
 					$this.right.insert(value)
 				}
@@ -49,7 +50,7 @@ public class BinaryTree {
 		}
 		
 		func contains(value) {
-			compareValue = $this.compare(this.value, value)
+			compareValue = $this.compare(is this.value? 0, value)
 			
 			if (compareValue < 0) {
 				if (this.left != null) {
@@ -101,6 +102,7 @@ public class BinaryTree {
 	private:
 		left = null 
 		right = null
+		value = null
 		depth = 0
 		
 		// Rotate left on this node
