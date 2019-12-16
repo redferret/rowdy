@@ -44,11 +44,6 @@ public class RowdyInstance {
   */
   private BaseNode main;
   
-  /**
-   * A list of functions currently running to determine if the code of a
-   * function needs to be duplicated 
-   */
-  private final List<String> functionCopies;
   private List<Value> programParamValues;
   private boolean firstTimeInitialization;
   private String nextImport;
@@ -64,7 +59,6 @@ public class RowdyInstance {
     callStack = new Stack<>();
     globalSymbolTable = new HashMap<>();
     firstTimeInitialization = true;
-    functionCopies = new ArrayList<>(50);
     inputStream = System.in;
     outputStream = System.out;
   }
@@ -693,10 +687,6 @@ public class RowdyInstance {
    */
   public Value executeFunc(String funcName, BaseNode functionNode, List<Value> parameterValues, RowdyObject parent) throws ConstantReassignmentException {
 
-    if (functionCopies.contains(funcName)) {
-      functionNode = functionNode.copy();
-    }
-    functionCopies.add(funcName);
     // 1. Get the formal parameters
     BaseNode functionBody = functionNode.get(FUNCTION_BODY);
     BaseNode parameters = functionBody.get(PARAMETERS);
@@ -771,7 +761,6 @@ public class RowdyInstance {
     // it's value.
     function = callStack.pop();
     function.getSymbolTable().free();
-    functionCopies.remove(funcName);
     return function.getReturnValue();
   }
 

@@ -32,13 +32,13 @@ public class LoopStatement extends BaseNode {
         throw new RuntimeException("ID '" + idName + "' already in use "
                 + "on line " + getLine());
       }
-      
-      curFunction.activeLoops.push(this);
-      setSeqActive(true);
+      BaseNode sequence = this.copy();
+      curFunction.activeLoops.push(sequence);
+      sequence.setSeqActive(true);
       boolean done = false;
       BaseNode loopStmtList = get(STMT_LIST);
       while (!done) {
-        instance.executeStmt(loopStmtList, this);
+        instance.executeStmt(loopStmtList, sequence);
         done = !isSeqActive();
       }
       if (curFunction != null) {

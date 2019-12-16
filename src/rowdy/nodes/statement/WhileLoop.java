@@ -23,13 +23,14 @@ public class WhileLoop extends BaseNode {
    
       BaseNode loopTest = getLeftMost();
       Function currentFunc = instance.callStack.peek();
-      currentFunc.activeLoops.push(this);
-      setSeqActive(true);
+      BaseNode sequence = this.copy();
+      currentFunc.activeLoops.push(sequence);
+      sequence.setSeqActive(true);
       boolean done = false;
       BaseNode loopStmtList = get(STMT_LIST);
       while (!done) {
         try {
-          instance.executeStmt(loopStmtList, this);
+          instance.executeStmt(loopStmtList, sequence);
         } catch (ConstantReassignmentException ex) {
           throw new RuntimeException(ex);
         }
