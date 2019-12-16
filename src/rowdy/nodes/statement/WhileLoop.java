@@ -23,7 +23,7 @@ public class WhileLoop extends BaseNode {
    
       BaseNode loopTest = getLeftMost();
       Function currentFunc = instance.callStack.peek();
-      BaseNode sequence = this.copy();
+      BaseNode sequence = softCopy();
       currentFunc.activeLoops.push(sequence);
       sequence.setSeqActive(true);
       boolean done = false;

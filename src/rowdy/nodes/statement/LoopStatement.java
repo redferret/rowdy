@@ -32,7 +32,7 @@ public class LoopStatement extends BaseNode {
         throw new RuntimeException("ID '" + idName + "' already in use "
                 + "on line " + getLine());
       }
-      BaseNode sequence = this.copy();
+      BaseNode sequence = softCopy();
       curFunction.activeLoops.push(sequence);
       sequence.setSeqActive(true);
       boolean done = false;
