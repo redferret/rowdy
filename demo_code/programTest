@@ -2,7 +2,9 @@
 import "rowdy.core"
 
 func main() {
-	$recur(0, 10)
+	a = 0
+	b = 10
+	$recur(a, b)
 }
 
 func recur(a, b) {
