@@ -118,7 +118,7 @@ public class RowdyInstance {
   }
   
   /**
-   * Terminals in a program tree typically won't serve any purpose
+   * Some terminals in a program tree that won't serve any purpose are cut out
    * @param program 
    */
   public void removeTerminals(BaseNode program) {
@@ -356,9 +356,10 @@ public class RowdyInstance {
    */
   public void dumpCallStack() {
     if (!callStack.isEmpty()){
-      System.out.print("Call Stack:\n");
+      System.err.println("Exception on line " + currentLine);
+      System.err.print("Call Stack:\n");
       callStack.forEach(function -> {
-        System.out.println("->" + function.getName() + ": line " + 
+        System.err.println("->" + function.getName() + ": line " + 
                 function.getLineCalledOn());
       });
     }
