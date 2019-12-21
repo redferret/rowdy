@@ -23,31 +23,28 @@ public class LoopStatement extends BaseNode {
   public Object execute(Object leftValue) {
     Terminal loopIdTerminal = (Terminal) get(ID).symbol();
     String idName = (loopIdTerminal).getValue();
-    Function curFunction = null;
     try {
-      if (!instance.callStack.isEmpty()) {
-        curFunction = instance.callStack.peek();
-        Value curValue = curFunction.getSymbolTable().getValue(idName);
-        if (curValue == null) {
-          curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
-        } else {
-          throw new RuntimeException("ID '" + idName + "' already in use "
-                  + "on line " + getLine());
-        }
+      Function curFunction = instance.callStack.peek();
+      Value curValue = curFunction.getSymbolTable().getValue(idName);
+      if (curValue == null) {
+        curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
       } else {
-        instance.allocate(idName, new Value(0, false), this.getLine());
+        throw new RuntimeException("ID '" + idName + "' already in use "
+                + "on line " + getLine());
       }
-      instance.activeLoops.push(this);
-      setSeqActive(true);
+      BaseNode sequence = softCopy();
+      curFunction.activeLoops.push(sequence);
+      sequence.setSeqActive(true);
       boolean done = false;
       BaseNode loopStmtList = get(STMT_LIST);
       while (!done) {
-        instance.executeStmt(loopStmtList, this);
-        done = !isSeqActive();
+        instance.executeStmt(loopStmtList, sequence);
+        done = !sequence.isSeqActive();
       }
       if (curFunction != null) {
         curFunction.getSymbolTable().unset(idName);
       }
+      curFunction.activeLoops.pop();
     } catch (ConstantReassignmentException | RuntimeException ex) {
       throw new RuntimeException(ex);
     }

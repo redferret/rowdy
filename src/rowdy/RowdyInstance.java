@@ -31,13 +31,10 @@ public class RowdyInstance {
 
   private BaseNode root;
   /**
-   * Stores the name of each identifier or function
+   * Stores the name of each identifier or function globally
    */
   public final HashMap<String, Value> globalSymbolTable;
-  /**
-   * Keeps track of the level of loops the program is in.
-   */
-  public final Stack<BaseNode> activeLoops;
+  
   /**
    * Keeps track of the functions currently being called.
    */
@@ -47,16 +44,12 @@ public class RowdyInstance {
   */
   private BaseNode main;
   
-  /**
-   * A list of functions currently running to determine if the code of a
-   * function needs to be duplicated 
-   */
-  private final List<String> functionCopies;
   private List<Value> programParamValues;
   private boolean firstTimeInitialization;
   private String nextImport;
   private InputStream inputStream;
   private OutputStream outputStream;
+  private int currentLine;
   public static final int ATOMIC_SET = 0, ATOMIC_GET = 1;
 
   
@@ -64,10 +57,8 @@ public class RowdyInstance {
     this.root = null;
     main = null;
     callStack = new Stack<>();
-    activeLoops = new Stack<>();
     globalSymbolTable = new HashMap<>();
     firstTimeInitialization = true;
-    functionCopies = new ArrayList<>(50);
     inputStream = System.in;
     outputStream = System.out;
   }
@@ -104,13 +95,6 @@ public class RowdyInstance {
         }
       }
     }
-//    BaseNode possibleDup = program.getLeftMost();
-//    if (possibleDup != null && possibleDup.symbol().id() == program.symbol().id()) {
-//      int usefulCount = countUsefulChildren(program);
-//      if (usefulCount < 2) {
-//        program.setChildren(program.getLeftMost().getAll());
-//      }
-//    }
   }
 
   private int countUsefulChildren(BaseNode root) {
@@ -127,7 +111,7 @@ public class RowdyInstance {
   }
   
   /**
-   * Terminals in a program tree typically won't serve any purpose
+   * Some terminals in a program tree that won't serve any purpose are cut out
    * @param program 
    */
   public void removeTerminals(BaseNode program) {
@@ -365,12 +349,12 @@ public class RowdyInstance {
    */
   public void dumpCallStack() {
     if (!callStack.isEmpty()){
-      System.out.print("Call Stack:\n");
-      while(!callStack.isEmpty()){
-        Function function = callStack.pop();
-        System.out.println("->" + function.getName() + ": line " + 
+      System.err.println("Exception on line " + currentLine);
+      System.err.print("Call Stack:\n");
+      callStack.forEach(function -> {
+        System.err.println("->" + function.getName() + ": line " + 
                 function.getLineCalledOn());
-      }
+      });
     }
   }
 
@@ -481,6 +465,10 @@ public class RowdyInstance {
       
       currentNode = programNodes.get(i);
       curNodeId = currentNode.symbol().id();
+      
+      if (currentNode.symbol().id() != STMT_LIST) {
+        currentLine = currentNode.getLine();
+      }
       
       switch (curNodeId) {
         case ASSIGN_STMT:
@@ -693,10 +681,6 @@ public class RowdyInstance {
    */
   public Value executeFunc(String funcName, BaseNode functionNode, List<Value> parameterValues, RowdyObject parent) throws ConstantReassignmentException {
 
-    if (functionCopies.contains(funcName)) {
-      functionNode = functionNode.copy();
-    }
-    functionCopies.add(funcName);
     // 1. Get the formal parameters
     BaseNode functionBody = functionNode.get(FUNCTION_BODY);
     BaseNode parameters = functionBody.get(PARAMETERS);
@@ -771,7 +755,6 @@ public class RowdyInstance {
     // it's value.
     function = callStack.pop();
     function.getSymbolTable().free();
-    functionCopies.remove(funcName);
     return function.getReturnValue();
   }
 

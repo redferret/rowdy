@@ -20,8 +20,16 @@ public class ReturnStatement extends BaseNode {
     Function functionReturning = instance.callStack.peek();
     ((BaseNode) seqControl).setSeqActive(false);
     BaseNode returnExpr = getLeftMost();
-    Value toSet = (Value) returnExpr.execute();
-    functionReturning.setReturnValue(toSet);
+    Value returnValue;
+    if (returnExpr != null) {
+      returnValue = (Value) returnExpr.execute();
+    } else {
+      returnValue = new Value();
+    }
+    functionReturning.setReturnValue(returnValue);
+    functionReturning.activeLoops.forEach(loop -> {
+      loop.setSeqActive(false);
+    });
     return null;
   }
 }

@@ -190,6 +190,7 @@ public class RowdyNodeFactory implements NodeFactory {
       case RETURN_STMT:
         ReturnStatement retstmt = new ReturnStatement(symbol, line);
         retstmt.setAsNonCompressable();
+        retstmt.setAsCriticalTerminal();
         return retstmt;
       case PRINT_STMT:
         PrintStatement pntstmt = new PrintStatement(symbol, line);

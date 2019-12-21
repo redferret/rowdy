@@ -19,6 +19,7 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -47,10 +48,10 @@ public class Rowdy {
     programFileName = "";
     verbose = false;
     if (args.length > 1) {
-      verbose = args[args.length - 1].equalsIgnoreCase("-verbose");
+      verbose = args[args.length - 1].equalsIgnoreCase("-v");
       programFileName = args[0];
     } else if (args.length == 1){
-      verbose = args[args.length - 1].equalsIgnoreCase("-verbose");
+      verbose = args[0].equalsIgnoreCase("-v");
       if (!verbose) {
         programFileName = args[0];
       }
@@ -90,7 +91,10 @@ public class Rowdy {
         List<Value> programParameters = new ArrayList<>();
 
         for (int p = 1; p < args.length; p++) {
-          programParameters.add(new Value(args[p], false));
+          String arg = args[p];
+          if (!arg.equals("-v")) {
+            programParameters.add(new Value(args[p], false));
+          }
         }
         rowdyInstance.initialize(mainProgram);
         rowdyInstance.optimizeProgram(mainProgram);
@@ -116,7 +120,7 @@ public class Rowdy {
       } catch (Throwable ex) {
         rowdyInstance.handleException(ex, verbose);
       }
-      
+      rowdyInstance.callStack.push(new Function("shell", new HashMap<>(), 0));
       Scanner keys = new Scanner(System.in);
       String line;
       do {

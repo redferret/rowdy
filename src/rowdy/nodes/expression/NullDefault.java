@@ -6,7 +6,6 @@ import rowdy.BaseNode;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.RowdyInstance.ATOMIC_GET;
-import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 
 /**
  *
@@ -20,7 +19,6 @@ public class NullDefault extends BaseNode {
 
   @Override
   public Object execute(Object leftValue) {
-    int line = this.getLine();
     BaseNode idTestNode = get(ATOMIC_ID);
     BaseNode defaultValue = null;
     if (getAll().size() > 1) {
@@ -37,7 +35,7 @@ public class NullDefault extends BaseNode {
     } else {
       returnValue = new Value(((Value) defaultValue.execute()).getValue());
       if (testValue != null && testValue.getValue() != null) {
-        return idTestNode.execute();
+        return testValue;
       }
       return returnValue;
     }

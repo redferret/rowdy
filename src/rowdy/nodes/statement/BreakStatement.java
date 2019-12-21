@@ -6,7 +6,6 @@ import growdy.Symbol;
 import growdy.Terminal;
 import rowdy.BaseNode;
 import rowdy.Function;
-import rowdy.Value; 
 import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.ID_OPTION;
@@ -26,12 +25,13 @@ public class BreakStatement extends RowdyNode {
   public Object execute(Object leftValue) {
     String idName = "";
     BaseNode idOption = get(ID_OPTION);
+    Function currentFunc = instance.callStack.peek();
     if (idOption == null) {
-      if (instance.activeLoops.isEmpty()) {
+      if (currentFunc.activeLoops.isEmpty()) {
         throw new RuntimeException("No loop to break. Line " 
                 + getLine());
       }
-      Node loopId = instance.activeLoops.peek();
+      Node loopId = currentFunc.activeLoops.peek();
       if (loopId.symbol().id() != WHILE_LOOP) {
         idName = ((Terminal) loopId.get(ID).symbol()).getValue();
       }
@@ -49,7 +49,7 @@ public class BreakStatement extends RowdyNode {
       }
     }
     for (;;) {
-      Node lp = instance.activeLoops.pop();
+      Node lp = currentFunc.activeLoops.pop();
       lp.setSeqActive(false);
       if (lp.symbol().id() != WHILE_LOOP) {
         idName = ((Terminal) lp.get(ID).symbol()).getValue();

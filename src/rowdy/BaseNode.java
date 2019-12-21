@@ -59,6 +59,22 @@ public abstract class BaseNode extends Node<BaseNode, Object>{
     return execute(null);
   }
   
+  public BaseNode softCopy() {
+    Symbol cSymbol = null;
+    if (this.symbol instanceof Terminal) {
+      cSymbol = ((Terminal)symbol).copy();
+    } else if (this.symbol instanceof NonTerminal) {
+      cSymbol = ((NonTerminal)symbol).copy();
+    }
+    
+    BaseNode copy = Rowdy.nodeFactory.getNode(cSymbol, this.line);
+    copy.setSeqActive(this.seqActive);
+    copy.setTrimmable(this.trimmable);
+    copy.setChildren(getAll());
+    
+    return copy;
+  }
+  
   @Override
   public BaseNode copy() {
     Symbol cSymbol = null;

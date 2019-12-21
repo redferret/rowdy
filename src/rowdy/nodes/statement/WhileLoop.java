@@ -2,12 +2,10 @@
 package rowdy.nodes.statement;
 
 import growdy.Symbol;
-import growdy.Terminal;
 import rowdy.BaseNode;
 import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -22,20 +20,23 @@ public class WhileLoop extends BaseNode {
 
   @Override
   public Object execute(Object leftValue) {
-    try {
       BaseNode loopTest = getLeftMost();
-      instance.activeLoops.push(this);
-      setSeqActive(true);
+      Function curFunction = instance.callStack.peek();
+      BaseNode sequence = softCopy();
+      curFunction.activeLoops.push(sequence);
+      sequence.setSeqActive(true);
       boolean done = false;
       BaseNode loopStmtList = get(STMT_LIST);
       while (!done) {
-        instance.executeStmt(loopStmtList, this);
+        try {
+          instance.executeStmt(loopStmtList, sequence);
+        } catch (ConstantReassignmentException ex) {
+          throw new RuntimeException(ex);
+        }
         boolean testBool = !(boolean) ((Value)loopTest.execute()).getValue();
-        done = !isSeqActive() || testBool;
+        done = !sequence.isSeqActive() || testBool;
       }
-    } catch (Throwable ex) {
-      throw new RuntimeException(ex);
-    }
+      curFunction.activeLoops.pop();
     return null;
   }
   

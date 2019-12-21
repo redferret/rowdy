@@ -30,12 +30,6 @@ public class Person {
 			return this.name
 		}
 		
-		func getFirstFriend() {
-			if ($size(this.friends) > 0) {
-				return this.friends[0]
-			}
-		}
-		
 	private:
 		name = ""
 		friends = new []
@@ -58,6 +52,7 @@ func main() {
 	}
 	
 	print "There are ", $size(ppl), " people\n"
+	
 	$forLoop(0, $size(ppl), 1, pplout)
 	
 	$areFriends(p1, p2)
