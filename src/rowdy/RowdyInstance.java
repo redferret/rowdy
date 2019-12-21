@@ -95,13 +95,6 @@ public class RowdyInstance {
         }
       }
     }
-//    BaseNode possibleDup = program.getLeftMost();
-//    if (possibleDup != null && possibleDup.symbol().id() == program.symbol().id()) {
-//      int usefulCount = countUsefulChildren(program);
-//      if (usefulCount < 2) {
-//        program.setChildren(program.getLeftMost().getAll());
-//      }
-//    }
   }
 
   private int countUsefulChildren(BaseNode root) {

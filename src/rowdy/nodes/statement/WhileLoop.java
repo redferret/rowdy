@@ -20,11 +20,10 @@ public class WhileLoop extends BaseNode {
 
   @Override
   public Object execute(Object leftValue) {
-   
       BaseNode loopTest = getLeftMost();
-      Function currentFunc = instance.callStack.peek();
+      Function curFunction = instance.callStack.peek();
       BaseNode sequence = softCopy();
-      currentFunc.activeLoops.push(sequence);
+      curFunction.activeLoops.push(sequence);
       sequence.setSeqActive(true);
       boolean done = false;
       BaseNode loopStmtList = get(STMT_LIST);
@@ -35,8 +34,9 @@ public class WhileLoop extends BaseNode {
           throw new RuntimeException(ex);
         }
         boolean testBool = !(boolean) ((Value)loopTest.execute()).getValue();
-        done = !isSeqActive() || testBool;
+        done = !sequence.isSeqActive() || testBool;
       }
+      curFunction.activeLoops.pop();
     return null;
   }
   

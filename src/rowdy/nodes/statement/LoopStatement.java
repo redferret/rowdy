@@ -39,11 +39,12 @@ public class LoopStatement extends BaseNode {
       BaseNode loopStmtList = get(STMT_LIST);
       while (!done) {
         instance.executeStmt(loopStmtList, sequence);
-        done = !isSeqActive();
+        done = !sequence.isSeqActive();
       }
       if (curFunction != null) {
         curFunction.getSymbolTable().unset(idName);
       }
+      curFunction.activeLoops.pop();
     } catch (ConstantReassignmentException | RuntimeException ex) {
       throw new RuntimeException(ex);
     }
