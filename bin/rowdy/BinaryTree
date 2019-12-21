@@ -3,7 +3,7 @@ public class BinaryTree {
 
 	construct(compare, value) {
 		this.value = value
-		this.compare = is compare? func(parentValue, insertedValue) {
+		this.compare = is compare ? func(parentValue, insertedValue) {
 			if parentValue < insertedValue {
 				return 1
 			} else if parentValue > insertedValue {
@@ -15,8 +15,6 @@ public class BinaryTree {
 	}
 	
 	public:
-	
-		// Add to this tree
 		func insert(value) {
 			if (is this.value?) {
 				this.value = value
@@ -28,19 +26,20 @@ public class BinaryTree {
 			if (direction < 0) {
 				if (this.left == null) {
 					this.left = new BinaryTree(this.compare, value)
+					this.left.parent = this
 				} else {
 					$this.left.insert(value)
 				}
 			} else if (direction > 0) {
 				if (this.right == null) {
 					this.right = new BinaryTree(this.compare, value)
+					this.right.parent = this
 				} else {
 					$this.right.insert(value)
 				}
 			}
 		}
 		
-		// Remove from this tree
 		func remove(value) {
 
 		}
@@ -100,14 +99,29 @@ public class BinaryTree {
 		}
 		
 	private:
-		left = null 
+		left = null
 		right = null
+		parent = null
 		value = null
-		depth = 0
+		balanceFactor = 0
 		
-		// Rotate left on this node
-		func rotateLeft() {
+		func rotateLeft(t1, t2) {
+			innerChild = t2.left
+			t1.right = innerChild
+			if (innerChild != null) {
+				innerChild.parent = t1
+			}
+			t2.left = t1
+			t1.parent = t2
 			
+			if (t2.balanceFactor == 0) {
+				t1.balanceFactor += 1
+				t2.balanceFactor -= 1
+			} else {
+				t1.balanceFactor = 0
+				t2.balanceFactor = 0
+			}
+			return t2
 		}
 		
 		// Rotate right on this node
@@ -119,11 +133,10 @@ public class BinaryTree {
 func main() {
 
 	tree = new BinaryTree()
-	$tree.insert(12)
-	$tree.insert(1)
 	$tree.insert(6)
-	$tree.insert(16)
-	$tree.insert(9)
+	$tree.insert(1)
+	$tree.insert(12)
+	$tree.insert(8)
 	
 	print "In Order\n"
 	$tree.printInOrder
