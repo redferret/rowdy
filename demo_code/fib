@@ -3,8 +3,8 @@
 	
 	func main(max) {
 		time = $runtime(func() {
-			max = is max? 1000
-			print $getFibList(max as long), ln
+			max = is max? 10
+			print $getFibList(max), ln
 		})
 		
 		print "Took ", time, " ms to finish", ln
@@ -15,12 +15,11 @@
 		x = 0 as long
 		z = 0 as long
 		y = 1 as long
-		while (x <= max) {
+		$forLoop(0, max, 1, func(){
 			$add(fibs, x)
 			z = x + y
 			x = y
 			y = z
-		}
-		$add(fibs, x)
+		})
 		return fibs
 	}
