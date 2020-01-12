@@ -4,10 +4,9 @@ package rowdy.nodes.statement;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.statement.BreakStatement;
-import rowdy.nodes.statement.LoopStatement;
 import static rowdy.testlang.lang.RowdyGrammarConstants.BREAK_STMT;
 import static rowdy.testlang.lang.RowdyGrammarConstants.LOOP_STMT;
 import static rowdy.testutils.TestUtils.getTestStatement;
@@ -40,16 +39,18 @@ public class BreakStatementTest extends TestCase {
       fail("Expected to fail with no loop");
     } catch (Throwable e) {}
     
-    rowdyInstance.globalSymbolTable.put("x", new Value(0, false));
     String loopCode = "loop x: {}";
     LoopStatement loopStmt = (LoopStatement) getTestStatement(loopCode, LOOP_STMT);
-    rowdyInstance.activeLoops.push(loopStmt);
+    Function f = rowdyInstance.callStack.peek();
+    f.getSymbolTable().allocate("x", new Value(0), 1, true);
+    
+    f.activeLoops.push(loopStmt);
     
     testCode = "break x";
     BreakStatement instance = (BreakStatement) getTestStatement(testCode, BREAK_STMT);
     instance.execute();
     
-    assertTrue(rowdyInstance.activeLoops.isEmpty());
+    assertTrue(f.activeLoops.isEmpty());
     assertNull(rowdyInstance.globalSymbolTable.get("x"));
   }
   

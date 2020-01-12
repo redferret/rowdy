@@ -120,7 +120,9 @@ public class Rowdy {
       } catch (Throwable ex) {
         rowdyInstance.handleException(ex, verbose);
       }
-      rowdyInstance.callStack.push(new Function("shell", new HashMap<>(), 0));
+      
+      rowdyInstance.runAsShell();
+      
       Scanner keys = new Scanner(System.in);
       String line;
       do {

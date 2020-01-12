@@ -1327,4 +1327,11 @@ public class RowdyInstance {
       e.printStackTrace();
     }
   }
+
+  /**
+   * Pushes a function call onto the call stack called 'shell'
+   */
+  public void runAsShell() {
+    callStack.push(new Function("shell", new HashMap<>(), 0));
+  }
 }

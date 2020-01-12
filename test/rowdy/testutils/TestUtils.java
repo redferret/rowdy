@@ -9,19 +9,19 @@ import growdy.Terminal;
 import growdy.exceptions.AmbiguousGrammarException;
 import growdy.exceptions.ParseException;
 import growdy.exceptions.SyntaxException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
 import rowdy.RowdyInstance;
 import rowdy.nodes.RowdyNode;
 import rowdy.nodes.RowdyNodeFactory;
 import rowdy.BaseNode;
 import rowdy.Value;
+import rowdy.exceptions.ConstantReassignmentException;
+import java.util.List;
+
 import static rowdy.testlang.lang.RowdyGrammarConstants.ID;
 import static rowdy.Rowdy.getBuilder;
 import static org.junit.Assert.fail;
-import rowdy.exceptions.ConstantReassignmentException;
-
+import rowdy.Function;
 /**
  *
  * @author Richard
@@ -38,6 +38,7 @@ public class TestUtils {
       fail("Unable to declare system constants");
     }
     RowdyNode.initRunner(rowdyInstance);
+    rowdyInstance.callStack.push(new Function("testShell", new HashMap<>(), 0));
   }
   
   public static void trimEmptyChildren(BaseNode root) {
