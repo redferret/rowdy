@@ -1,7 +1,7 @@
 import "rowdy.core"
 
 func main(total) {
-
+	
 	if is total? {
 		print "Please enter a total number of candies to start with", ln
 		return 1
