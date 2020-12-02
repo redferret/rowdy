@@ -39,7 +39,7 @@ public class RowdyNodeFactory implements NodeFactory {
       case THIS_:
       case FUNCTION_BODY:
       case ARRAY_ACCESS:
-      case FUNC_BODY_EXPR:
+      case FUNC_PARAMS:
       case REF_ACCESS:
       case INHERIT_OPT:
       case DYNAMIC:

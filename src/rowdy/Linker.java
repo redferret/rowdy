@@ -19,6 +19,7 @@ import java.util.jar.JarFile;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
 import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
+import static rowdy.lang.RowdyGrammarConstants.SINGLE_IMPORT;
 
 /**
  *
@@ -80,16 +81,19 @@ public class Linker {
       currentID = importTreeNodes.symbol().id();
       switch (currentID) {
         case IMPORTS:
-          Node importConstant = importTreeNodes.get(CONSTANT, false);
-          if (importConstant != null) {
-            String importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
-            importPaths.add(importPath);
-            Node nextImport = importTreeNodes.get(IMPORTS);
-            while (nextImport.hasSymbols()) {
-              importConstant = nextImport.get(CONSTANT);
-              importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
+          Node imports = importTreeNodes.get(SINGLE_IMPORT, false);
+          if (imports != null && imports.hasSymbols()) {
+            Node importConstant = imports.get(CONSTANT, false);
+            if (importConstant != null) {
+              String importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
               importPaths.add(importPath);
-              nextImport = nextImport.get(IMPORTS);
+              Node nextImport = importTreeNodes.get(IMPORTS);
+              while (nextImport.hasSymbols()) {
+                importConstant = nextImport.get(CONSTANT);
+                importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
+                importPaths.add(importPath);
+                nextImport = nextImport.get(IMPORTS);
+              }
             }
           }
       }

@@ -19,7 +19,7 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import rowdy.exceptions.MainNotFoundException;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
 /**
@@ -89,7 +89,7 @@ public class Rowdy {
 
       try {
         List<Value> programParameters = new ArrayList<>();
-
+        
         for (int p = 1; p < args.length; p++) {
           String arg = args[p];
           if (!arg.equals("-v")) {
@@ -99,7 +99,7 @@ public class Rowdy {
         rowdyInstance.initialize(mainProgram);
         rowdyInstance.optimizeProgram(mainProgram);
         rowdyInstance.execute(programParameters);
-      } catch (Throwable e) {
+      } catch (ConstantReassignmentException | MainNotFoundException e) {
         rowdyInstance.handleException(e, verbose);
       }
     } else {
@@ -117,7 +117,9 @@ public class Rowdy {
           }
         });
         linker.loadJarLibs("bin/");
-      } catch (Throwable ex) {
+      } catch (AmbiguousGrammarException | ParseException | SyntaxException 
+              | IOException | ClassNotFoundException | IllegalAccessException 
+              | IllegalArgumentException | InvocationTargetException | URISyntaxException ex) {
         rowdyInstance.handleException(ex, verbose);
       }
       
@@ -156,7 +158,10 @@ public class Rowdy {
             linker.loadImport(importPath);
             linker.loadJarLibs("bin/");
           }
-        } catch (Throwable e) {
+        } catch (AmbiguousGrammarException | ParseException | SyntaxException 
+                | IOException | ClassNotFoundException | IllegalAccessException 
+                | IllegalArgumentException | InvocationTargetException 
+                | URISyntaxException | ConstantReassignmentException e) {
           rowdyInstance.handleException(e, verbose);
         }
       } while (true);

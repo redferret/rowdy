@@ -16,10 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
-import static rowdy.BaseNode.SAFE_MUTABLE;
-import static rowdy.BaseNode.UNSAFE_MUTABLE;
 import static rowdy.BaseNode.instance;
 import static rowdy.lang.RowdyGrammarConstants.*;
+import static rowdy.BaseNode.UNSAFE;
+import static rowdy.BaseNode.SAFE;
 
 
 /**
@@ -179,12 +179,12 @@ public class RowdyInstance {
       curNode = childrenNodes.get(i);
       switch(curNode.symbol().id()) {
         case THIS_:
-          return UNSAFE_MUTABLE;
+          return UNSAFE;
         default:
           return checkForSafety(curNode);
       }
     }
-    return SAFE_MUTABLE;
+    return SAFE;
   }
   
   private void markAllAsSafe(BaseNode program) {
@@ -196,7 +196,7 @@ public class RowdyInstance {
       markAllAsSafe(curNode);
       switch(curNode.symbol().id()) {
         case FUNCTION_BODY:
-          curNode.setObjectMutable(SAFE_MUTABLE);
+          curNode.setObjectMutable(SAFE);
           break;
       }
     }
@@ -257,7 +257,7 @@ public class RowdyInstance {
           }
           paramsId += "-params " + curNode.getLine() + ThreadLocalRandom.current().nextInt();
           
-          BaseNode parentNode = curNode.get(FUNC_BODY_EXPR, false);
+          BaseNode parentNode = curNode.get(FUNC_PARAMS, false);
           if (parentNode == null) {
             parentNode = curNode;
           }
@@ -420,7 +420,12 @@ public class RowdyInstance {
           ((AssignStatement) cur).execute();
           break;
         case FUNCTION:
-          Node asNativeFunction = cur.get(NATIVE_FUNC_OPT);
+          Node options = cur.get(FUNC_OPTS);
+          Node asNativeFunction = null;
+          
+          if (options != null && options.hasSymbols()) {
+            asNativeFunction = options.get(NATIVE_FUNC_OPT);
+          }
           
           String functionName = cur.get(ID).symbol().toString();
           if (asNativeFunction != null && asNativeFunction.hasSymbols()) {
@@ -492,7 +497,7 @@ public class RowdyInstance {
         case PRINT_STMT:
           ((PrintStatement) currentNode).execute(outputStream);
           break;
-        case IMPORT_SINGLE:
+        case SINGLE_IMPORT:
           Node importConstant = currentNode.get(CONSTANT, false);
           if (importConstant != null) {
             nextImport = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
@@ -525,7 +530,7 @@ public class RowdyInstance {
     
     List<Value> parameterValues = new ArrayList<>();
     
-    BaseNode funcBodyExpr = root.get(FUNC_BODY_EXPR);
+    BaseNode funcBodyExpr = root.get(FUNC_PARAMS);
     if (funcBodyExpr != null) {
       Value paramsValue = (Value) funcBodyExpr.execute(new Value(new ArrayList<>(), false));
       List<BaseNode> params = (List<BaseNode>) paramsValue.getValue();
@@ -645,7 +650,7 @@ public class RowdyInstance {
     
     BaseNode arrayPart = functionCode.get(ARRAY_PART);
     if (arrayPart != null && arrayPart.hasSymbols()) {
-      
+      // TODO: Incomplete use case for a function call '$f()[0]'
     }
     return returnVal;
   }
@@ -718,16 +723,26 @@ public class RowdyInstance {
       }
     }
     
-    // 3. Push the function onto the call stack
     Function function = new Function(funcName, params, functionNode.getLine());
     function.setClassObject(parent);
     
-    BaseNode dynamicOpt = functionNode.get(DYNAMIC_OPT);
-    if (functionNode.symbol().id() == ANONYMOUS_FUNC || (dynamicOpt != null)) {
+    BaseNode funcOpts = functionNode.get(FUNC_OPTS);
+    if (functionNode.symbol().id() == ANONYMOUS_FUNC) {
       function.setAsDynamic();
+    } else if (funcOpts != null) {
+      BaseNode option = funcOpts.getLeftMost();
+      if (option != null) {
+        switch(option.symbol().id()) {
+          case DYNAMIC_OPT:
+            if (option.hasSymbols()) {
+              function.setAsDynamic();
+            }
+            break;
+        }
+      }
     }
     
-    // 4. Get and execute the stmt-list and determine if the function is safe
+    // 3. Get the stmt-list and determine if the function is safe
     BaseNode funcBody = functionNode.get(FUNCTION_BODY);
     if (!funcBody.isObjectSafe() && parent != null) {
       throw new RuntimeException("Attempting to execute an unsafe function in a "
@@ -748,6 +763,7 @@ public class RowdyInstance {
     BaseNode stmtList = funcBody.get(STMT_LIST), seqControl = new RowdyNode(null, 0);
     seqControl.setSeqActive(true);
     
+    // 4. Push the function onto the call stack
     callStack.push(function);
     executeStmt(stmtList, seqControl);
     // When finished, remove the function from the
@@ -1329,7 +1345,7 @@ public class RowdyInstance {
   }
 
   /**
-   * Pushes a function call onto the call stack called 'shell'
+   * Pushes a dummy function onto the call stack called 'shell'
    */
   public void runAsShell() {
     callStack.push(new Function("shell", new HashMap<>(), 0));
