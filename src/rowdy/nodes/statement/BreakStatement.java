@@ -49,10 +49,13 @@ public class BreakStatement extends RowdyNode {
       }
     }
     for (;;) {
-      Node lp = currentFunc.activeLoops.pop();
+      Node lp = currentFunc.activeLoops.peek();
       lp.setSeqActive(false);
       if (lp.symbol().id() != WHILE_LOOP) {
         idName = ((Terminal) lp.get(ID).symbol()).getValue();
+        currentFunc.activeLoops.pop();
+      } else {
+        break;
       }
       if (!idName.isEmpty()) {
         String tempBinding = ((Terminal) lp.get(ID).symbol()).getValue();

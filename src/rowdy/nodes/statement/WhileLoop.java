@@ -36,7 +36,7 @@ public class WhileLoop extends BaseNode {
         boolean testBool = !(boolean) ((Value)loopTest.execute()).getValue();
         done = !sequence.isSeqActive() || testBool;
       }
-      curFunction.activeLoops.pop();
+    curFunction.activeLoops.pop();
     return null;
   }
   
