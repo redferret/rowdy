@@ -10,7 +10,7 @@
 		print "Took ", time, " ms to finish", ln
 	}
 
-	func getFibList(max) {
+  static func getFibList(max) {
 		fibs = new []
 		x = 0 as long
 		z = 0 as long
