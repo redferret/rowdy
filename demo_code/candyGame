@@ -3,8 +3,16 @@ import "rowdy.core"
 func main(total) {
 	
 	if is total? {
-		print "Please enter a total number of candies to start with", ln
-		return 1
+		print "Please enter a total number of candies to start with: "
+		read total
+		while true {
+			if $not($isNumber(total)) or total < 2 {
+				print "Invalid entry, please enter a number, and is greater than 2 "
+				read total
+			} else {
+				break
+			}
+		}
 	}
 
 	print "There are a total of ", total, " candies. The first one to reach 0 candies wins", ln

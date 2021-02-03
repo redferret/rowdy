@@ -24,7 +24,7 @@
             <Keywords name="Folders in comment, open">//</Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">func round print if loop else fi break return repeat then concat import read break true false isset array new this null and or const super native int byte long string long boolean bigint as double temp global dynamic class private public construct inherits is while static</Keywords>
+            <Keywords name="Keywords1">func round print if loop else fi break return repeat then concat import read break true false isset array new this null and or const super native int byte long string long boolean bigint as double temp global dynamic class private public construct inherits is while static throw try catch</Keywords>
             <Keywords name="Keywords2"></Keywords>
             <Keywords name="Keywords3"></Keywords>
             <Keywords name="Keywords4"></Keywords>

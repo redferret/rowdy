@@ -25,9 +25,9 @@ public class Change {
 		amt = 0
 }
 
-func main (price, amt) {
+func main(price, amt) {
 	if (is price?) or (is amt?) {
-		print "Missing Arguments, the amount due and the amount given are needed", ln
+		print "Missing Arguments, the amount due and the amount given are needed, respectively", ln
 		return 1
 	}
 	currency = $DecimalFormat("$###,##0.00")
@@ -35,9 +35,9 @@ func main (price, amt) {
 	change = new Change(changeDue)
 	
 	print
-	"Amount Due: ", $format(price, currency),	ln,
-	"Amount Given: ", $format(amt, currency),	ln,ln,
-	"Change Due: 	", $format(changeDue, currency),	ln,
+	"Amount Due: ", $format(price, currency),ln,
+	"Amount Given: ", $format(amt, currency),ln,ln,
+	"Change Due: 	", $format(changeDue, currency),ln,
 	"----------------------------",ln,
 	"Hundreds:  ", $change.getChange(100),ln,
 	"Fifties:   ", $change.getChange(50),ln,
