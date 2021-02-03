@@ -8,7 +8,7 @@ import rowdy.BaseNode;
 import rowdy.RowdyClass;
 import rowdy.Value;
 import static rowdy.lang.RowdyGrammarConstants.ARRAY_EXPR;
-import static rowdy.lang.RowdyGrammarConstants.FUNC_BODY_EXPR;
+import static rowdy.lang.RowdyGrammarConstants.FUNC_PARAMS;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.ID_;
 import static rowdy.lang.RowdyGrammarConstants.MAP_EXPR;
@@ -37,7 +37,7 @@ public class NewObject extends BaseNode {
 
         List<Value> constructorParams = new ArrayList<>();
 
-        BaseNode funcBodyExpr = get(FUNC_BODY_EXPR);
+        BaseNode funcBodyExpr = get(FUNC_PARAMS);
         if (funcBodyExpr != null) {
           Value paramsValue = (Value) funcBodyExpr.execute(new Value(new ArrayList<>()));
           List<BaseNode> params = (List<BaseNode>) paramsValue.getValue();

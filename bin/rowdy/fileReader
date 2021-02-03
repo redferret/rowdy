@@ -10,10 +10,10 @@ public class FileReader {
 	
 	public:
 		func printFile() {
-			loop file: {
+			while true {
 				line = $readLine(this.reader)
 				if (line == null) {
-					break file
+					break
 				} else {
 					print line, "\n"
 				}

@@ -16,7 +16,7 @@ public class BinaryTree {
 	
 	public:
 		func insert(value) {
-			if (is this.value?) {
+			if ($this.isEmpty()) {
 				this.value = value
 				return
 			}
@@ -44,12 +44,17 @@ public class BinaryTree {
 
 		}
 		
-		func isNull() {
+		func isEmpty() {
 			return this.value == null
 		}
 		
 		func contains(value) {
-			compareValue = $this.compare(is this.value? 0, value)
+		
+			if ($this.isEmpty()) {
+				return false
+			}
+		
+			compareValue = $this.compare(this.value, value)
 			
 			if (compareValue < 0) {
 				if (this.left != null) {
@@ -103,6 +108,7 @@ public class BinaryTree {
 		right = null
 		parent = null
 		value = null
+		compare = null
 		balanceFactor = 0
 		
 		func rotateLeft(t1, t2) {
@@ -124,9 +130,8 @@ public class BinaryTree {
 			return t2
 		}
 		
-		// Rotate right on this node
-		func rotateRight() {
-		
+		func rotateRight(t1, t2) {
+			
 		}
 }
 

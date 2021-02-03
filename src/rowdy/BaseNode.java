@@ -14,7 +14,7 @@ public abstract class BaseNode extends Node<BaseNode, Object>{
   protected static RowdyInstance instance;
   protected boolean isCompressable, reduce, criticalTerminal;
   private int objectMutable;
-  public static final int UNSAFE_MUTABLE = 101, SAFE_MUTABLE = 100, UNKNOWN = 0;
+  public static final int UNSAFE = 101, SAFE = 100, UNKNOWN = 0;
   
   public BaseNode(Symbol symbol, int lineNumber) {
     super(symbol, lineNumber);
@@ -29,7 +29,7 @@ public abstract class BaseNode extends Node<BaseNode, Object>{
   }
   
   public boolean isObjectSafe() {
-    return objectMutable != UNSAFE_MUTABLE;
+    return objectMutable != UNSAFE;
   }
   public void setAsNonCompressable() {
     isCompressable = false;

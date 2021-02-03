@@ -44,7 +44,6 @@ public class LoopStatement extends BaseNode {
       if (curFunction != null) {
         curFunction.getSymbolTable().unset(idName);
       }
-      curFunction.activeLoops.pop();
     } catch (ConstantReassignmentException | RuntimeException ex) {
       throw new RuntimeException(ex);
     }

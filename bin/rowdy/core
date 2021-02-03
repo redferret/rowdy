@@ -5,6 +5,9 @@ const PI = 3.141592653589793
 const NaN = 0d / 0d
 const ln = "\n"
 
+const AnonymousFunc = "rowdy.nodes.expression.AnonymousFunc"
+const RowdyNode = "rowdy.nodes.RowdyNode"
+
 // Formal: native func java(object, method, paramClasses, paramValues ... )
 native func java(object, method, paramClasses)
 
@@ -38,8 +41,8 @@ func abs(n) {
 }
 
 func isFunction(var) {
-	return $equals($type(var), "rowdy.nodes.expression.AnonymousFunc")
-					or $equals($type(var), "rowdy.nodes.RowdyNode")
+	return $equals($type(var), AnonymousFunc)
+					or $equals($type(var), RowdyNode)
 }
 
 func max(a, b) {

@@ -1,26 +1,63 @@
 
-	func main() {
-		$f1()
+import "rowdy.core"
+
+func main() {
+	$f1
+	// Difference between f3 and f4 is that 't' in f3 is in the domain of f3 and not the loop
+	// where f4 defines 't' inside a lambda function, once the function is finished executing 
+	// that domain is destroyed and can't be referenced outside the loop.
+	$f3
+	$f4
+}
+
+func f1(){
+	loop x: 50 {
+		print x, " - first\n"
+		$f2()
+		print x, " - fourth\n"
+		break
 	}
-	
-	func f1(){
-		loop x: {
-			print x, " - first\n"
-			$f2()
-			print x, " - fourth\n"
+}
+
+func f2() {
+	loop x: {
+		print x, " - second init\n"
+	  x = 100
+		print x, " - second\n"
+		break
+	}
+	loop x: 500 {
+		print x, " - third\n"
+		break
+	}
+}
+
+func f3() {
+	fs = func(i) {
+		return i ^ 2
+	} 
+	i = 0
+	loop f: fs {
+		i++
+		t = $f(i)
+		if t == 49 {
+			print t, " - fifth", ln
 			break
 		}
 	}
-	
-	func f2() {
-		loop x: {
-			x = 100
-			print x, " - second\n"
-			break
+	print "done ", t, ln
+}
+
+func f4() {
+	f = func(i) {
+		return i ^ 2
+	} 
+	$forLoop(0, 10, 1, func(i) {
+		t = $f(i)
+		if t == 144 {
+			print t, " - sixth", ln
+			return true
 		}
-		loop x: {
-			x = 500
-			print x, " - third\n"
-			break
-		}
-	}
+	})
+	print "done", ln
+}
