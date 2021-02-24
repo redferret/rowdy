@@ -99,7 +99,7 @@ public class Rowdy {
         rowdyInstance.initialize(mainProgram);
         rowdyInstance.optimizeProgram(mainProgram);
         rowdyInstance.execute(programParameters);
-      } catch (ConstantReassignmentException | MainNotFoundException e) {
+      } catch (Throwable e) {
         rowdyInstance.handleException(e, verbose);
       }
     } else {
@@ -117,9 +117,7 @@ public class Rowdy {
           }
         });
         linker.loadJarLibs("bin/");
-      } catch (AmbiguousGrammarException | ParseException | SyntaxException 
-              | IOException | ClassNotFoundException | IllegalAccessException 
-              | IllegalArgumentException | InvocationTargetException | URISyntaxException ex) {
+      } catch (Throwable ex) {
         rowdyInstance.handleException(ex, verbose);
       }
       
@@ -158,10 +156,7 @@ public class Rowdy {
             linker.loadImport(importPath);
             linker.loadJarLibs("bin/");
           }
-        } catch (AmbiguousGrammarException | ParseException | SyntaxException 
-                | IOException | ClassNotFoundException | IllegalAccessException 
-                | IllegalArgumentException | InvocationTargetException 
-                | URISyntaxException | ConstantReassignmentException e) {
+        } catch (Throwable e) {
           rowdyInstance.handleException(e, verbose);
         }
       } while (true);

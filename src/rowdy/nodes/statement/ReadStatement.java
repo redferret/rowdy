@@ -1,7 +1,6 @@
 
 package rowdy.nodes.statement;
 
-import growdy.Node;
 import growdy.Symbol;
 import growdy.Terminal;
 import java.io.InputStream;
@@ -9,7 +8,6 @@ import java.util.Scanner;
 import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.RowdyNode;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.PARAMS_TAIL;
 

@@ -200,6 +200,10 @@ public class RowdyNodeFactory implements NodeFactory {
         LoopStatement lpstmt = new LoopStatement(symbol, line);
         lpstmt.setAsNonCompressable();
         return lpstmt;
+      case THROW_STMT:
+        ThrowStatement throwstmt = new ThrowStatement(symbol, line);
+        throwstmt.setAsNonCompressable();
+        return throwstmt;
       case WHILE_LOOP:
         WhileLoop whileLoop = new WhileLoop(symbol, line);
         whileLoop.setAsNonCompressable();

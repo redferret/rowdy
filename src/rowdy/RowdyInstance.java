@@ -502,6 +502,8 @@ public class RowdyInstance {
           if (importConstant != null) {
             nextImport = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
           }
+        case THROW_STMT:
+          ((ThrowStatement) currentNode).execute();
         default:
           if (seqControl != null) {
             if (seqControl.isSeqActive()) {

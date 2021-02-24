@@ -17,6 +17,7 @@ native func equalsIgnoreCase(str1, str2)
 native func strcmp(str1, str2)
 native func contains(str, substring)
 native func slice(str1, from, to)
+native func getChar(str, index)
 
 native func DecimalFormat(pattern)
 native func format(str, formatter)
