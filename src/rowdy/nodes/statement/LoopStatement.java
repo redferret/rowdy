@@ -7,6 +7,7 @@ import rowdy.BaseNode;
 import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
+import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.lang.RowdyGrammarConstants.ID;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 
@@ -27,7 +28,13 @@ public class LoopStatement extends BaseNode {
       Function curFunction = instance.callStack.peek();
       Value curValue = curFunction.getSymbolTable().getValue(idName);
       if (curValue == null) {
-        curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
+        BaseNode presetValueNode = get(ATOMIC_ID);
+        if (presetValueNode != null) {
+          Value v = (Value) presetValueNode.execute();
+          curFunction.getSymbolTable().allocate(idName, v, this.getLine(), false);
+        } else {
+          curFunction.getSymbolTable().allocate(idName, new Value(0, false), this.getLine(), false);
+        }
       } else {
         throw new RuntimeException("ID '" + idName + "' already in use "
                 + "on line " + getLine());
