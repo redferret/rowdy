@@ -1,7 +1,7 @@
 
 import "rowdy.core"
 
-func main(max) 
+func main(max) {
 	time = $runtime(func() {
 		max = is max? 10
 		print $getList(max), ln
