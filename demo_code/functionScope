@@ -1,4 +1,4 @@
-
+import "rowdy.core"
 
 func main () {
 	$f1()
@@ -24,9 +24,25 @@ func f1() {
 	// you define it in the header of the function
 	print v5, " = v5 in f1\n" // still 23
 
-	$f3() // Not initializing, no initialization will cause
-	// v5 to be scoped to f1... this will change in the future
+	$f3 // Not initializing of v5, still bound to f1 as a formal parameter
 	print v5, " = v5 in f1\n" // 100
+
+  // Statically bind v5 to f3
+  f3 = func() <v5> {
+    v5 = 500
+    print v5, " = v5 in f3\n"
+  }
+
+  $f3
+  print v5, " = v5 in f1\n"
+
+  // keyword `this` to scope variables to current function (or object instance)
+  f3 = func() {
+    this.v5 = 45
+    print v5, " = v5 in f3\n"
+  }
+  $f3
+  print v5, " = v5 in f1\n"
 }
 
 func a1 () {
