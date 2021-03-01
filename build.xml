@@ -22,6 +22,22 @@
       <fileset dir="bin/"/>
     </copy>   
     
+    <delete><fileset dir="./release/demo_code/"/></delete>
+    <delete><fileset dir="./release/dist/"/></delete>
+    
+    <mkdir dir="./release/" />
+    <mkdir dir="./release/demo_code/"/>
+    <mkdir dir="./release/dist/"/>
+    <copy todir="./release/demo_code/"> 
+      <fileset dir="./demo_code/"/>
+    </copy>
+    <copy todir="./release/dist/"> 
+      <fileset dir="./dist"/>
+    </copy>
+    <copy file="RowdyForNotepad" todir="./release"/>
+    <copy file="LICENSE" todir="./release"/>
+    <copy file="README.md" todir="./release"/>
+    
     <replace file="./test/rowdy/testlang/lang/RowdyGrammarConstants.java" 
              token="rowdy.lang;" 
              value="rowdy.testlang.lang;"/>

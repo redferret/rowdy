@@ -1,7 +1,0 @@
-
-import "MyLibs.fileA"
-import "MyLibs.fileB"
-
-func main(a, b) {
-	print "Hello, World!\n"
-}

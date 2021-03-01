@@ -47,7 +47,7 @@ public class IfStatementTest extends TestCase {
   
   public void testFullIfElseIf() throws ConstantReassignmentException {
     String testCode = 
-            "  loop test: {"
+            "  loop test:0 {"
             + " if (test == 0) {"
             + "   a = 0 as int"
             + " } else if (test == 1) {"

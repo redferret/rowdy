@@ -30,7 +30,7 @@ public class LoopStatementTest extends TestCase {
    * Test of execute method, of class LoopStatement.
    */
   public void testExecute() throws ConstantReassignmentException {
-    String testCode = "loop x: {a = x as int break}";
+    String testCode = "loop x:0 {a = x as int break}";
     LoopStatement instance = (LoopStatement) getTestStatement(testCode, LOOP_STMT);
     
     instance.execute();
