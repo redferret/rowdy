@@ -1,0 +1,54 @@
+
+import "rowdy.streams"
+
+public class FileReader {
+	
+	construct(filePath) {
+		this.inputStream = $openFileInputStream(filePath)
+		this.reader = $getBufferedReader(this.inputStream)
+	}
+	
+	public:
+		func printFile() {
+			while true {
+				line = $readLine(this.reader)
+				if (line == null) {
+					break
+				} else {
+					print line, "\n"
+				}
+			}
+		}
+		
+		func asString() {
+			lines = ""
+			while true {
+				line = $readLine(this.reader)
+				if (line == null) {
+					break
+				} else {
+					lines = concat lines, line, "\n"
+				}
+			}
+			return lines
+		}
+		
+		func nextLine() {
+			this.line = $readLine(this.reader)
+			return this.line
+		}
+		
+		func currentLine() {
+			return this.line
+		}
+		
+		func close() {
+			$closeInputStream(this.inputStream)
+			$closeBufferedReader(this.reader)
+		}
+		
+	private:
+		line = ""
+		reader = null
+		inputStream = null
+}

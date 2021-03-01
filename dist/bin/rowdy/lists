@@ -1,0 +1,37 @@
+const ArrayList = "java.util.ArrayList"
+const HashMap = "java.util.HashMap"
+
+native func Map()
+native func List()
+native func put(map, key, value)
+native func add(list, value)
+native func set(list, index, value)
+native func remove(list, index)
+native func get(collection, index)
+native func forEach(list, callback)
+native func forLoop(initial, end, inc, callback)
+native func size(collection)
+
+native func next(iterator)
+native func Iterator(collection)
+
+dynamic func apply(list, applier) <nlist> {
+	list = is list? new []
+	nlist = new []
+	$forEach(list, func(i) <val> { 
+		val = $applier(i)
+		if (val != null) {
+			$add(nlist, val)
+		}
+	})
+	return nlist 
+}
+
+func range(from, to, inc) { 
+	inc = is inc? 1
+	nlist = new []
+	$forLoop(from, to, inc, func(i) { 
+		$add(nlist, i)
+	})
+	return nlist
+}

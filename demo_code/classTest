@@ -1,0 +1,41 @@
+
+import "rowdy.core"
+
+public class Person {
+
+	construct(name, age) {
+		this.name = is name? "No Name"
+		this.age = is age? 0
+	}
+
+	public:
+
+		func getThis() {
+			return this
+		}
+		
+		func getArr() {
+			return new [ this.name, this.age ]
+		}
+		
+		func getName() {
+			return this.name
+		}
+		
+		func intro() {
+			return concat "My name is ", this.name, " and I'm ", this.age
+		}
+		
+		func rep() {
+			return (concat this.name, "(", this.age, ")")
+		}
+		
+	private:
+		name = ""
+}
+
+func main() {
+	ppl = new [ new Person("Rich", 32)]
+	p1 = new Person(age: 0, name: "Rich")
+	print $ppl[0].getName(), ln
+}

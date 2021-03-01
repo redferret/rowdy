@@ -1,0 +1,44 @@
+
+	import "rowdy.core"
+	
+	func main(width, height) {
+		print "It took ", $runtime(prog), " ms to finish", ln
+	}
+
+	dynamic func prog() {
+		if width > 50 or height > 50 {
+			print "Max Dimensions: width <= 50, height <= 50", ln
+			return 1
+		}
+		
+		cap = func(width) {
+			print "-"
+			$forLoop(0, width, 1, func() {
+				print "---"
+			})
+			print "-", ln
+		}
+		
+		center = func(width) {
+			print "|"
+			$forLoop(0, width, 1, func() {
+				print "~~~"
+			})
+			print "|\n"
+		}
+		
+		body = func(width, height) {
+			$forLoop(0, height, 1, func() {
+				$center(width)
+			})
+		}
+		
+		drawRect = func(width, height) {
+			$cap(width)
+			$body(width, height)
+			$cap(width)
+			print "The area is ", (width * height) as int, ln
+		}
+		
+		$drawRect(width, height)
+	}
