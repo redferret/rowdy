@@ -1,9 +1,0 @@
-
-import "core.rowdy"
-import "core.fileReader"
-
-func main(fileName) {
-	fileReader = new FileReader(fileName)
-	$fileReader.printFile()
-	$fileReader.close()
-}

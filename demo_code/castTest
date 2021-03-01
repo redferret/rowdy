@@ -1,9 +1,0 @@
-
-import "core.rowdy"
-
-func main() {
-
-	val1 = 19.45 as int
-	$println(val1)
-	
-}
