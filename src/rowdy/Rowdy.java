@@ -128,7 +128,7 @@ public class Rowdy {
       do {
         StringBuilder program = new StringBuilder();
         for (;;) {
-          System.out.print(">>> ");
+          System.out.print("<< ");
           line = keys.nextLine();
           if (line.isEmpty()) {
             break;
@@ -150,9 +150,6 @@ public class Rowdy {
           growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyInstance.initialize((RowdyNode) growdy.getProgram());
           rowdyInstance.executeLine();
-          if (line.contains("print")) {
-            System.out.println();
-          }
           // Check for a single line import
           String importPath = rowdyInstance.getNextImport();
           if (importPath != null) {
@@ -181,8 +178,8 @@ public class Rowdy {
   }
 
   private static void displayVersion() {
-    System.out.println("Rowdy 1.1.2 (default)");
-    System.out.println("Released on [Java SE Runtime Environment (build 1.8.0_161-b12)\n" +
+    System.out.println("Rowdy 1.1.3 (default)");
+    System.out.println("Developed on [Java SE Runtime Environment (build 1.8.0_161-b12)\n" +
       "Java HotSpot 64-Bit Server VM (build 25.161-b12, mixed mode)]");
     System.out.println("Current Java Version: " + System.getProperty("java.version"));
   }

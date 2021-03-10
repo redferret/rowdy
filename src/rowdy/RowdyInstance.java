@@ -51,10 +51,12 @@ public class RowdyInstance {
   private OutputStream outputStream;
   private int currentLine;
   public static final int ATOMIC_SET = 0, ATOMIC_GET = 1;
+  private boolean isShellEnv;
 
   
   public RowdyInstance() {
     this.root = null;
+    this.isShellEnv = false;
     main = null;
     callStack = new Stack<>();
     globalSymbolTable = new HashMap<>();
@@ -1350,6 +1352,11 @@ public class RowdyInstance {
    * Pushes a dummy function onto the call stack called 'shell'
    */
   public void runAsShell() {
+    this.isShellEnv = true;
     callStack.push(new Function("shell", new HashMap<>(), 0));
+  }
+
+  public boolean isShellEnv() {
+    return this.isShellEnv;
   }
 }
