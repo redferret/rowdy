@@ -899,6 +899,14 @@ public class RowdyInstance {
     }
   }
   
+  public OutputStream getOutputStream() {
+    return this.outputStream;
+  }
+  
+  public InputStream getInputStream() {
+    return this.inputStream;
+  }
+  
   public void setInputStream(InputStream stream) {
     this.inputStream = stream;
   }
