@@ -9,13 +9,12 @@ public class Person {
 	}
 
 	public:
-
 		func getThis() {
 			return this
 		}
 		
 		func getArr() {
-			return new [ this.name, this.age ]
+			return [ this.name, this.age ]
 		}
 		
 		func getName() {
@@ -27,15 +26,18 @@ public class Person {
 		}
 		
 		func rep() {
-			return (concat this.name, "(", this.age, ")")
+			return $this.intro
 		}
 		
 	private:
 		name = ""
+		age = 0
 }
 
 func main() {
-	ppl = new [ new Person("Rich", 32)]
-	p1 = new Person(age: 0, name: "Rich")
-	print $ppl[0].getName(), ln
+	ppl = [ new Person("Rich", 32), new Person("Dustin", 34)]
+	print $ppl[0].getName, ln
+	print $ppl[1].intro, ln
+	person = ppl[1]
+	print person, ln
 }

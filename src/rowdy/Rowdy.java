@@ -183,7 +183,7 @@ public class Rowdy {
   }
 
   private static void displayVersion() {
-    System.out.println("Rowdy 1.1.5 (default)");
+    System.out.println("Rowdy 1.1.6 (default)");
     System.out.println("Developed on [Java SE Runtime Environment (build 1.8.0_161-b12)\n" +
       "Java HotSpot 64-Bit Server VM (build 25.161-b12, mixed mode)]");
     System.out.println("Current Java Version: " + System.getProperty("java.version"));

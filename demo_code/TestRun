@@ -1,0 +1,16 @@
+
+import "rowdy.core"
+
+func main() {
+	people = ["Richard", "Drew", "Dustin"]
+	
+	print_person = func (person) {
+		print person, "\n"
+	}
+	
+	$print_person("Hello!")
+	
+	$forEach(people, print_person)
+	
+	print $print_person("")
+}

@@ -7,8 +7,10 @@ import junit.framework.TestSuite;
 import rowdy.BaseNode;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import static rowdy.testlang.lang.RowdyGrammarConstants.EXPRESSION;
-import static rowdy.testlang.lang.RowdyGrammarConstants.STMT_LIST;
+import rowdy.nodes.statement.AssignStatement;
+import static rowdy.testlang.lang.RowdyGrammarConstants.ASSIGN_STMT;
+import static rowdy.testlang.lang.RowdyGrammarConstants.NULL_DEFAULT;
+import static rowdy.testutils.TestUtils.fetch;
 import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.rowdyInstance;
 
@@ -29,7 +31,7 @@ public class NullDefaultTest extends TestCase  {
   
   public void testForNullOnly() throws ConstantReassignmentException {
     String testCode = "is testVar1?";
-    BaseNode instance = getTestStatement(testCode, EXPRESSION);
+    NullDefault instance = (NullDefault) getTestStatement(testCode, NULL_DEFAULT);
     boolean result = (boolean) ((Value) instance.execute()).getValue();
     assertTrue(result);
     
@@ -41,16 +43,16 @@ public class NullDefaultTest extends TestCase  {
   
   public void testForDefaultValue() {
     String testCode = "a = is testVar2? \"default\"";
-    BaseNode instance = getTestStatement(testCode, STMT_LIST);
+    AssignStatement instance = (AssignStatement) getTestStatement(testCode, ASSIGN_STMT);
     instance.execute();
-    Value value = rowdyInstance.globalSymbolTable.get("a");
+    Value value = fetch("a");
     String result = (String) value.getValue();
     String expected = "default";
     assertEquals(expected, result);
     
-    getTestStatement("testVar2 = \"Test\"", STMT_LIST).execute();
+    ((AssignStatement) getTestStatement("testVar2 = \"Test\"", ASSIGN_STMT)).execute();
     instance.execute();
-    value = rowdyInstance.globalSymbolTable.get("a");
+    value = fetch("a");
     result = (String) value.getValue();
     expected = "Test";
     assertEquals(expected, result);

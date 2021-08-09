@@ -18,6 +18,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import rowdy.exceptions.ConstantReassignmentException;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
+import static rowdy.lang.RowdyGrammarConstants.IMPORT;
 import static rowdy.lang.RowdyGrammarConstants.IMPORTS;
 import static rowdy.lang.RowdyGrammarConstants.SINGLE_IMPORT;
 
@@ -29,10 +30,12 @@ public class Linker {
   
   private final RowdyInstance rowdyInstance;
   private final GRowdy growdy;
+  private final List<String> loadedImports;
   
   public Linker(GRowdy growdy, RowdyInstance rowdyInstance) {
     this.rowdyInstance = rowdyInstance;
     this.growdy = growdy;
+    loadedImports = new ArrayList<>();
   }
   
   public void loadImport(String importPath) {
@@ -57,7 +60,9 @@ public class Linker {
   }
   
   public void loadImports(BaseNode program, List<BaseNode> compiledImports) {
-    List<String> localImports = getImports(program);
+    List<String> localImports = new ArrayList<>();
+    BaseNode imports = program.get(IMPORTS, false);
+    getImports(imports, localImports);
     localImports.forEach(localImport -> {
       String importPath = "bin/" + localImport;
       try {
@@ -71,34 +76,34 @@ public class Linker {
     });
   }
   
-  public List<String> getImports(BaseNode root) {
-    BaseNode importTreeNodes;
+  public void getImports(BaseNode root, List<String> importPaths) {
     ArrayList<BaseNode> children = root.getAll();
     int currentID;
-    List<String> importPaths = new ArrayList<>();
     for (int i = 0; i < children.size(); i++) {
-      importTreeNodes = children.get(i);
+      BaseNode importTreeNodes = children.get(i);
       currentID = importTreeNodes.symbol().id();
       switch (currentID) {
-        case IMPORTS:
-          Node imports = importTreeNodes.get(SINGLE_IMPORT, false);
-          if (imports != null && imports.hasSymbols()) {
-            Node importConstant = imports.get(CONSTANT, false);
+        case SINGLE_IMPORT:
+          if (importTreeNodes != null && importTreeNodes.hasSymbols()) {
+            Node importConstant = importTreeNodes.get(CONSTANT, false);
             if (importConstant != null) {
               String importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
               importPaths.add(importPath);
-              Node nextImport = importTreeNodes.get(IMPORTS);
-              while (nextImport.hasSymbols()) {
-                importConstant = nextImport.get(CONSTANT);
-                importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
-                importPaths.add(importPath);
-                nextImport = nextImport.get(IMPORTS);
-              }
+//              Node nextImport = importTreeNodes.get(IMPORTS);
+//              while (nextImport.hasSymbols()) {
+//                importConstant = nextImport.get(CONSTANT);
+//                importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
+//                importPaths.add(importPath);
+//                nextImport = nextImport.get(IMPORTS);
+//              }
             }
           }
+          break;
+        case IMPORTS:
+          getImports(importTreeNodes, importPaths);
+          break;
       }
     }
-    return importPaths;
   }
   
   public void loadNativeJava(Class c) throws IllegalAccessException, 
