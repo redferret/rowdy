@@ -17,6 +17,8 @@ import java.util.Scanner;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
@@ -122,13 +124,15 @@ public class Rowdy {
       
       rowdyInstance.runAsShell();
       
-      Scanner keys = new Scanner(System.in);
+      Scanner keys = new Scanner(rowdyInstance.getInputStream());
+      PrintStream out = (PrintStream) rowdyInstance.getOutputStream();
+      
       String line;
       displayVersion();
       do {
         StringBuilder program = new StringBuilder();
         for (;;) {
-          System.out.print("<< ");
+          out.print(">> ");
           line = keys.nextLine();
           if (line.isEmpty()) {
             break;
@@ -150,6 +154,7 @@ public class Rowdy {
           growdy.buildFromString(program.toString(), STMT_LIST);
           rowdyInstance.initialize((RowdyNode) growdy.getProgram());
           rowdyInstance.executeLine();
+          out.println();
           // Check for a single line import
           String importPath = rowdyInstance.getNextImport();
           if (importPath != null) {
@@ -178,7 +183,7 @@ public class Rowdy {
   }
 
   private static void displayVersion() {
-    System.out.println("Rowdy 1.1.3 (default)");
+    System.out.println("Rowdy 1.1.6 (default)");
     System.out.println("Developed on [Java SE Runtime Environment (build 1.8.0_161-b12)\n" +
       "Java HotSpot 64-Bit Server VM (build 25.161-b12, mixed mode)]");
     System.out.println("Current Java Version: " + System.getProperty("java.version"));

@@ -504,8 +504,10 @@ public class RowdyInstance {
           if (importConstant != null) {
             nextImport = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
           }
+          break;
         case THROW_STMT:
           ((ThrowStatement) currentNode).execute();
+          break;
         default:
           if (seqControl != null) {
             if (seqControl.isSeqActive()) {
@@ -897,6 +899,14 @@ public class RowdyInstance {
     } else {
       return value;
     }
+  }
+  
+  public OutputStream getOutputStream() {
+    return this.outputStream;
+  }
+  
+  public InputStream getInputStream() {
+    return this.inputStream;
   }
   
   public void setInputStream(InputStream stream) {

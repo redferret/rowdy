@@ -22,11 +22,6 @@ public class PrintStatement extends BaseNode {
   public Object execute(Object printStream) {
     PrintStream stream = (PrintStream) printStream;
     StringBuilder printValue = new StringBuilder();
-    int deleteAt = 0;
-    if (instance.isShellEnv()){
-      printValue.append(">> ");
-      deleteAt = 3;
-    }
     
     BaseNode paramsNode = get(PARAMETERS);
     Value listValue = (Value) paramsNode.execute(new Value(new ArrayList<>()));
@@ -42,7 +37,6 @@ public class PrintStatement extends BaseNode {
     
     char c;
     StringBuilder toPrint = new StringBuilder();
-    
     if (printValue.toString().contains("\\n")) {
       for (int l = 0; l < printValue.length(); l++) {
         c = printValue.charAt(l);
@@ -53,14 +47,11 @@ public class PrintStatement extends BaseNode {
           toPrint.append(c);
         }
       }
-      printValue.delete(deleteAt, printValue.length());
-      printValue.append(toPrint);
-    } 
-    if (instance.isShellEnv()) {
-      stream.println(printValue);
-    }else {
+      stream.print(toPrint);
+    } else {
       stream.print(printValue);
     }
+    
     return null;
   }
 }
