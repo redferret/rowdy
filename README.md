@@ -5,7 +5,7 @@ This is an interpreter, developed in Java, I wrote for Principals of Programming
 Consult the [Rowdy Wiki](https://github.com/redferret/rowdy/wiki) for more information
 
 # Building Rowdy
-Clone the repo down and run Ant a the root of the project
+Clone the repo down and run Ant a the root of the project. If you want to most current release go [here](https://github.com/redferret/Rowdy-Release)
 
 # Framework
 The idea of how Rowdy is implemented is using the Parse tree as the physical program. Each node in the tree has the ability to be executed separate of the rest of the tree. This allows for the execution of sub-programs within the larger program. Not every tree node can be executed successfully without issue though. For instance executing just a return statement without executing a function will lead to some unknown behavior. Growdy returns a parse tree based on the `NodeFactory` provided by Growdy. This can be a very simple factory or complex enough to tell Growdy how to build each node and what kind of data abstraction the node will have.
