@@ -35,7 +35,7 @@ import static rowdy.lang.RowdyGrammarConstants.THIS_;
  */
 public class Optimizer {
   
-  private RowdyInstance instance;
+  private final RowdyInstance instance;
   
   public Optimizer(RowdyInstance instance) {
     this.instance = instance;
