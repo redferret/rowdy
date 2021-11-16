@@ -16,8 +16,10 @@ import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.lang.RowdyGrammarConstants.CLASS_DEF;
 import static rowdy.lang.RowdyGrammarConstants.CONCAT_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
+import static rowdy.lang.RowdyGrammarConstants.DEFINITION;
 import static rowdy.lang.RowdyGrammarConstants.EXPRESSION;
 import static rowdy.lang.RowdyGrammarConstants.EXPR_LIST;
+import static rowdy.lang.RowdyGrammarConstants.FUNCTION;
 import static rowdy.lang.RowdyGrammarConstants.FUNCTION_BODY;
 import static rowdy.lang.RowdyGrammarConstants.FUNC_CALL;
 import static rowdy.lang.RowdyGrammarConstants.FUNC_PARAMS;
@@ -27,6 +29,7 @@ import static rowdy.lang.RowdyGrammarConstants.PARAMETERS;
 import static rowdy.lang.RowdyGrammarConstants.PARAMS_TAIL;
 import static rowdy.lang.RowdyGrammarConstants.PRINT_STMT;
 import static rowdy.lang.RowdyGrammarConstants.PRIVATE_SCOPE;
+import static rowdy.lang.RowdyGrammarConstants.STMT_LIST;
 import static rowdy.lang.RowdyGrammarConstants.THIS_;
 
 /**
@@ -302,6 +305,46 @@ public class Optimizer {
       }
     }
   }
+  
+  public void listStmtsAndDefs(BaseNode root) {
+    BaseNode workingRoot;
+    List<BaseNode> children = root.getAll();
+    
+    for (int i = 0; i < children.size(); i++) {
+      workingRoot = children.get(i);
+      switch(workingRoot.symbol().id()) {
+        case DEFINITION:
+        case STMT_LIST:
+          scanRoot(workingRoot);
+          break;
+        default:
+          listStmtsAndDefs(workingRoot);
+      }
+    }
+  }
+
+  private void scanRoot(BaseNode workingRoot) {
+    BaseNode nextRoot;
+    BaseNode leftChild;
+    BaseNode replacementRoot;
+    int workingRootSymbolId = workingRoot.symbol().id();
+    List<BaseNode> workingChildren = workingRoot.getAll();
+    while (true) {
+      nextRoot = workingRoot.get(workingRootSymbolId);
+      if (nextRoot != null) {
+        leftChild = nextRoot.getLeftMost();
+        listStmtsAndDefs(leftChild);
+        replacementRoot = nextRoot.get(workingRootSymbolId);
+        workingChildren.remove(workingChildren.size() - 1);
+        workingRoot.add(leftChild);
+        if (replacementRoot != null){
+          workingChildren.add(replacementRoot);
+        }
+      } else {
+        break;
+      }
+    }
+  }
 
   /**
    * Reduces the size of the program tree to decrease the number of recursive
@@ -315,6 +358,7 @@ public class Optimizer {
     simplifyParams(root);
     removeTerminals(root);
     reduce(root);
+    listStmtsAndDefs(root);
     checkForUnsafeFunctions(root);
   }
 }
