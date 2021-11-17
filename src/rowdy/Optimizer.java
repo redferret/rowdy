@@ -14,6 +14,7 @@ import static rowdy.BaseNode.UNSAFE;
 import static rowdy.lang.RowdyGrammarConstants.ATOMIC_CONST;
 import static rowdy.lang.RowdyGrammarConstants.ATOMIC_ID;
 import static rowdy.lang.RowdyGrammarConstants.CLASS_DEF;
+import static rowdy.lang.RowdyGrammarConstants.CLASS_DEFS;
 import static rowdy.lang.RowdyGrammarConstants.CONCAT_EXPR;
 import static rowdy.lang.RowdyGrammarConstants.CONSTANT;
 import static rowdy.lang.RowdyGrammarConstants.DEFINITION;
@@ -315,12 +316,21 @@ public class Optimizer {
       switch(workingRoot.symbol().id()) {
         case DEFINITION:
         case STMT_LIST:
+        case CLASS_DEFS:
           scanRoot(workingRoot);
+          scanChildren(workingRoot);
           break;
         default:
           listStmtsAndDefs(workingRoot);
       }
     }
+  }
+  
+  private void scanChildren(BaseNode workingRoot) {
+    List<BaseNode> workingChildren = workingRoot.getAll();
+    workingChildren.forEach((child) -> {
+      listStmtsAndDefs(child);
+    });
   }
 
   private void scanRoot(BaseNode workingRoot) {
@@ -333,7 +343,6 @@ public class Optimizer {
       nextRoot = workingRoot.get(workingRootSymbolId);
       if (nextRoot != null) {
         leftChild = nextRoot.getLeftMost();
-        listStmtsAndDefs(leftChild);
         replacementRoot = nextRoot.get(workingRootSymbolId);
         workingChildren.remove(workingChildren.size() - 1);
         workingRoot.add(leftChild);
