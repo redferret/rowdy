@@ -7,7 +7,6 @@ import rowdy.exceptions.ConstantReassignmentException;
 import rowdy.nodes.RowdyNode;
 import rowdy.nodes.expression.AtomicId;
 import static rowdy.testlang.lang.RowdyGrammarConstants.*;
-import static rowdy.testutils.TestUtils.getTestStatement;
 import static rowdy.testutils.TestUtils.rowdyInstance;
 
 /**
@@ -16,8 +15,11 @@ import static rowdy.testutils.TestUtils.rowdyInstance;
  */
 public class RowdyInstanceTest extends TestCase {
   
+  private final Optimizer optimizer;
+  
   public RowdyInstanceTest(String testName) {
     super(testName);
+    optimizer = new Optimizer(rowdyInstance);
   }
 
   public void testInitialize() {
@@ -97,7 +99,7 @@ public class RowdyInstanceTest extends TestCase {
 
   public void testBuildParameterNodeForParent() {
     BaseNode parent = new RowdyNode(new NonTerminal("", STATEMENT), 0);
-    rowdyInstance.buildParameterNodeForParent(parent, "paramName", 0);
+    optimizer.buildParameterNodeForParent(parent, "paramName", 0);
     assertFalse(parent.getAll().isEmpty());
     assertTrue(parent.get(PARAMETERS).get(ATOMIC_ID) instanceof AtomicId);
   }
