@@ -8,10 +8,39 @@
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
 <project name="rowdy" default="test" basedir=".">
-  
-  <target name="-post-jar">
-    <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
+  <target name="-test-release-dir" depends="release.dir.check" if="dir.exists">
+    <delete><fileset dir="./release/"/></delete>
+  </target>
+
+  <target name="release.dir.check">
+    <condition property="dir.exists">
+      <available file="./release" type="dir"/>
+    </condition>
+  </target>
+
+  <target name="copy.dependant.RowdyLib" depends="RowdyLib.check" if="file.exists">
     <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./bin"/>
+  </target>
+
+  <target name="RowdyLib.check">
+    <condition property="file.exists">
+      <available file="../RowdyLib/dist/RowdyLib.jar"/>
+    </condition>
+  </target>
+
+  <target name="copy.dependant.Growdy" depends="GRowdy.check" if="file.exists">
+    <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
+  </target>
+
+  <target name="GRowdy.check">
+    <condition property="file.exists">
+      <available file="../GRowdy/dist/GRowdy.jar"/>
+    </condition>
+  </target>
+
+  <target name="-post-jar" depends="release.dir.check,copy.dependant.RowdyLib,copy.dependant.Growdy">
+    <!-- <copy file="../GRowdy/dist/GRowdy.jar" todir="./travis-ci"/>
+    <copy file="../RowdyLib/dist/RowdyLib.jar" todir="./bin"/> -->
     <copy todir="./test/rowdy/testlang/lang">
       <fileset dir="./src/rowdy/lang"/>
     </copy> 
@@ -20,11 +49,8 @@
     </copy>      
     <copy todir="./dist/bin/">
       <fileset dir="bin/"/>
-    </copy>   
-    
-    <delete><fileset dir="./release/demo_code/"/></delete>
-    <delete><fileset dir="./release/dist/"/></delete>
-    
+    </copy>
+
     <mkdir dir="./release/" />
     <mkdir dir="./release/demo_code/"/>
     <mkdir dir="./release/dist/"/>
