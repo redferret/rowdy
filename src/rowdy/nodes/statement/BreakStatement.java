@@ -58,13 +58,13 @@ public class BreakStatement extends RowdyNode {
         break;
       }
       if (!idName.isEmpty()) {
-        String tempBinding = ((Terminal) lp.get(ID).symbol()).getValue();
+        String breakId = ((Terminal) idOption.get(ID).symbol()).getValue();
         if (curFunction != null){
-          curFunction.getSymbolTable().unset(tempBinding);
+          curFunction.getSymbolTable().unset(idName);
         } else {
           instance.globalSymbolTable.remove(idName);
         }
-        if (idName.equals(tempBinding)) {
+        if (idName.equals(breakId)) {
           break;
         }
       } else {
