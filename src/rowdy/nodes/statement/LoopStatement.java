@@ -52,6 +52,7 @@ public class LoopStatement extends BaseNode {
         curFunction.getSymbolTable().unset(idName);
       }
     } catch (ConstantReassignmentException | RuntimeException ex) {
+      ex.printStackTrace();
       throw new RuntimeException(ex);
     }
     return null;

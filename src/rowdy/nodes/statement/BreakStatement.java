@@ -23,7 +23,7 @@ public class BreakStatement extends RowdyNode {
   }
   @Override
   public Object execute(Object leftValue) {
-    String idName = "";
+    String idName = "", breakId = "";
     BaseNode idOption = get(ID_OPTION);
     Function currentFunc = instance.callStack.peek();
     if (idOption == null) {
@@ -36,7 +36,7 @@ public class BreakStatement extends RowdyNode {
         idName = ((Terminal) loopId.get(ID).symbol()).getValue();
       }
     } else {
-      idName = ((Terminal) get(ID_OPTION).get(ID).symbol()).getValue();
+      breakId = ((Terminal) get(ID_OPTION).get(ID).symbol()).getValue();
     }
     Function curFunction = null;
     if (!idName.isEmpty()) {
@@ -48,7 +48,7 @@ public class BreakStatement extends RowdyNode {
         }
       }
     }
-    for (;;) {
+    while (!currentFunc.activeLoops.isEmpty()) {
       Node lp = currentFunc.activeLoops.peek();
       lp.setSeqActive(false);
       if (lp.symbol().id() != WHILE_LOOP) {
@@ -58,7 +58,6 @@ public class BreakStatement extends RowdyNode {
         break;
       }
       if (!idName.isEmpty()) {
-        String breakId = ((Terminal) idOption.get(ID).symbol()).getValue();
         if (curFunction != null){
           curFunction.getSymbolTable().unset(idName);
         } else {
