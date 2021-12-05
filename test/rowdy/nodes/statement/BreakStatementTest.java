@@ -39,7 +39,7 @@ public class BreakStatementTest extends TestCase {
       fail("Expected to fail with no loop");
     } catch (Throwable e) {}
     
-    String loopCode = "loop x: {}";
+    String loopCode = "loop x: 0 {}";
     LoopStatement loopStmt = (LoopStatement) getTestStatement(loopCode, LOOP_STMT);
     Function f = rowdyInstance.callStack.peek();
     f.getSymbolTable().allocate("x", new Value(0), 1, true);

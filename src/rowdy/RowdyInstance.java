@@ -203,7 +203,11 @@ public class RowdyInstance {
       if (currentNode.symbol().id() != STMT_LIST) {
         currentLine = currentNode.getLine();
       }
-      
+      if (seqControl != null) {
+        if (!seqControl.isSeqActive()) {
+          break;
+        }
+      }
       switch (curNodeId) {
         case ASSIGN_STMT:
         case LOOP_STMT:

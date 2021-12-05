@@ -4,12 +4,13 @@ package rowdy.nodes.statement;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import rowdy.Function;
 import rowdy.Value;
 import rowdy.exceptions.ConstantReassignmentException;
-import rowdy.nodes.statement.LoopStatement;
 import static rowdy.testlang.lang.RowdyGrammarConstants.LOOP_STMT;
 import static rowdy.testutils.TestUtils.fetch;
 import static rowdy.testutils.TestUtils.getTestStatement;
+import static rowdy.testutils.TestUtils.rowdyInstance;
 
 /**
  *
@@ -28,15 +29,16 @@ public class LoopStatementTest extends TestCase {
 
   /**
    * Test of execute method, of class LoopStatement.
+   * @throws rowdy.exceptions.ConstantReassignmentException
    */
   public void testExecute() throws ConstantReassignmentException {
-    String testCode = "loop x:0 {a = x as int break}";
-    LoopStatement instance = (LoopStatement) getTestStatement(testCode, LOOP_STMT);
+    String testCode = "loop x:0 {a = 12 break}";
+    LoopStatement loopStmt = (LoopStatement) getTestStatement(testCode, LOOP_STMT);
     
-    instance.execute();
+    loopStmt.execute();
     Value aVal = fetch("a");
     Integer result = (Integer) aVal.getValue();
-    Integer expected = 0;
+    Integer expected = 12;
     assertEquals(expected, result);
   }
   
