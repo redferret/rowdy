@@ -24,7 +24,7 @@ public class Function {
     this.name = name;
     this.symbolTable = new SymbolTable(params, this);
     activeLoops = new Stack<>();
-    funcReturnValue = null;
+    funcReturnValue = new Value(null, false);
     this.lineCalledOn = lineCalledOn;
     parent = null;
     isDynamic = false;
@@ -83,9 +83,6 @@ public class Function {
   }
 
   public Value getReturnValue() {
-    if (funcReturnValue == null) {
-      return new Value(null, false);
-    }
     return funcReturnValue;
   }
 
