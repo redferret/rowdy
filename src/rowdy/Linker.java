@@ -88,13 +88,6 @@ public class Linker {
             if (importConstant != null) {
               String importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
               importPaths.add(importPath);
-//              Node nextImport = importTreeNodes.get(IMPORTS);
-//              while (nextImport.hasSymbols()) {
-//                importConstant = nextImport.get(CONSTANT);
-//                importPath = ((Terminal) importConstant.symbol()).getValue().replaceAll("\\.", "/").replaceAll("\"", "");
-//                importPaths.add(importPath);
-//                nextImport = nextImport.get(IMPORTS);
-//              }
             }
           }
           break;
