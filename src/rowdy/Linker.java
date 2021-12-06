@@ -65,10 +65,13 @@ public class Linker {
     localImports.forEach(localImport -> {
       String importPath = "bin/" + localImport;
       try {
-        growdy.buildFromSource(importPath);
-        BaseNode compliedImport = (BaseNode) growdy.getProgram();
-        compiledImports.add(compliedImport);
-        loadImports(compliedImport, compiledImports);
+        if (!loadedImports.contains(importPath)) {
+            loadedImports.add(importPath);
+            growdy.buildFromSource(importPath);
+            BaseNode compliedImport = (BaseNode) growdy.getProgram();
+            compiledImports.add(compliedImport);
+            loadImports(compliedImport, compiledImports);
+        }
       } catch (Throwable ex) {
         rowdyInstance.handleException(ex, false);
       }
